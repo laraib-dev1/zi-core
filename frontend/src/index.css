@@ -1,0 +1,649 @@
+@import "tailwindcss";
+
+@plugin "@tailwindcss/forms";
+
+@theme {
+  /* Hero Business section: subtle up-down float */
+  --animate-hero-float: hero-float 3s ease-in-out infinite;
+  @keyframes hero-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+}
+@plugin "@tailwindcss/typography";
+@plugin "@tailwindcss/aspect-ratio";
+@plugin "@tailwindcss/container-queries";
+
+body {
+  @apply text-black;
+  overflow-y: overlay;
+  margin: 0;
+  padding: 0;
+  min-height: auto !important;
+  height: auto !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+  min-height: auto !important;
+  height: auto !important;
+  background: transparent !important;
+  scroll-padding-top: 5rem; /* for fixed navbar when scrolling to #section */
+}
+
+#root {
+  min-height: auto !important;
+  height: auto !important;
+  background: transparent !important;
+}
+
+/* Profile page specific - prevent black space after footer */
+body.profile-page {
+  background-color: #F5F5F5 !important;
+  min-height: 100vh !important;
+}
+
+html.profile-page {
+  background-color: #F5F5F5 !important;
+  min-height: 100vh !important;
+  height: 100% !important;
+}
+
+#root.profile-page {
+  background-color: #F5F5F5 !important;
+  min-height: 100vh !important;
+  height: 100% !important;
+}
+
+/* Remove default padding/margin from sections */
+section {
+  padding: 0;
+  margin: 0;
+}
+
+/* Remove default padding/margin from headings */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+/* Fix Mantine RTE toolbar jumping */
+.mantine-RichTextEditor-root {
+  width: 100% !important;
+}
+
+.mantine-RichTextEditor-toolbar {
+  position: static !important;   /* prevent moving with scroll */
+  top: auto !important;
+  z-index: 10;
+}
+
+.mantine-RichTextEditor-content {
+  min-height: 160px !important;
+}
+
+::-webkit-scrollbar {
+  height: 0px;
+  width: 0px;
+}
+.no-scrollbar {
+  -ms-overflow-style: none; 
+  scrollbar-width: none;    
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;            
+}
+:root {
+  --background: 255 255 255; /* white */
+  --foreground: 0 0 0; /* black */
+}
+
+/* Ensure body/html/#root stick to content - no extra space or background after footer */
+body, html, #root {
+  display: block !important;
+  overflow-x: hidden;
+  background: transparent !important;
+}
+/* FIX for table hiding dropdown */
+/* Fix for react-data-table-component blocking dropdowns */
+.rdt_Table,
+.rdt_TableRow,
+.rdt_TableCell,
+.rdt_TableCol,
+.rdt_TableCol_Sortable {
+  overflow: visible !important;
+}
+
+
+/* Ensure Radix dropdown is visible */
+[data-radix-dropdown-menu-content] {
+  z-index: 999999 !important;
+  position: relative !important;
+}
+@layer utilities {
+  .rdt_TableCell {
+    overflow: visible !important;
+  }
+
+  /* Section Spacing Utilities - mobile-friendly gap (smaller on small screens) */
+  .section-gap {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .section-gap-top {
+    padding-top: 12px !important;
+  }
+
+  .section-gap-bottom {
+    padding-bottom: 12px !important;
+  }
+
+  @media (min-width: 640px) {
+    .section-gap {
+      padding-top: 20px !important;
+      padding-bottom: 20px !important;
+    }
+    .section-gap-top {
+      padding-top: 20px !important;
+    }
+    .section-gap-bottom {
+      padding-bottom: 20px !important;
+    }
+  }
+  
+  /* Remove all gaps/padding before footer on profile page */
+  [data-profile-page] main section {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  [data-profile-page] > div:last-child {
+    padding-top: 20px !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  [data-profile-page] footer {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* Ensure footer is the absolute last element - no space or background after it */
+  footer {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* Prevent any background from showing after footer - clip containers at footer */
+  /* Blog/Privacy/Terms (data-toc-sticky-page) par overflow visible taake right sidebar scroll chale */
+  div.bg-white:has(footer):not([data-toc-sticky-page]),
+  div:has(> footer):not([data-toc-sticky-page]),
+  div:has(section:has(footer)):not([data-toc-sticky-page]) {
+    overflow: hidden !important;
+  }
+
+  /* Ensure footer section has no space after it */
+  section:has(footer),
+  section:last-child:has(footer) {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* Hide anything after footer */
+  footer ~ *,
+  section:has(footer) ~ * {
+    display: none !important;
+  }
+
+  /* Ensure body/html/#root don't extend beyond footer */
+  body:after,
+  html:after,
+  #root:after {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* Force page containers to stop at footer - prevent white background extension */
+  div:has(> section:has(footer)):not([data-toc-sticky-page]),
+  div:has(section:has(footer)):not([data-toc-sticky-page]) {
+    overflow: hidden !important;
+    height: fit-content !important;
+    min-height: auto !important;
+    max-height: fit-content !important;
+  }
+
+  /* Specifically target bg-white divs that contain footer */
+  div.bg-white:has(> section:has(footer)):not([data-toc-sticky-page]),
+  div.bg-white:has(section:has(footer)):not([data-toc-sticky-page]),
+  div.bg-white:has(Footer):not([data-toc-sticky-page]),
+  div.bg-white:has(footer):not([data-toc-sticky-page]) {
+    overflow: hidden !important;
+    height: fit-content !important;
+    min-height: auto !important;
+    max-height: fit-content !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Ensure bg-white divs stop exactly at footer */
+  div.bg-white > section:last-child:has(footer) {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Ensure footer is truly the last element */
+  footer {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Hide any pseudo-elements after footer */
+  footer::after,
+  section:has(footer)::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  .section-gap-top {
+    padding-top: 20px !important;
+  }
+
+  .section-gap-bottom {
+    padding-bottom: 20px !important;
+  }
+
+  /* Footer gap - visible white gap before footer */
+  .footer-gap {
+    padding-top: 10px;
+    padding-bottom: 20px;
+    background-color: white;
+  }
+
+  /* Footer top gap - 20px top padding with white background, no bottom padding */
+  .footer-gap-top {
+    padding-top: 20px !important;
+    padding-bottom: 0 !important;
+    background-color: white !important;
+  }
+
+  /* Navbar bottom gap - 20px bottom padding after navbar (used on pages, not in navbar itself) */
+  .navbar-gap-bottom {
+    padding-bottom: 20px !important;
+  }
+
+  /* Inner section gap - 10px for spacing within sections */
+  .inner-gap {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .inner-gap-top {
+    padding-top: 10px;
+  }
+
+  .inner-gap-bottom {
+    padding-bottom: 10px;
+  }
+
+  /* Container Padding Utilities */
+  .container-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-padding {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-padding {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+}
+
+/* Theme classes */
+.theme-heading {
+  color: var(--theme-primary, #8B5E3C);
+}
+
+.theme-text-primary {
+  color: var(--theme-primary, #8B5E3C);
+}
+
+/* Admin and Developer Panel - Force black text for readability */
+main[class*="admin"],
+main[class*="developer"] {
+  color: #000000 !important;
+}
+
+main[class*="admin"] *,
+main[class*="developer"] * {
+  color: #000000 !important;
+}
+
+/* Preserve theme colors for specific elements */
+main[class*="admin"] .theme-heading,
+main[class*="admin"] .theme-text-primary,
+main[class*="developer"] .theme-heading,
+main[class*="developer"] .theme-text-primary {
+  color: var(--theme-primary, #8B5E3C) !important;
+}
+
+/* Theme buttons should have white text - applies everywhere */
+.theme-button,
+button.theme-button,
+[class*="theme-button"],
+button[style*="background-color: var(--theme-primary"],
+button[style*="background-color: var(--theme-dark"],
+button[style*="backgroundColor: var(--theme-primary"],
+button[style*="backgroundColor: var(--theme-dark"] {
+  color: #ffffff !important;
+}
+
+/* Preserve other button and link colors */
+main[class*="admin"] button:not(.theme-button):not([style*="background-color: var(--theme"]),
+main[class*="admin"] a:not([class*="theme"]),
+main[class*="developer"] button:not(.theme-button):not([style*="background-color: var(--theme"]),
+main[class*="developer"] a:not([class*="theme"]) {
+  color: #000000 !important;
+}
+
+/* Ensure table cells are black */
+.rdt_TableCell {
+  color: #000000 !important;
+}
+
+.theme-button {
+  background-color: var(--theme-primary, #8B5E3C);
+  color: white !important;
+}
+
+.theme-button:hover {
+  background-color: var(--theme-dark, #6B4A2C);
+  color: white !important;
+}
+
+/* Enhanced DataTable row hover */
+.enhanced-table-actions {
+  transition: all 0.2s ease;
+  overflow: visible !important;
+  width: 32px;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.rdt_TableRow:hover .enhanced-table-actions {
+  width: 100% !important;
+  min-width: 140px;
+}
+
+.rdt_TableRow:hover .enhanced-table-actions .action-buttons {
+  display: flex !important;
+}
+
+.rdt_TableRow:hover .enhanced-table-actions .dots-icon {
+  display: none !important;
+}
+
+.enhanced-table-actions .action-buttons {
+  display: none;
+}
+
+.enhanced-table-actions .dots-icon {
+  display: flex;
+}
+
+/* Address truncation */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Theme background accent */
+.theme-bg-accent {
+  background-color: var(--theme-accent, #f5f5f5);
+}
+
+/* Subtle image hover zoom on Second Landing only */
+.second-landing-page img {
+  transition: transform 0.25s ease-out;
+}
+
+.second-landing-page img:hover {
+  transform: scale(1.03);
+}
+
+/* Preserve text alignment in rich text content - only if no inline style */
+.prose p:not([style*="text-align"]),
+.prose div:not([style*="text-align"]),
+.prose h1:not([style*="text-align"]),
+.prose h2:not([style*="text-align"]),
+.prose h3:not([style*="text-align"]),
+.prose h4:not([style*="text-align"]),
+.prose h5:not([style*="text-align"]),
+.prose h6:not([style*="text-align"]) {
+  text-align: inherit;
+}
+
+/* Force text-align from inline styles - comprehensive rules */
+.prose [style*="text-align: center"],
+.prose [style*="text-align:center"],
+.prose [style*="text-align: center;"],
+.prose [style*="text-align:center;"],
+.prose [style*="text-align: CENTER"],
+.prose [style*="text-align:CENTER"],
+.content-area [style*="text-align: center"],
+.content-area [style*="text-align:center"],
+.content-area [style*="text-align: center;"],
+.content-area [style*="text-align:center;"],
+.content-area [style*="text-align: CENTER"],
+.content-area [style*="text-align:CENTER"],
+.prose p[style*="text-align: center"],
+.prose div[style*="text-align: center"],
+.prose h1[style*="text-align: center"],
+.prose h2[style*="text-align: center"],
+.prose h3[style*="text-align: center"],
+.content-area p[style*="text-align: center"],
+.content-area div[style*="text-align: center"],
+.content-area h1[style*="text-align: center"],
+.content-area h2[style*="text-align: center"],
+.content-area h3[style*="text-align: center"] {
+  text-align: center !important;
+}
+
+.prose [style*="text-align: right"],
+.prose [style*="text-align:right"],
+.prose [style*="text-align: right;"],
+.prose [style*="text-align:right;"],
+.prose [style*="text-align: RIGHT"],
+.prose [style*="text-align:RIGHT"],
+.content-area [style*="text-align: right"],
+.content-area [style*="text-align:right"],
+.content-area [style*="text-align: right;"],
+.content-area [style*="text-align:right;"],
+.content-area [style*="text-align: RIGHT"],
+.content-area [style*="text-align:RIGHT"],
+.prose p[style*="text-align: right"],
+.prose div[style*="text-align: right"],
+.prose h1[style*="text-align: right"],
+.prose h2[style*="text-align: right"],
+.prose h3[style*="text-align: right"],
+.content-area p[style*="text-align: right"],
+.content-area div[style*="text-align: right"],
+.content-area h1[style*="text-align: right"],
+.content-area h2[style*="text-align: right"],
+.content-area h3[style*="text-align: right"] {
+  text-align: right !important;
+}
+
+.prose [style*="text-align: justify"],
+.prose [style*="text-align:justify"],
+.prose [style*="text-align: justify;"],
+.prose [style*="text-align:justify;"],
+.prose [style*="text-align: JUSTIFY"],
+.prose [style*="text-align:JUSTIFY"],
+.content-area [style*="text-align: justify"],
+.content-area [style*="text-align:justify"],
+.content-area [style*="text-align: justify;"],
+.content-area [style*="text-align:justify;"],
+.content-area [style*="text-align: JUSTIFY"],
+.content-area [style*="text-align:JUSTIFY"],
+.prose p[style*="text-align: justify"],
+.prose div[style*="text-align: justify"],
+.prose h1[style*="text-align: justify"],
+.prose h2[style*="text-align: justify"],
+.prose h3[style*="text-align: justify"],
+.content-area p[style*="text-align: justify"],
+.content-area div[style*="text-align: justify"],
+.content-area h1[style*="text-align: justify"],
+.content-area h2[style*="text-align: justify"],
+.content-area h3[style*="text-align: justify"] {
+  text-align: justify !important;
+}
+
+.prose [style*="text-align: left"],
+.prose [style*="text-align:left"],
+.prose [style*="text-align: left;"],
+.prose [style*="text-align:left;"],
+.prose [style*="text-align: LEFT"],
+.prose [style*="text-align:LEFT"],
+.content-area [style*="text-align: left"],
+.content-area [style*="text-align:left"],
+.content-area [style*="text-align: left;"],
+.content-area [style*="text-align:left;"],
+.content-area [style*="text-align: LEFT"],
+.content-area [style*="text-align:LEFT"],
+.prose p[style*="text-align: left"],
+.prose div[style*="text-align: left"],
+.prose h1[style*="text-align: left"],
+.prose h2[style*="text-align: left"],
+.prose h3[style*="text-align: left"],
+.content-area p[style*="text-align: left"],
+.content-area div[style*="text-align: left"],
+.content-area h1[style*="text-align: left"],
+.content-area h2[style*="text-align: left"],
+.content-area h3[style*="text-align: left"] {
+  text-align: left !important;
+}
+
+/* Style links in content pages with theme color */
+.prose a,
+.prose a:link,
+.prose a:visited {
+  color: var(--theme-primary, #8B5E3C) !important;
+  text-decoration: underline;
+}
+
+.prose a:hover,
+.prose a:active {
+  color: var(--theme-dark, #6B4A2C) !important;
+}
+
+/* Product Detail Tabs Styling */
+button[data-radix-tabs-trigger][data-state="active"],
+[data-radix-tabs-trigger][data-state="active"] {
+  background-color: var(--theme-primary, #8B5E3C) !important;
+  color: white !important;
+  transform: scale(1.05) !important;
+  transition: all 0.3s ease-in-out !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+button[data-radix-tabs-trigger][data-state="inactive"],
+[data-radix-tabs-trigger][data-state="inactive"] {
+  background-color: transparent !important;
+  color: #666 !important;
+  transform: scale(1) !important;
+  transition: all 0.3s ease-in-out !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+button[data-radix-tabs-trigger][data-state="inactive"]:hover,
+[data-radix-tabs-trigger][data-state="inactive"]:hover,
+[role="tab"][data-state="inactive"]:hover {
+  background-color: color-mix(in srgb, var(--theme-primary, #8B5E3C) 15%, #e5e7eb) !important;
+}
+
+/* Additional selector for Radix UI tabs */
+[role="tab"][data-state="active"] {
+  background-color: var(--theme-primary, #8B5E3C) !important;
+  color: white !important;
+  transform: scale(1.05) !important;
+  transition: all 0.3s ease-in-out !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+[role="tab"][data-state="inactive"] {
+  background-color: transparent !important;
+  color: #666 !important;
+  transform: scale(1) !important;
+  transition: all 0.3s ease-in-out !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Hide scrollbar for category section */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ensure all clickable elements use pointer cursor */
+a:not([style*="cursor: not-allowed"]):not([style*="cursor:default"]),
+button:not([disabled]):not([style*="cursor: not-allowed"]):not([style*="cursor:default"]),
+[role="button"]:not([style*="cursor: not-allowed"]):not([style*="cursor:default"]),
+[onclick]:not([style*="cursor: not-allowed"]):not([style*="cursor:default"]) {
+  cursor: pointer;
+}
+
+/* Circular loader animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* iOS-style page transition animation */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInSlide 0.3s ease-out;
+}
+
+/* Blog detail: root + main overflow visible taake right sidebar sticky kaam kare (last so wins) */
+div.bg-white[data-toc-sticky-page],
+div.bg-white[data-toc-sticky-page] main {
+  overflow: visible !important;
+}

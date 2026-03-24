@@ -1,0 +1,395 @@
+/* From Uiverse.io by dexter-st */
+.loader-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  width: auto;
+  margin: 2rem;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.6em;
+  font-weight: 600;
+  user-select: none;
+  color: #fff;
+  scale: 1;
+}
+
+/* Make loader feel balanced on large screens (keep mobile as-is) */
+@media (min-width: 1024px) {
+  .loader-wrapper {
+    height: 160px;
+    font-size: 2.2em;
+    scale: 1.25;
+  }
+}
+
+@media (min-width: 1536px) {
+  .loader-wrapper {
+    height: 180px;
+    font-size: 2.4em;
+    scale: 1.35;
+  }
+}
+
+.loader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  background-color: transparent;
+  mask: repeating-linear-gradient(
+    90deg,
+    transparent 0,
+    transparent 6px,
+    black 7px,
+    black 8px
+  );
+}
+
+.loader::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Old colors - commented out */
+  /* background-image: radial-gradient(circle at 50% 50%, #ff0 0%, transparent 50%),
+    radial-gradient(circle at 45% 45%, #f00 0%, transparent 45%),
+    radial-gradient(circle at 55% 55%, #0ff 0%, transparent 45%),
+    radial-gradient(circle at 45% 55%, #0f0 0%, transparent 45%),
+    radial-gradient(circle at 55% 45%, #00f 0%, transparent 45%); */
+  /* Theme color version */
+  background-image: radial-gradient(circle at 50% 50%, var(--theme-primary) 0%, transparent 50%),
+    radial-gradient(circle at 45% 45%, var(--theme-primary) 0%, transparent 45%),
+    radial-gradient(circle at 55% 55%, var(--theme-primary) 0%, transparent 45%),
+    radial-gradient(circle at 45% 55%, var(--theme-primary) 0%, transparent 45%),
+    radial-gradient(circle at 55% 45%, var(--theme-primary) 0%, transparent 45%);
+  mask: radial-gradient(
+    circle at 50% 50%,
+    transparent 0%,
+    transparent 10%,
+    black 25%
+  );
+  animation:
+    transform-animation 2s infinite alternate,
+    opacity-animation 4s infinite;
+  animation-timing-function: cubic-bezier(0.6, 0.8, 0.5, 1);
+}
+
+@keyframes transform-animation {
+  0% {
+    transform: translate(-55%);
+  }
+  100% {
+    transform: translate(55%);
+  }
+}
+
+@keyframes opacity-animation {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  65% {
+    opacity: 0;
+  }
+}
+
+.loader-text {
+  position: relative;
+  z-index: 2;
+}
+
+.loader-letter {
+  display: inline-block;
+  opacity: 0;
+  animation: loader-letter-anim 4s infinite linear;
+  z-index: 2;
+}
+
+.loader-letter:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.loader-letter:nth-child(2) {
+  animation-delay: 0.205s;
+}
+.loader-letter:nth-child(3) {
+  animation-delay: 0.31s;
+}
+.loader-letter:nth-child(4) {
+  animation-delay: 0.415s;
+}
+.loader-letter:nth-child(5) {
+  animation-delay: 0.521s;
+}
+.loader-letter:nth-child(6) {
+  animation-delay: 0.626s;
+}
+.loader-letter:nth-child(7) {
+  animation-delay: 0.731s;
+}
+.loader-letter:nth-child(8) {
+  animation-delay: 0.837s;
+}
+.loader-letter:nth-child(9) {
+  animation-delay: 0.942s;
+}
+.loader-letter:nth-child(10) {
+  animation-delay: 1.047s;
+}
+.loader-letter:nth-child(11) {
+  animation-delay: 1.152s;
+}
+.loader-letter:nth-child(12) {
+  animation-delay: 1.257s;
+}
+.loader-letter:nth-child(13) {
+  animation-delay: 1.362s;
+}
+.loader-letter:nth-child(14) {
+  animation-delay: 1.467s;
+}
+.loader-letter:nth-child(15) {
+  animation-delay: 1.572s;
+}
+.loader-letter:nth-child(16) {
+  animation-delay: 1.677s;
+}
+.loader-letter:nth-child(17) {
+  animation-delay: 1.782s;
+}
+.loader-letter:nth-child(18) {
+  animation-delay: 1.887s;
+}
+.loader-letter:nth-child(19) {
+  animation-delay: 1.992s;
+}
+.loader-letter:nth-child(20) {
+  animation-delay: 2.097s;
+}
+
+@keyframes loader-letter-anim {
+  0% {
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+    text-shadow: 0 0 4px #fff;
+    transform: scale(1.1) translateY(-2px);
+  }
+  20% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ========== Theme-colored loader variants (all use var(--theme-primary)) ========== */
+.loader-spinner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--theme-primary);
+}
+
+/* Circular arc – spinning ring segment */
+.loader-spinner-arc {
+  font-size: 48px;
+}
+.loader-spinner-arc::before {
+  content: "";
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  border: 0.2em solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: loader-spin 0.8s linear infinite;
+}
+@media (min-width: 1024px) {
+  .loader-spinner-arc { font-size: 56px; }
+}
+@media (min-width: 1536px) {
+  .loader-spinner-arc { font-size: 64px; }
+}
+
+/* Thin arc */
+.loader-spinner-arc-thin {
+  font-size: 48px;
+}
+.loader-spinner-arc-thin::before {
+  content: "";
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  border: 0.12em solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: loader-spin 0.8s linear infinite;
+}
+@media (min-width: 1024px) {
+  .loader-spinner-arc-thin { font-size: 56px; }
+}
+@media (min-width: 1536px) {
+  .loader-spinner-arc-thin { font-size: 64px; }
+}
+
+/* Vertical bars – equalizer (3 bars) */
+.loader-spinner-bars {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: flex-end;
+}
+.loader-spinner-bars .loader-bar {
+  width: 10px;
+  min-height: 12px;
+  border-radius: 5px;
+  background: var(--theme-primary);
+  animation: loader-bars 0.6s ease-in-out infinite both;
+}
+.loader-spinner-bars .loader-bar:nth-child(1) { height: 0.45em; animation-delay: 0s; }
+.loader-spinner-bars .loader-bar:nth-child(2) { height: 0.75em; animation-delay: 0.1s; }
+.loader-spinner-bars .loader-bar:nth-child(3) { height: 0.45em; animation-delay: 0.2s; }
+@keyframes loader-bars {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1); }
+}
+
+/* Solid circle – pulse */
+.loader-spinner-solid-circle::before {
+  content: "";
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: var(--theme-primary);
+  animation: loader-pulse 1s ease-in-out infinite;
+}
+@media (min-width: 1024px) {
+  .loader-spinner-solid-circle::before { width: 0.65em; height: 0.65em; }
+}
+@keyframes loader-pulse {
+  0%, 100% { transform: scale(0.85); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+/* Dotted circle – dots on ring */
+.loader-spinner-dotted-circle {
+  font-size: 44px;
+  position: relative;
+  width: 1em;
+  height: 1em;
+}
+.loader-spinner-dotted-circle .loader-dot {
+  position: absolute;
+  width: 0.2em;
+  height: 0.2em;
+  border-radius: 50%;
+  background: var(--theme-primary);
+  animation: loader-dot-opacity 1s ease-in-out infinite both;
+}
+.loader-spinner-dotted-circle .loader-dot:nth-child(1) { top: 0; left: 50%; margin-left: -0.1em; animation-delay: 0s; }
+.loader-spinner-dotted-circle .loader-dot:nth-child(2) { top: 50%; right: 0; margin-top: -0.1em; animation-delay: 0.125s; }
+.loader-spinner-dotted-circle .loader-dot:nth-child(3) { bottom: 0; left: 50%; margin-left: -0.1em; animation-delay: 0.25s; }
+.loader-spinner-dotted-circle .loader-dot:nth-child(4) { top: 50%; left: 0; margin-top: -0.1em; animation-delay: 0.375s; }
+.loader-spinner-dotted-circle .loader-dot:nth-child(5) { top: 8%; right: 8%; animation-delay: 0.0625s; }
+.loader-spinner-dotted-circle .loader-dot:nth-child(6) { top: 8%; left: 8%; animation-delay: 0.1875s; }
+.loader-spinner-dotted-circle .loader-dot:nth-child(7) { bottom: 8%; left: 8%; animation-delay: 0.3125s; }
+.loader-spinner-dotted-circle .loader-dot:nth-child(8) { bottom: 8%; right: 8%; animation-delay: 0.4375s; }
+@keyframes loader-dot-opacity {
+  0%, 100% { opacity: 0.25; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/* Horizontal dots – three dots bounce */
+.loader-spinner-dots-horizontal {
+  gap: 6px;
+}
+.loader-spinner-dots-horizontal .loader-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--theme-primary);
+  animation: loader-dots-bounce 0.6s ease-in-out infinite both;
+}
+.loader-spinner-dots-horizontal .loader-dot:nth-child(1) { animation-delay: 0s; }
+.loader-spinner-dots-horizontal .loader-dot:nth-child(2) { animation-delay: 0.1s; }
+.loader-spinner-dots-horizontal .loader-dot:nth-child(3) { animation-delay: 0.2s; }
+@keyframes loader-dots-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(-8px); opacity: 1; }
+}
+
+/* Dots grid – 3x3 */
+.loader-spinner-dots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4px;
+  max-width: 36px;
+  max-height: 36px;
+}
+.loader-spinner-dots-grid .loader-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--theme-primary);
+  animation: loader-grid-dot 1s ease-in-out infinite both;
+}
+.loader-spinner-dots-grid .loader-dot:nth-child(1) { animation-delay: 0s; }
+.loader-spinner-dots-grid .loader-dot:nth-child(2) { animation-delay: 0.05s; }
+.loader-spinner-dots-grid .loader-dot:nth-child(3) { animation-delay: 0.1s; }
+.loader-spinner-dots-grid .loader-dot:nth-child(4) { animation-delay: 0.15s; }
+.loader-spinner-dots-grid .loader-dot:nth-child(5) { animation-delay: 0.2s; }
+.loader-spinner-dots-grid .loader-dot:nth-child(6) { animation-delay: 0.25s; }
+.loader-spinner-dots-grid .loader-dot:nth-child(7) { animation-delay: 0.3s; }
+.loader-spinner-dots-grid .loader-dot:nth-child(8) { animation-delay: 0.35s; }
+.loader-spinner-dots-grid .loader-dot:nth-child(9) { animation-delay: 0.4s; }
+@keyframes loader-grid-dot {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/* Pinwheel – quadrant circle */
+.loader-spinner-pinwheel {
+  font-size: 48px;
+}
+.loader-spinner-pinwheel::before {
+  content: "";
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--theme-primary) 0deg 90deg,
+    transparent 90deg 180deg,
+    var(--theme-primary) 180deg 270deg,
+    transparent 270deg 360deg
+  );
+  animation: loader-spin 0.9s linear infinite;
+}
+@media (min-width: 1024px) {
+  .loader-spinner-pinwheel { font-size: 56px; }
+}
+@media (min-width: 1536px) {
+  .loader-spinner-pinwheel { font-size: 64px; }
+}
+
+@keyframes loader-spin {
+  to { transform: rotate(360deg); }
+}
+
