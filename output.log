@@ -1,0 +1,194 @@
+2026-03-24 23:51:06.398 [warning] [Main] [CursorProclistService] Native module unavailable; disabling proclist metrics: Cannot find module './build/Release/cursor_proclist.node'
+Require stack:
+- D:\cursor\resources\app\node_modules\cursor-proclist\index.js
+- D:\cursor\resources\app\out\main.js
+2026-03-24 23:51:06.441 [info] [Main] updateURL https://api2.cursor.sh/updates/api/update/win32-x64-user/cursor/2.6.21/7da4bdc65e3119bf82144b21c8233aa987f16d6bca377c5e9700f48e7a88b1e1/stable
+2026-03-24 23:51:06.442 [info] [Main] update#setState idle
+2026-03-24 23:51:17.797 [info] [Window] [CursorExtensionIsolationService] Extension isolation gate is disabled, effective isolation is disabled
+2026-03-24 23:51:17.802 [warning] [Window] Via 'product.json#extensionEnabledApiProposals' extension 'ms-toolsai.datawrangler' wants API proposal 'debugFocus' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.
+2026-03-24 23:51:17.803 [warning] [Window] Via 'product.json#extensionEnabledApiProposals' extension 'ms-vscode.vscode-copilot-data-analysis' wants API proposal 'chatVariableResolver' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.
+2026-03-24 23:51:17.804 [warning] [Window] Via 'product.json#extensionEnabledApiProposals' extension 'ms-python.python' wants API proposal 'terminalShellType' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.
+2026-03-24 23:51:17.807 [warning] [Window] Via 'product.json#extensionEnabledApiProposals' extension 'ms-python.vscode-python-envs' wants API proposal 'terminalShellType' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.
+2026-03-24 23:51:17.807 [warning] [Window] Via 'product.json#extensionEnabledApiProposals' extension 'github.copilot-chat' wants API proposal 'chatReadonlyPromptReference' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.
+2026-03-24 23:51:17.808 [warning] [Window] Via 'product.json#extensionEnabledApiProposals' extension 'ms-azuretools.vscode-azure-github-copilot' wants API proposal 'lmTools' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.
+2026-03-24 23:51:17.809 [warning] [Window] Via 'product.json#extensionEnabledApiProposals' extension 'vscjava.vscode-java-pack' wants API proposal 'lmTools' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.
+2026-03-24 23:51:17.811 [warning] [Window] Via 'product.json#extensionEnabledApiProposals' extension 'apidev.azure-api-center' wants API proposal 'chatParticipant' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.
+2026-03-24 23:51:17.812 [warning] [Window] Via 'product.json#extensionEnabledApiProposals' extension 'apidev.azure-api-center' wants API proposal 'languageModels' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.
+2026-03-24 23:51:18.024 [warning] [Window] Missing property "cppConfig" in oldValue. Filling with value from initValue. Please add a migration if necessary.
+2026-03-24 23:51:18.025 [warning] [Window] Missing property "rpcFileLoggerFolder" in oldValue. Filling with value from initValue. Please add a migration if necessary.
+2026-03-24 23:51:18.199 [info] [Window] [storage] Database optimization (VACUUM) is disabled via feature flag
+2026-03-24 23:51:20.627 [info] [Window] Started local extension host with pid 13588.
+2026-03-24 23:51:22.819 [error] [Window] Extension 'github.vscode-pull-request-github' wants API proposal 'chatSessionsProvider@2' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.
+2026-03-24 23:51:22.820 [error] [Window] Extension 'github.vscode-pull-request-github' wants API proposal 'languageModelToolResultAudience' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.
+2026-03-24 23:51:22.820 [error] [Window] Extension 'github.vscode-pull-request-github' wants API proposal 'remoteCodingAgents' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.
+2026-03-24 23:51:22.821 [error] [Window] Extension 'github.vscode-pull-request-github' appears in product.json but enables LESS API proposals than the extension wants.
+package.json (LOSES): activeComment, chatParticipantAdditions, chatParticipantPrivate, codiconDecoration, codeActionRanges, commentingRangeHint, commentReactor, commentReveal, commentThreadApplicability, contribAccessibilityHelpContent, contribCommentEditorActionsMenu, contribCommentPeekContext, contribCommentThreadAdditionalMenu, contribCommentsViewThreadMenus, contribEditorContentMenu, contribShareMenu, diffCommand, languageModelDataPart, quickDiffProvider, shareProvider, tokenInformation, treeViewMarkdownMessage
+product.json (WINS): activeComment, codiconDecoration, codeActionRanges, commentingRangeHint, commentReactor, commentReveal, commentThreadApplicability, contribAccessibilityHelpContent, contribCommentEditorActionsMenu, contribCommentPeekContext, contribCommentThreadAdditionalMenu, contribCommentsViewThreadMenus, contribEditorContentMenu, contribMultiDiffEditorMenus, contribShareMenu, diffCommand, quickDiffProvider, shareProvider, tabInputTextMerge, tokenInformation, treeViewMarkdownMessage
+2026-03-24 23:51:22.963 [error] [Window] [xdebug.php-debug]: property `title` is mandatory and must be of type `string` or `object`
+2026-03-24 23:51:23.132 [warning] [Window] [ms-python.python]: Cannot register 'python.venvPath'. This property is already registered.
+2026-03-24 23:51:23.134 [warning] [Window] [zobo.php-intellisense]: Cannot register 'php.executablePath'. This property is already registered.
+2026-03-24 23:51:23.135 [warning] [Window] [zobo.php-intellisense]: Cannot register 'php.files.exclude'. This property is already registered.
+2026-03-24 23:51:26.876 [info] [Window] [WorktreeCleanupCron] Registering cleanup task with interval of 6 hours
+2026-03-24 23:51:26.878 [info] [Window] [WorktreeCleanupCron] Cleanup task registered with interval of 6 hours (21600000ms)
+2026-03-24 23:51:27.913 [warning] [Window] Creation of workbench contribution 'workbench.contrib.configurationMigration' took 135ms.
+2026-03-24 23:51:28.095 [info] [Window] [Debug] Registered command palette action: debug.classifyRecentConversations
+2026-03-24 23:51:28.096 [info] [Window] [Debug] Registered command palette action: debug.getLayoutState
+2026-03-24 23:51:28.096 [info] [Window] [Debug] Registered command palette action: debug.simulateSidebarBug
+2026-03-24 23:51:28.096 [info] [Window] [Debug] Registered command palette action: debug.simulateLeftIconFlippedHenryBug
+2026-03-24 23:51:28.097 [info] [Window] [Debug] Registered command palette action: debug.setSidebarPosition
+2026-03-24 23:51:28.097 [info] [Window] [Debug] Registered command palette action: debug.toggleSyncMode
+2026-03-24 23:51:28.098 [info] [Window] [Debug] Registered command palette action: debug.toggleAgentMode
+2026-03-24 23:51:28.098 [info] [Window] [Debug] Registered command palette action: debug.testLayoutPersistence
+2026-03-24 23:51:28.099 [info] [Window] [Debug] Registered command palette action: debug.logComposer
+2026-03-24 23:51:28.100 [info] [Window] [Debug] Registered command palette action: debug.getContextKeyValue
+2026-03-24 23:51:28.100 [info] [Window] [Debug] Registered command palette action: debug.getApplicationProperty
+2026-03-24 23:51:28.101 [info] [Window] [Debug] Registered command palette action: debug.testLinearIssues
+2026-03-24 23:51:28.131 [info] [Window] OpenInBrowserWatcher: Initializing terminal log watcher
+2026-03-24 23:51:28.302 [info] [Window] [Cursor Proclist Polling] Local collection disabled by config
+2026-03-24 23:51:34.534 [info] [Main] update#setState checking for updates
+2026-03-24 23:51:35.523 [info] [Main] update#setState idle
+2026-03-24 23:51:37.629 [info] [Window] [perf] Render performance baseline is 327ms
+2026-03-24 23:51:41.916 [info] [Window] [LocalProcessExtensionHost] getDefaultShell result: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+2026-03-24 23:51:41.932 [info] [Window] [LocalProcessExtensionHost] Final userTerminalHint: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+2026-03-24 23:51:42.236 [info] [Window] [MainThreadCursor] mcp_snapshot_synchronization gate (session-sticky): false
+2026-03-24 23:51:42.345 [warning] [Window] No search provider registered for scheme: file, waiting
+2026-03-24 23:51:42.418 [info] [Window] [MainThreadShellExec] $updateShellExecCapabilities: hostKind=1, expectedHost=1, isRemote=false, sandboxSupported=false, linuxKernelVersion=none
+2026-03-24 23:51:42.419 [info] [Window] [MainThreadShellExec] AppArmor suggestion skipped: sandboxSupported=false, linuxKernelVersion=none
+2026-03-24 23:51:42.807 [info] [Extension Host] Extension host with pid 13588 started
+2026-03-24 23:51:42.807 [info] [Extension Host] Skipping acquiring lock for c:\Users\vc\AppData\Roaming\Cursor\User\workspaceStorage\6cd111151904806de251ffd47e3dd118.
+2026-03-24 23:51:42.807 [info] [Extension Host] [ExtHostShellExec] Detecting sandbox support...
+2026-03-24 23:51:42.807 [info] [Extension Host] [ExtHostShellExec] Platform: win32, Shell type: unknown
+2026-03-24 23:51:42.807 [info] [Extension Host] [ExtHostShellExec] dirname: d:\cursor\resources\app\out\vs\workbench\api\node
+2026-03-24 23:51:42.807 [info] [Extension Host] [ExtHostShellExec] Sandbox helper path: d:\cursor\resources\app\resources\helpers\cursorsandbox.exe
+2026-03-24 23:51:42.807 [info] [Extension Host] [ExtHostShellExec] process.resourcesPath: D:\cursor\resources
+2026-03-24 23:51:42.807 [info] [Extension Host] [ExtHostShellExec] process.execPath: D:\cursor\Cursor.exe
+2026-03-24 23:51:42.809 [info] [Extension Host] [shell-exec:sandbox] [isSandboxHelperSupported] Starting sandbox support check...
+2026-03-24 23:51:42.809 [info] [Extension Host] [shell-exec:sandbox] [checkBinaryAvailable] Resolved binary path: d:\cursor\resources\app\resources\helpers\cursorsandbox.exe
+2026-03-24 23:51:42.809 [info] [Extension Host] [shell-exec:sandbox] [checkBinaryAvailable] Binary path exists: true
+2026-03-24 23:51:42.809 [info] [Extension Host] [ExtHostShellExec] Sandbox support detected: false, platform: win32, kernelVersion: N/A
+2026-03-24 23:51:42.809 [info] [Extension Host] [ExtHostShellExec] Initializing terminal executor with userTerminalHint: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+2026-03-24 23:51:42.809 [info] [Extension Host] ExtHostSearch [cursorIgnore] internal fileSearch start reason=cursorIgnoreCheck roots=1 include=**/.cursorignore maxResults=0 numThreads=(default) folderQueries=[{"cwd":"d:\\Projects\\Zi_Core","disregardIgnoreFiles":false,"disregardParentIgnoreFiles":true,"disregardGlobalIgnoreFiles":true,"ignoreSymlinks":false,"rgNoIgnore":false,"rgNoIgnoreParent":true,"rgNoIgnoreGlobal":true,"rgFollow":true}]
+2026-03-24 23:51:43.243 [info] [Extension Host] ExtensionService#_doActivateExtension vscode.git-base, startup: true, activationEvent: '*', root cause: anysphere.cursor-agent-exec
+2026-03-24 23:51:43.268 [info] [Extension Host] ExtensionService#_doActivateExtension anysphere.cursor-polyfills-remote, startup: true, activationEvent: '*'
+2026-03-24 23:51:43.550 [info] [Extension Host] ExtensionService#_doActivateExtension formulahendry.auto-close-tag, startup: true, activationEvent: '*'
+2026-03-24 23:51:43.564 [info] [Extension Host] ExtensionService#_doActivateExtension formulahendry.auto-rename-tag, startup: true, activationEvent: '*'
+2026-03-24 23:51:43.778 [info] [Extension Host] ExtensionService#_doActivateExtension IHunte.laravel-blade-wrapper, startup: true, activationEvent: '*'
+2026-03-24 23:51:43.794 [info] [Extension Host] ExtensionService#_doActivateExtension oderwat.indent-rainbow, startup: true, activationEvent: '*'
+2026-03-24 23:51:43.806 [info] [Extension Host] ExtensionService#_doActivateExtension vincaslt.highlight-matching-tag, startup: true, activationEvent: '*'
+2026-03-24 23:51:43.892 [info] [Extension Host] Extension activated success: vscode.git-base — 24ms (code loading: 23ms, activate call: 1ms, activate resolved: 0ms)
+2026-03-24 23:51:43.975 [info] [Extension Host] ExtHostSearch d:\cursor\resources\app\node_modules\@vscode\ripgrep\bin\rg.exe --files --hidden --case-sensitive --no-require-git -g '**/.cursorignore' -g '!**/.git' -g '!**/.svn' -g '!**/.hg' -g '!**/.DS_Store' -g '!**/Thumbs.db' -g '!**/node_modules' -g '!**/bower_components' -g '!**/*.code-search' --no-ignore-parent --follow --no-config --no-ignore-global
+ - cwd: d:\Projects\Zi_Core
+ - Sibling clauses: {}
+2026-03-24 23:51:43.990 [info] [Extension Host] Extension activated success: anysphere.cursor-polyfills-remote — 280ms (code loading: 280ms, activate call: 0ms, activate resolved: 0ms)
+2026-03-24 23:51:44.008 [info] [Extension Host] Extension activated success: formulahendry.auto-close-tag — 27ms (code loading: 13ms, activate call: 14ms, activate resolved: 0ms)
+2026-03-24 23:51:44.050 [info] [Extension Host] Extension activated success: IHunte.laravel-blade-wrapper — 14ms (code loading: 12ms, activate call: 2ms, activate resolved: 0ms)
+2026-03-24 23:51:44.060 [info] [Extension Host] Extension activated success: oderwat.indent-rainbow — 17ms (code loading: 9ms, activate call: 8ms, activate resolved: 0ms)
+2026-03-24 23:51:44.111 [info] [Extension Host] Extension activated success: vincaslt.highlight-matching-tag — 122ms (code loading: 75ms, activate call: 47ms, activate resolved: 0ms)
+2026-03-24 23:51:44.112 [info] [Extension Host] ExtensionService#_doActivateExtension vscode.git, startup: true, activationEvent: '*', root cause: anysphere.cursor-agent-exec
+2026-03-24 23:51:44.414 [info] [Extension Host] ExtensionService#_doActivateExtension vscode.github, startup: true, activationEvent: '*'
+2026-03-24 23:51:44.868 [info] [Extension Host] ExtHostSearch Search finished. Stats: {"cmdTime":938,"fileWalkTime":938,"directoriesWalked":0,"filesWalked":0,"cmdResultCount":0}
+2026-03-24 23:51:44.877 [info] [Extension Host] ExtHostSearch [cursorIgnore] internal fileSearch done in 2186ms limitHit=false failed=false resultCount=0 cmdTime=938 fileWalkTime=938 providerTime=(unknown)
+2026-03-24 23:51:45.061 [info] [Extension Host] Extension activated success: vscode.github — 120ms (code loading: 103ms, activate call: 4ms, activate resolved: 13ms)
+2026-03-24 23:51:45.687 [info] [Extension Host] Extension activated success: vscode.git — 1093ms (code loading: 301ms, activate call: 9ms, activate resolved: 783ms)
+2026-03-24 23:51:45.763 [info] [Extension Host] ExtensionService#_doActivateExtension anysphere.cursor-retrieval, startup: true, activationEvent: '*', root cause: anysphere.cursor-agent-exec
+2026-03-24 23:51:47.675 [error] [Window] [Extension Host] (node:13588) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `Cursor --trace-deprecation ...` to show where the warning was created)
+2026-03-24 23:51:47.739 [info] [Extension Host] Extension activated success: formulahendry.auto-rename-tag — 3934ms (code loading: 204ms, activate call: 37ms, activate resolved: 3693ms)
+2026-03-24 23:51:47.961 [info] [Extension Host] Extension activated success: anysphere.cursor-retrieval — 2126ms (code loading: 1909ms, activate call: 12ms, activate resolved: 205ms)
+2026-03-24 23:51:47.992 [info] [Extension Host] ExtensionService#_doActivateExtension anysphere.cursor-agent-exec, startup: true, activationEvent: '*'
+2026-03-24 23:51:50.179 [info] [Extension Host] ExtensionService#_doActivateExtension anysphere.cursor-mcp, startup: false, activationEvent: 'api', root cause: anysphere.cursor-agent-exec
+2026-03-24 23:51:51.824 [info] [Extension Host] Extension activated success: anysphere.cursor-mcp — 1434ms (code loading: 1329ms, activate call: 1ms, activate resolved: 104ms)
+2026-03-24 23:51:51.892 [info] [Extension Host] ExtensionService#_doActivateExtension vscode.emmet, startup: false, activationEvent: 'onLanguage'
+2026-03-24 23:51:52.101 [info] [Extension Host] Extension activated success: vscode.emmet — 188ms (code loading: 95ms, activate call: 93ms, activate resolved: 0ms)
+2026-03-24 23:51:52.191 [info] [Extension Host] Extension activated success: anysphere.cursor-agent-exec — 4179ms (code loading: 1463ms, activate call: 27ms, activate resolved: 2689ms)
+2026-03-24 23:51:52.192 [info] [Extension Host] Eager extensions activated
+2026-03-24 23:51:52.265 [info] [Extension Host] ExtensionService#_doActivateExtension anysphere.cursor-always-local, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:54.179 [info] [Extension Host] ExtensionService#_doActivateExtension cursor.cursor-browser-automation, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:54.248 [info] [Extension Host] ExtensionService#_doActivateExtension anysphere.cursor-deeplink, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:54.799 [info] [Extension Host] ExtensionService#_doActivateExtension anysphere.cursor-resolver, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:55.346 [info] [Window] Extension host (LocalProcess pid: 13588) is unresponsive.
+2026-03-24 23:51:55.348 [warning] [Window] [ExtensionService] No inspect port found for LocalProcess pid: 13588
+2026-03-24 23:51:55.613 [info] [Extension Host] ExtensionService#_doActivateExtension anysphere.cursor-shadow-workspace, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:55.900 [info] [Extension Host] ExtensionService#_doActivateExtension anysphere.cursor-socket, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:55.907 [info] [Extension Host] ExtensionService#_doActivateExtension vscode.debug-auto-launch, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:55.917 [info] [Extension Host] ExtensionService#_doActivateExtension vscode.merge-conflict, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:55.987 [info] [Extension Host] ExtensionService#_doActivateExtension bradlc.vscode-tailwindcss, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:56.161 [info] [Extension Host] ExtensionService#_doActivateExtension eamodio.gitlens, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:56.552 [info] [Extension Host] ExtensionService#_doActivateExtension ecmel.vscode-html-css, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:56.559 [info] [Extension Host] ExtensionService#_doActivateExtension EditorConfig.EditorConfig, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:56.722 [info] [Extension Host] ExtensionService#_doActivateExtension esbenp.prettier-vscode, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:56.725 [info] [Extension Host] ExtensionService#_doActivateExtension vscode.github-authentication, startup: false, activationEvent: 'onStartupFinished', root cause: GitHub.vscode-pull-request-github
+2026-03-24 23:51:56.775 [info] [Extension Host] ExtensionService#_doActivateExtension PKief.material-icon-theme, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:56.823 [info] [Extension Host] ExtensionService#_doActivateExtension ritwickdey.LiveServer, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:51:56.969 [info] [Extension Host] Extension activated success: anysphere.cursor-always-local — 1932ms (code loading: 1912ms, activate call: 15ms, activate resolved: 5ms)
+2026-03-24 23:51:56.972 [info] [Window] Extension host (LocalProcess pid: 13588) is responsive.
+2026-03-24 23:51:56.984 [info] [Extension Host] Extension activated success: cursor.cursor-browser-automation — 76ms (code loading: 68ms, activate call: 2ms, activate resolved: 6ms)
+2026-03-24 23:51:57.000 [info] [Extension Host] Extension activated success: anysphere.cursor-deeplink — 559ms (code loading: 544ms, activate call: 15ms, activate resolved: 0ms)
+2026-03-24 23:51:57.010 [info] [Extension Host] Extension activated success: anysphere.cursor-resolver — 821ms (code loading: 813ms, activate call: 3ms, activate resolved: 5ms)
+2026-03-24 23:51:57.012 [info] [Extension Host] Extension activated success: anysphere.cursor-shadow-workspace — 287ms (code loading: 286ms, activate call: 1ms, activate resolved: 0ms)
+2026-03-24 23:51:57.015 [info] [Extension Host] Extension activated success: anysphere.cursor-socket — 9ms (code loading: 7ms, activate call: 2ms, activate resolved: 0ms)
+2026-03-24 23:51:57.019 [info] [Extension Host] Extension activated success: vscode.debug-auto-launch — 12ms (code loading: 10ms, activate call: 2ms, activate resolved: 0ms)
+2026-03-24 23:51:57.092 [info] [Extension Host] Extension activated success: vscode.merge-conflict — 90ms (code loading: 67ms, activate call: 12ms, activate resolved: 11ms)
+2026-03-24 23:51:58.182 [info] [Extension Host] Extension activated success: eamodio.gitlens — 1460ms (code loading: 390ms, activate call: 379ms, activate resolved: 691ms)
+2026-03-24 23:51:58.199 [info] [Extension Host] Extension activated success: ecmel.vscode-html-css — 9ms (code loading: 6ms, activate call: 2ms, activate resolved: 1ms)
+2026-03-24 23:51:58.301 [info] [Extension Host] Extension activated success: EditorConfig.EditorConfig — 263ms (code loading: 162ms, activate call: 3ms, activate resolved: 98ms)
+2026-03-24 23:51:58.436 [info] [Extension Host] Extension activated success: vscode.github-authentication — 82ms (code loading: 48ms, activate call: 11ms, activate resolved: 23ms)
+2026-03-24 23:51:58.537 [info] [Extension Host] Extension activated success: PKief.material-icon-theme — 146ms (code loading: 47ms, activate call: 5ms, activate resolved: 94ms)
+2026-03-24 23:51:58.551 [info] [Extension Host] Extension activated success: ritwickdey.LiveServer — 36ms (code loading: 32ms, activate call: 3ms, activate resolved: 1ms)
+2026-03-24 23:51:59.651 [info] [Extension Host] ExtensionService#_doActivateExtension GitHub.vscode-pull-request-github, startup: false, activationEvent: 'onStartupFinished'
+2026-03-24 23:52:00.866 [info] [Extension Host] Extension activated success: bradlc.vscode-tailwindcss — 3946ms (code loading: 174ms, activate call: 1ms, activate resolved: 3771ms)
+2026-03-24 23:52:02.122 [info] [Extension Host] Extension activated success: esbenp.prettier-vscode — 5399ms (code loading: 4493ms, activate call: 6ms, activate resolved: 900ms)
+2026-03-24 23:52:03.943 [info] [Extension Host] Extension activated success: GitHub.vscode-pull-request-github — 4094ms (code loading: 675ms, activate call: 3ms, activate resolved: 3416ms)
+2026-03-24 23:52:03.959 [error] [Window] MainThreadChatAgents2#$updateAgent: No agent with handle 0 registered
+2026-03-24 23:52:35.116 [error] [Extension Host] AbortError: The user aborted a request.
+    at y (c:\Users\vc\.cursor\extensions\eamodio.gitlens-17.11.1-universal\dist\gitlens.js:2448:85826)
+    at AbortSignal.b (c:\Users\vc\.cursor\extensions\eamodio.gitlens-17.11.1-universal\dist\gitlens.js:2448:86002)
+    at AbortSignal.[nodejs.internal.kHybridDispatch] (node:internal/event_target:843:20)
+    at AbortSignal.dispatchEvent (node:internal/event_target:776:26)
+    at runAbort (node:internal/abort_controller:486:10)
+    at abortSignal (node:internal/abort_controller:457:3)
+    at nIs.abort (node:internal/abort_controller:505:5)
+    at nIs.abort (file:///d:/cursor/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:177:2441596)
+    at Timeout.<anonymous> (c:\Users\vc\.cursor\extensions\eamodio.gitlens-17.11.1-universal\dist\gitlens.js:2513:9652)
+    at listOnTimeout (node:internal/timers:585:17)
+    at processTimers (node:internal/timers:521:7)
+2026-03-24 23:52:35.120 [error] [Window] The user aborted a request. {"type":"aborted","message":"The user aborted a request."}
+2026-03-24 23:52:39.846 [info] [Window] [Cursor Proclist] Local collection enabled by dynamic config change
+2026-03-24 23:52:39.879 [info] [Window] [ShellExec] Created session 3b3cf61d-cd26-4a94-8d7f-38aa0a885eec on LocalProcess host
+2026-03-24 23:52:39.915 [info] [Window] [Cursor Proclist Polling] Started polling (every 5 min)
+2026-03-24 23:52:40.239 [warning] [Window] AgentsTelemetry: agentVisibleStartTime is undefined -- agent pane is already hidden.
+2026-03-24 23:52:40.262 [warning] [Window] AgentsTelemetry: agentVisibleStartTime is undefined -- agent pane is already hidden.
+2026-03-24 23:55:11.870 [info] [Main] [PowerMainService] Started wakelock id=0 owner=window:1 reason="agent-loop" activeCount=1
+2026-03-24 23:55:11.953 [info] [Window] [ComposerWakelockManager] Acquired wakelock id=0 reason="agent-loop" composerId=f4c22b49-6fb4-45dd-bf84-d5242d713665
+2026-03-25 00:01:59.638 [error] [Extension Host] ConnectError: [aborted] read ECONNRESET
+    at o.from (d:\cursor\resources\app\extensions\cursor-always-local\dist\main.js:2:981068)
+    at B (d:\cursor\resources\app\extensions\cursor-always-local\dist\main.js:2:376626)
+    at Promise.reject (d:\cursor\resources\app\extensions\cursor-always-local\dist\main.js:2:388733)
+    at ClientHttp2Stream.<anonymous> (d:\cursor\resources\app\extensions\cursor-always-local\dist\main.js:2:387265)
+    at ClientHttp2Stream.emit (node:events:519:28)
+    at emitErrorNT (node:internal/streams/destroy:170:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at processTicksAndRejections (node:internal/process/task_queues:89:21)
+2026-03-25 00:01:59.640 [error] [Extension Host] ConnectError: [aborted] read ECONNRESET
+    at o.from (d:\cursor\resources\app\extensions\cursor-always-local\dist\main.js:2:981068)
+    at B (d:\cursor\resources\app\extensions\cursor-always-local\dist\main.js:2:376626)
+    at Promise.reject (d:\cursor\resources\app\extensions\cursor-always-local\dist\main.js:2:388733)
+    at ClientHttp2Stream.<anonymous> (d:\cursor\resources\app\extensions\cursor-always-local\dist\main.js:2:387265)
+    at ClientHttp2Stream.emit (node:events:519:28)
+    at emitErrorNT (node:internal/streams/destroy:170:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at processTicksAndRejections (node:internal/process/task_queues:89:21)
+2026-03-25 00:02:01.480 [error] [Window] An unknown error occurred. Please consult the log for more details. {"name":"ConnectError","rawMessage":"read ECONNRESET","code":10,"metadata":{},"details":[],"cause":{"errno":-4077,"code":"ECONNRESET","syscall":"read"}}
+2026-03-25 00:04:56.373 [info] [Main] update#setState checking for updates
+2026-03-25 00:04:56.422 [info] [Window] [Extensions]: Checking for updates. Reason: Product update
+2026-03-25 00:04:57.352 [info] [Main] update#setState idle
+2026-03-25 00:05:35.438 [warning] [Window] Settings pattern "chat.*" doesn't match any settings
+2026-03-25 00:05:35.448 [warning] [Window] Settings pattern "mcp" doesn't match any settings
+2026-03-25 00:05:35.449 [warning] [Window] SettingsEditor2: Settings not included in settingsLayout.ts: crashReporting.enabled, testRunner.config, cursorAuth.allowedTeamId, [php]
+2026-03-25 00:05:35.460 [warning] [Window] Settings pattern "GitHub.copilot.manageExtension" doesn't match any settings
+2026-03-25 00:05:38.066 [info] [Window] Extension host (LocalProcess pid: 13588) is unresponsive.
+2026-03-25 00:05:38.098 [warning] [Window] [ExtensionService] No inspect port found for LocalProcess pid: 13588
+2026-03-25 00:05:38.122 [info] [Window] Extension host (LocalProcess pid: 13588) is responsive.
+2026-03-25 00:05:38.856 [warning] [Window] Settings pattern "chat.*" doesn't match any settings
+2026-03-25 00:05:38.856 [warning] [Window] Settings pattern "mcp" doesn't match any settings
+2026-03-25 00:05:38.861 [warning] [Window] Settings pattern "GitHub.copilot.manageExtension" doesn't match any settings
