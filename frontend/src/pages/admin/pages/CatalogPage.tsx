@@ -7,20 +7,31 @@ import BlogCategoriesTab from "@/components/admin/blog/BlogCategoriesTab";
 import BlogAuthorsTab from "@/components/admin/blog/BlogAuthorsTab";
 import { getEnabledCatalogTypes } from "@/api/catalogtype.api";
 
-export default function CatalogPage() {
+interface CatalogPageProps {
+  forcedType?: string;
+  forcedLabel?: string;
+}
+
+export default function CatalogPage({ forcedType, forcedLabel }: CatalogPageProps) {
   const { type } = useParams<{ type: string }>();
   const [activeTab, setActiveTab] = useState("dashboard");
-  const catalogType = type || "blog";
-  const [typeLabel, setTypeLabel] = useState(catalogType.charAt(0).toUpperCase() + catalogType.slice(1));
+  const catalogType = forcedType || type || "blog";
+  const [typeLabel, setTypeLabel] = useState(
+    forcedLabel || (catalogType.charAt(0).toUpperCase() + catalogType.slice(1))
+  );
 
   useEffect(() => {
+    if (forcedLabel) {
+      setTypeLabel(forcedLabel);
+      return;
+    }
     getEnabledCatalogTypes()
       .then((types: { slug: string; label: string }[]) => {
         const t = types.find((x) => x.slug === catalogType);
         if (t?.label) setTypeLabel(t.label);
       })
       .catch(() => {});
-  }, [catalogType]);
+  }, [catalogType, forcedLabel]);
 
   return (
     <div className="bg-white shadow rounded-lg p-6">

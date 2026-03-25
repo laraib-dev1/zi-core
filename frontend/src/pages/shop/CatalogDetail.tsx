@@ -20,6 +20,9 @@ const SECTION_IDS: Record<string, string> = {
   projects: "#portfolio",
   services: "#services",
   courses: "#courses",
+  applications: "#catalog-applications",
+  apps: "#catalog-apps",
+  websites: "#catalog-websites",
 };
 
 export default function CatalogDetail() {
@@ -92,7 +95,8 @@ export default function CatalogDetail() {
   }
 
   if (notFound || !item) {
-    const backHref = SECTION_IDS[type || ""] || "/";
+    const normalizedType = String(type || "").toLowerCase();
+    const backHref = SECTION_IDS[normalizedType] || `/#catalog-${normalizedType}`;
     return (
       <div className="min-h-screen flex flex-col bg-transparent pt-20">
         <Navbar2 bottomDivHasColor={false} />

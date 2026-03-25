@@ -33,6 +33,7 @@ import CoursesSection from "@/components/landing/CoursesSection";
 import FAQsSection from "@/components/landing/FAQsSection";
 import ComingSoonSection from "@/components/landing/ComingSoonSection";
 import CatalogSection from "@/components/landing/CatalogSection";
+import ApplicationsSection from "@/components/landing/ApplicationsSection";
 import FloatingWhatsApp from "@/components/ui/FloatingWhatsApp";
 import PageLoader from "@/components/ui/PageLoader";
 import { Search, Lightbulb, Settings, Rocket, Package } from "lucide-react";
@@ -77,7 +78,7 @@ const MAIN_NAV_SCROLL_IDS = new Set(["home", "about", "portfolio", "testimonials
 // Default order when API hasn't loaded yet - must match backend DEFAULT_SECTIONS
 const DEFAULT_SECTION_ORDER = [
   "hero", "about", "cta-banner-1", "text-image", "how-we-work", "cta-banner-2", "services", "courses",
-  "portfolio", "feature-cards", "cta-banner-3", "other-pages", "testimonials", "faqs", "help-banner-1",
+  "portfolio", "applications", "feature-cards", "cta-banner-3", "other-pages", "testimonials", "faqs", "help-banner-1",
   "contact", "cta-banner-4", "scale-operations", "feature-service", "hero-business", "team",
   "unlock-potential", "call-to-action", "features-details", "clients", "excellence", "help-banner-2",
   "event-banner", "limited-offer", "coming-soon",
@@ -170,6 +171,15 @@ This platform showcases my journey as a surgeon and medical photographer, captur
     portfolio: () => (
       <div id="portfolio" className={spacing.section.gap}>
         <PortfolioGridSection title="Portfolio" subtitle="Mini info section details" />
+      </div>
+    ),
+    applications: () => (
+      <div id="applications" className={spacing.section.gap}>
+        <ApplicationsSection
+          catalogTypeSlug="applications"
+          title="Our Applications"
+          subtitle="Mini info section details"
+        />
       </div>
     ),
     "feature-cards": () => (
@@ -480,13 +490,22 @@ export default function SecondLanding() {
           if (sectionId.startsWith("catalog-")) {
             const slug = sectionId.replace(/^catalog-/, "");
             const label = sectionLabels[sectionId] || slug;
+            const shouldUseApplicationsTiles = ["applications", "apps", "websites"].includes(slug);
             return (
               <div key={sectionId} id={sectionId} className={spacing.section.gap}>
-                <CatalogSection
-                  catalogTypeSlug={slug}
-                  title={label}
-                  subtitle="Mini info section details"
-                />
+                {shouldUseApplicationsTiles ? (
+                  <ApplicationsSection
+                    catalogTypeSlug={slug}
+                    title={label}
+                    subtitle="Mini info section details"
+                  />
+                ) : (
+                  <CatalogSection
+                    catalogTypeSlug={slug}
+                    title={label}
+                    subtitle="Mini info section details"
+                  />
+                )}
               </div>
             );
           }

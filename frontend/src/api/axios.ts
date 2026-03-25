@@ -1,13 +1,35 @@
 import axios from "axios";
 
-const urls = (import.meta.env.VITE_API_URLS || "").split(",").map((url: string) => url.trim()).filter(Boolean);
+function cleanEnvValue(value: string): string {
+  return String(value || "")
+    .replace(/\\n/g, "")
+    .replace(/\r?\n/g, "")
+    .replace(/^['"]|['"]$/g, "")
+    .trim();
+}
+
+const urls = cleanEnvValue(import.meta.env.VITE_API_URLS || "")
+  .split(",")
+  .map((url: string) => cleanEnvValue(url))
+  .filter(Boolean);
 
 const isLocalhost =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1";
 
 // Localhost → use first URL (local API). Vercel/production → use second URL (production API). Fallback to first if only one URL set.
-const API_URL = isLocalhost ? urls[0] : (urls[1] || urls[0]);
+const rawApiUrl = isLocalhost
+  ? urls[0]
+  : (urls[1] || urls[0] || cleanEnvValue(import.meta.env.VITE_API_URL || ""));
+
+function ensureApiPath(url: string): string {
+  const trimmed = (url || "").trim().replace(/\/$/, "");
+  if (!trimmed) return "";
+  if (trimmed.endsWith("/api")) return trimmed;
+  return `${trimmed}/api`;
+}
+
+const API_URL = ensureApiPath(rawApiUrl);
 
 console.log("API Base URL:", API_URL); // debug
 

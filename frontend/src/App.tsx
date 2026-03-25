@@ -40,6 +40,7 @@ const AdminQueries = React.lazy(() => import("./pages/admin/pages/QueriesPage"))
 const AdminReviews = React.lazy(() => import("./pages/admin/pages/ReviewsPage"));
 const AdminBlogs = React.lazy(() => import("./pages/admin/pages/BlogPage"));
 const CatalogPage = React.lazy(() => import("./pages/admin/pages/CatalogPage"));
+const ApplicationsPage = React.lazy(() => import("./pages/admin/pages/ApplicationsPage"));
 const SpConsolePage = React.lazy(() => import("./pages/admin/pages/SpConsolePage"));
 const AdminSectionsPage = React.lazy(() => import("./pages/admin/pages/AdminSectionsPage"));
 const AdminCategories = React.lazy(() => import("./pages/admin/pages/CategoriesPage"));
@@ -109,6 +110,7 @@ export default function App() {
           <Route path="blogs" element={<Navigate to="/admin/catalog/blog" replace />} />
           <Route path="catalog" element={<Navigate to="/admin/catalog/blog" replace />} />
           <Route path="catalog/:type" element={<CatalogPage />} />
+          <Route path="applications" element={<ApplicationsPage />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="sections" element={<AdminSectionsPage />} />
           <Route path="sp-console" element={<SpConsolePage />} />

@@ -29,7 +29,7 @@ export const getCatalogTypes = async (req, res) => {
   try {
     await connectDB();
     await ensureDefaultTypes();
-    const types = await CatalogType.find().sort({ order: 1 });
+    const types = await CatalogType.find({ slug: { $ne: "applications" } }).sort({ order: 1 });
     res.json({ success: true, data: types });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -40,7 +40,7 @@ export const getEnabledCatalogTypes = async (req, res) => {
   try {
     await connectDB();
     await ensureDefaultTypes();
-    const types = await CatalogType.find({ showInAdmin: true }).sort({ order: 1 });
+    const types = await CatalogType.find({ showInAdmin: true, slug: { $ne: "applications" } }).sort({ order: 1 });
     res.json({ success: true, data: types });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
