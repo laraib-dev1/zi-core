@@ -33,6 +33,7 @@ export default function FloatingWhatsApp({
   className,
 }: FloatingWhatsAppProps) {
   const normalizedPhone = phoneNumber.replace(/\D/g, "");
+  if (!normalizedPhone) return null;
   const baseUrl = `https://wa.me/${normalizedPhone}`;
   const href = message
     ? `${baseUrl}?text=${encodeURIComponent(message)}`

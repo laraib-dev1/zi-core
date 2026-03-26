@@ -38,6 +38,8 @@ import FloatingWhatsApp from "@/components/ui/FloatingWhatsApp";
 import PageLoader from "@/components/ui/PageLoader";
 import { Search, Lightbulb, Settings, Rocket, Package } from "lucide-react";
 import { smoothScrollToElement } from "@/lib/utils";
+import { getCompany } from "@/api/company.api";
+import { applyCompanyBranding, buildWhatsAppUrl, DEFAULT_COMPANY_NAME } from "@/utils/companyBrand";
 
 const myProjectsHtmlContent = `
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
@@ -86,7 +88,7 @@ const DEFAULT_SECTION_ORDER = [
 
 type ImgFn = (slot: string) => string;
 
-function createSectionRenderers(img: ImgFn): Record<string, () => React.ReactNode> {
+function createSectionRenderers(img: ImgFn, companyName: string): Record<string, () => React.ReactNode> {
   return {
     hero: () => (
       <div id="home" className="pb-12px sm:pb-5">
@@ -98,7 +100,7 @@ function createSectionRenderers(img: ImgFn): Record<string, () => React.ReactNod
           rightImageSrc={img("hero-right") || "/hero.png"}
           rightImageAlt="Hero"
           introduction="I'm"
-          title="Dr. Ali Athar"
+          title={companyName}
           titleClassName="theme-text-primary"
           subtitle="FCPS, Surgeon"
           description="Where surgery meets storytelling.
@@ -387,6 +389,15 @@ function parseBanner2Map(list: { slot?: string; imageUrl?: string }[]) {
 
 export default function SecondLanding() {
   const { hash } = useLocation();
+  const [companyData, setCompanyData] = useState<{ company: string; logo?: string; favicon?: string; phone?: string }>(() => {
+    const cachedCompany = getCachedData<any>(CACHE_KEYS.COMPANY);
+    return {
+      company: cachedCompany?.company || DEFAULT_COMPANY_NAME,
+      logo: cachedCompany?.logo || "",
+      favicon: cachedCompany?.favicon || "",
+      phone: cachedCompany?.phone || "",
+    };
+  });
   const [enabledSectionIds, setEnabledSectionIds] = useState<string[] | null>(() => {
     const cached = getCachedData<string[]>(CACHE_KEYS.ENABLED_LANDING_SECTIONS);
     return cached ?? null;
@@ -428,6 +439,39 @@ export default function SecondLanding() {
     fetchAll();
   }, []);
 
+  useEffect(() => {
+    const loadCompanyData = async () => {
+      try {
+        const cachedCompany = getCachedData<any>(CACHE_KEYS.COMPANY);
+        if (cachedCompany) {
+          const normalized = {
+            company: cachedCompany.company || DEFAULT_COMPANY_NAME,
+            logo: cachedCompany.logo || "",
+            favicon: cachedCompany.favicon || "",
+            phone: cachedCompany.phone || "",
+          };
+          setCompanyData(normalized);
+          applyCompanyBranding(normalized);
+        }
+
+        const latestCompany = await getCompany();
+        const normalized = {
+          company: latestCompany?.company || DEFAULT_COMPANY_NAME,
+          logo: latestCompany?.logo || "",
+          favicon: latestCompany?.favicon || "",
+          phone: latestCompany?.phone || "",
+        };
+        setCompanyData(normalized);
+        setCachedData(CACHE_KEYS.COMPANY, latestCompany);
+        applyCompanyBranding(normalized);
+      } catch {
+        applyCompanyBranding(companyData);
+      }
+    };
+    loadCompanyData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const img = (slot: string) => banner2Map[slot] || "";
 
   const sectionsReady = enabledSectionIds !== null;
@@ -436,7 +480,10 @@ export default function SecondLanding() {
       ? enabledSectionIds
       : DEFAULT_SECTION_ORDER;
 
-  const sectionRenderers = React.useMemo(() => createSectionRenderers(img), [banner2Map]);
+  const sectionRenderers = React.useMemo(
+    () => createSectionRenderers(img, companyData.company || DEFAULT_COMPANY_NAME),
+    [banner2Map, companyData.company]
+  );
 
   const otherPagesItems: { id: string; label: string }[] =
     enabledSectionIds == null || enabledSectionIds.length === 0
@@ -465,7 +512,12 @@ export default function SecondLanding() {
 
   return (
     <div className="min-h-screen flex flex-col bg-transparent second-landing-page">
-      <Navbar2 bottomDivHasColor={false} otherPagesItems={otherPagesItems} />
+      <Navbar2
+        bottomDivHasColor={false}
+        otherPagesItems={otherPagesItems}
+        companyName={companyData.company || DEFAULT_COMPANY_NAME}
+        hireMeHref={buildWhatsAppUrl(companyData.phone, "Hi, I want to hire you.")}
+      />
 
       {/* Section gap from spacing.ts = outer padding (wrapper), not on section div */}
       <main className="flex-1 pt-0">
@@ -516,7 +568,7 @@ export default function SecondLanding() {
         <Footer variant="landing2" />
       </section>
       <FloatingWhatsApp
-        phoneNumber="1234567890"
+        phoneNumber={companyData.phone || ""}
         message="Hi, I'd like to get in touch."
         label="Chat on WhatsApp"
       />

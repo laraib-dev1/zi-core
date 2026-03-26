@@ -25,6 +25,7 @@ import blogRoutes from "./src/routes/blog.routes.js";
 import catalogtypeRoutes from "./src/routes/catalogtype.routes.js";
 import landingsectionRoutes from "./src/routes/landingsection.routes.js";
 import banner2Routes from "./src/routes/banner2.routes.js";
+import applicationRoutes from "./src/routes/application.routes.js";
 
 dotenv.config();
 
@@ -88,6 +89,7 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/catalogtypes", catalogtypeRoutes);
 app.use("/api/landingsections", landingsectionRoutes);
 app.use("/api/banners2", banner2Routes);
+app.use("/api/applications", applicationRoutes);
 
 // Health check for Vercel (helps debug and avoids cold-start 500 on first hit)
 app.get("/api/health", (req, res) => {

@@ -1,4 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getCompany } from "@/api/company.api";
+import { CACHE_KEYS, getCachedData, setCachedData } from "@/utils/cache";
+import { applyCompanyBranding, DEFAULT_COMPANY_NAME, resolveCompanyAssetUrl } from "@/utils/companyBrand";
 
 /**
  * AuthLayout
@@ -7,6 +10,43 @@ import React from "react";
  * Uses theme color for border and accents.
  */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  const [company, setCompany] = useState<{ company: string; logo: string; favicon: string }>({
+    company: DEFAULT_COMPANY_NAME,
+    logo: "",
+    favicon: "",
+  });
+
+  useEffect(() => {
+    const cachedCompany = getCachedData<any>(CACHE_KEYS.COMPANY);
+    if (cachedCompany) {
+      const normalized = {
+        company: cachedCompany.company || DEFAULT_COMPANY_NAME,
+        logo: cachedCompany.logo || "",
+        favicon: cachedCompany.favicon || "",
+      };
+      setCompany(normalized);
+      applyCompanyBranding(normalized);
+    }
+
+    const loadCompany = async () => {
+      try {
+        const latest = await getCompany();
+        const normalized = {
+          company: latest?.company || DEFAULT_COMPANY_NAME,
+          logo: latest?.logo || "",
+          favicon: latest?.favicon || "",
+        };
+        setCompany(normalized);
+        setCachedData(CACHE_KEYS.COMPANY, latest);
+        applyCompanyBranding(normalized);
+      } catch {
+        applyCompanyBranding(company);
+      }
+    };
+    loadCompany();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div
       className="w-full min-h-screen bg-cover bg-center flex justify-center items-center px-4"
@@ -18,9 +58,16 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         {/* Left Logo Box (360px) */}
         <div className="w-full md:w-[360px] flex flex-col items-center justify-center gap-4 text-white">
           <div className="w-40 h-40 rounded-full bg-white/20 border border-white/30 flex items-center justify-center shadow-lg">
-            <img src="/logo.png" alt="Logo" className="w-32 h-32 object-contain" />
+            <img
+              src={resolveCompanyAssetUrl(company.logo) || "/logo.png"}
+              alt={company.company || "Logo"}
+              className="w-32 h-32 object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/logo.png";
+              }}
+            />
           </div>
-          <h1 className="text-2xl font-semibold tracking-wide">Welcome to Veres</h1>
+          <h1 className="text-2xl font-semibold tracking-wide">{`Welcome to ${company.company || DEFAULT_COMPANY_NAME}`}</h1>
           <p className="text-sm text-white/80 text-center px-6">
             Handcrafted essentials with a touch of elegance.
           </p>

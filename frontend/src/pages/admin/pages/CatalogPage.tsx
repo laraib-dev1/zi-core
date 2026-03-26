@@ -14,11 +14,12 @@ interface CatalogPageProps {
 
 export default function CatalogPage({ forcedType, forcedLabel }: CatalogPageProps) {
   const { type } = useParams<{ type: string }>();
-  const [activeTab, setActiveTab] = useState("dashboard");
   const catalogType = forcedType || type || "blog";
+  const [activeTab, setActiveTab] = useState(catalogType === "applications" ? "blogs" : "dashboard");
   const [typeLabel, setTypeLabel] = useState(
     forcedLabel || (catalogType.charAt(0).toUpperCase() + catalogType.slice(1))
   );
+  const isApplications = catalogType === "applications";
 
   useEffect(() => {
     if (forcedLabel) {
@@ -39,47 +40,47 @@ export default function CatalogPage({ forcedType, forcedLabel }: CatalogPageProp
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="inline-flex gap-1 p-1.5 rounded-xl mb-6 h-auto border-0 shadow-none bg-[color-mix(in_srgb,var(--theme-primary)_10%,#e8f0f3)]">
-          <TabsTrigger
+          {!isApplications && <TabsTrigger
             value="dashboard"
             className="rounded-lg px-4 py-2 text-sm font-medium data-[state=active]:bg-[var(--theme-primary)] data-[state=active]:text-white data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:bg-[color-mix(in_srgb,var(--theme-primary)_15%,transparent)] transition-colors"
           >
             Dashboard
-          </TabsTrigger>
+          </TabsTrigger>}
           <TabsTrigger
             value="blogs"
             className="rounded-lg px-4 py-2 text-sm font-medium data-[state=active]:bg-[var(--theme-primary)] data-[state=active]:text-white data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:bg-[color-mix(in_srgb,var(--theme-primary)_15%,transparent)] transition-colors"
           >
             {typeLabel}
           </TabsTrigger>
-          <TabsTrigger
+          {!isApplications && <TabsTrigger
             value="categories"
             className="rounded-lg px-4 py-2 text-sm font-medium data-[state=active]:bg-[var(--theme-primary)] data-[state=active]:text-white data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:bg-[color-mix(in_srgb,var(--theme-primary)_15%,transparent)] transition-colors"
           >
             Categories & Niches
-          </TabsTrigger>
-          <TabsTrigger
+          </TabsTrigger>}
+          {!isApplications && <TabsTrigger
             value="authors"
             className="rounded-lg px-4 py-2 text-sm font-medium data-[state=active]:bg-[var(--theme-primary)] data-[state=active]:text-white data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:bg-[color-mix(in_srgb,var(--theme-primary)_15%,transparent)] transition-colors"
           >
             Author Profile
-          </TabsTrigger>
+          </TabsTrigger>}
         </TabsList>
 
-        <TabsContent value="dashboard" className="mt-0">
+        {!isApplications && <TabsContent value="dashboard" className="mt-0">
           <BlogDashboard catalogType={catalogType} typeLabel={typeLabel} />
-        </TabsContent>
+        </TabsContent>}
 
         <TabsContent value="blogs" className="mt-0">
           <BlogsTab catalogType={catalogType} typeLabel={typeLabel} />
         </TabsContent>
 
-        <TabsContent value="categories" className="mt-0">
+        {!isApplications && <TabsContent value="categories" className="mt-0">
           <BlogCategoriesTab catalogType={catalogType} typeLabel={typeLabel} />
-        </TabsContent>
+        </TabsContent>}
 
-        <TabsContent value="authors" className="mt-0">
+        {!isApplications && <TabsContent value="authors" className="mt-0">
           <BlogAuthorsTab catalogType={catalogType} typeLabel={typeLabel} />
-        </TabsContent>
+        </TabsContent>}
       </Tabs>
     </div>
   );

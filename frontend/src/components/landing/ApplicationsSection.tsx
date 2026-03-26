@@ -5,6 +5,7 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import { spacing } from "@/utils/spacing";
 import { cn } from "@/lib/utils";
 import { getPublishedCatalogItems } from "@/api/blog.api";
+import { getApplications } from "@/api/application.api";
 
 interface ApplicationsSectionProps {
   catalogTypeSlug: string;
@@ -52,7 +53,7 @@ export default function ApplicationsSection({
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    getPublishedCatalogItems(catalogTypeSlug)
+    (catalogTypeSlug === "applications" ? getApplications("published") : getPublishedCatalogItems(catalogTypeSlug))
       .then((rows: any[]) => {
         if (cancelled) return;
         const mapped = (Array.isArray(rows) ? rows : []).map((row: any) => ({
@@ -100,11 +101,11 @@ export default function ApplicationsSection({
             showBatch={false}
             showHeading
             heading={title}
-            showCutDivider
             cutDividerVariant="withSides"
             showMiniInfo
             miniInfo={subtitle}
-            showDividerLine={false}
+            showCutDivider={false}
+            showDividerLine={true}
             align="left"
           />
         </div>
@@ -139,9 +140,9 @@ export default function ApplicationsSection({
             visibleItems.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center gap-3 rounded-xl border border-gray-200 bg-[#f7f8fa] px-3 py-3"
+                className="grid grid-cols-1 sm:grid-cols-[72px_minmax(0,1fr)_auto] items-start sm:items-center gap-3 rounded-xl border border-gray-200 bg-[#f7f8fa] px-3 py-3"
               >
-                <div className="h-14 w-14 rounded-md bg-gray-200 overflow-hidden shrink-0 flex items-center justify-center">
+                <div className="h-16 w-16 sm:h-14 sm:w-14 rounded-md bg-gray-200 overflow-hidden shrink-0 flex items-center justify-center">
                   {item.image ? (
                     <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
                   ) : (
@@ -149,7 +150,7 @@ export default function ApplicationsSection({
                   )}
                 </div>
 
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0">
                   <div className="font-semibold text-gray-900 truncate">{item.title}</div>
                   <div className="text-xs text-gray-500 truncate">{item.subTag}</div>
                   <div className="mt-1 text-[11px] text-gray-500 truncate">
@@ -162,7 +163,7 @@ export default function ApplicationsSection({
 
                 <Link
                   to={`/catalog/${catalogTypeSlug}/${item.id}`}
-                  className="shrink-0 min-w-[74px] text-center rounded-md px-3 py-2 text-xs text-white"
+                  className="justify-self-start sm:justify-self-end shrink-0 min-w-[92px] text-center rounded-md px-3 py-2 text-xs text-white"
                   style={{ backgroundColor: "var(--theme-primary)" }}
                 >
                   View

@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import SecondLanding from "./pages/shop/SecondLanding";
 import ProjectDetail from "./pages/shop/ProjectDetail";
@@ -30,6 +30,9 @@ import PageLoader from "./components/ui/PageLoader";
 import Login from "./pages/auth/Login";
 import AdminRoute from "./components/AdminRoute";
 import { Navigate } from "react-router-dom";
+import { getCompany } from "./api/company.api";
+import { CACHE_KEYS, getCachedData, setCachedData } from "./utils/cache";
+import { applyCompanyBranding, DEFAULT_COMPANY_NAME } from "./utils/companyBrand";
 const AdminLayout = React.lazy(() => import("./pages/admin/layout/Adminlayout"));
 const AdminProducts = React.lazy(() => import("./pages/admin/pages/ProductPage"));
 const AdminSettings = React.lazy(() => import("./pages/admin/pages/SettingsPage"));
@@ -59,6 +62,26 @@ const PortfolioPage = React.lazy(() => import("@/components/landing/PortfolioPag
 const CatalogDetail = React.lazy(() => import("@/pages/shop/CatalogDetail"));
 
 export default function App() {
+  useEffect(() => {
+    const cachedCompany = getCachedData<any>(CACHE_KEYS.COMPANY);
+    if (cachedCompany) {
+      applyCompanyBranding(cachedCompany);
+    } else {
+      applyCompanyBranding({ company: DEFAULT_COMPANY_NAME });
+    }
+
+    const loadCompanyBranding = async () => {
+      try {
+        const company = await getCompany();
+        setCachedData(CACHE_KEYS.COMPANY, company);
+        applyCompanyBranding(company);
+      } catch {
+        // Ignore and keep current branding fallback
+      }
+    };
+    loadCompanyBranding();
+  }, []);
+
   return (
     <AuthProvider>
       <LoaderProvider>

@@ -59,14 +59,14 @@ export default function SectionHeader({
   showMiniInfo = false,
   miniInfo = "Mini info section details",
   showDividerLine = false,
-  align = "center",
+  align = "left",
   variant = "light",
   className,
 }: SectionHeaderProps) {
   const isDark = variant === "dark";
   const isCenter = align === "center";
 
-  const headingColor = isDark ? "text-gray-300" : "text-gray-900";
+  const headingColor = isDark ? "text-gray-300" : "theme-heading";
   const miniInfoColor = isDark ? "text-gray-400" : "text-gray-600";
 
   return (
@@ -140,8 +140,7 @@ export default function SectionHeader({
 
         {showDividerLine && (
           <div
-            className={cn("w-full mt-3 h-px", isDark && "bg-gray-600")}
-            style={!isDark ? { backgroundColor: "var(--theme-primary, #8B5E3C)", opacity: 0.5 } : undefined}
+            className={cn("w-full mt-3 h-px", isDark ? "bg-gray-600" : "bg-gray-200")}
           />
         )}
       </div>

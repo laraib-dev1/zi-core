@@ -10,6 +10,7 @@ import { getCompany } from "@/api/company.api";
 import { getMe } from "@/api/auth.api";
 import { getCachedData, setCachedData, CACHE_KEYS } from "@/utils/cache";
 import * as LucideIcons from "lucide-react";
+import { buildWhatsAppUrl } from "@/utils/companyBrand";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function Navbar() {
   const { user: authUser, loading: authLoading, logout: authLogout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [navLoading, setNavLoading] = useState(false);
-  const [company, setCompany] = useState<{ logo: string; company: string }>({ logo: "", company: "" });
+  const [company, setCompany] = useState<{ logo: string; company: string; phone: string }>({ logo: "", company: "", phone: "" });
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
 
   // Use auth context user so we don't flash "Sign In" on page change when user is logged in
@@ -36,14 +37,16 @@ export default function Navbar() {
           // Use cached data
           setCompany({ 
             logo: cachedCompany.logo || "/logo-removebg-preview.png", 
-            company: cachedCompany.company || "Grace by Anu" 
+            company: cachedCompany.company || "Grace by Anu",
+            phone: cachedCompany.phone || ""
           });
         } else {
           // Fetch from API
           const data = await getCompany();
           setCompany({ 
             logo: data.logo || "/logo-removebg-preview.png", 
-            company: data.company || "Grace by Anu" 
+            company: data.company || "Grace by Anu",
+            phone: data.phone || ""
           });
           // Cache the data (24 hours)
           setCachedData(CACHE_KEYS.COMPANY, data);
@@ -55,10 +58,11 @@ export default function Navbar() {
         if (cachedCompany) {
           setCompany({ 
             logo: cachedCompany.logo || "/logo-removebg-preview.png", 
-            company: cachedCompany.company || "Grace by Anu" 
+            company: cachedCompany.company || "Grace by Anu",
+            phone: cachedCompany.phone || ""
           });
         } else {
-          setCompany({ logo: "/logo-removebg-preview.png", company: "Grace by Anu" });
+          setCompany({ logo: "/logo-removebg-preview.png", company: "Grace by Anu", phone: "" });
         }
       }
     };
@@ -109,6 +113,8 @@ export default function Navbar() {
 
   return `${base} ${color}`;
 };
+
+  const hireMeHref = buildWhatsAppUrl(company.phone, "Hi, I want to hire you.");
 
   return (
     <header className="bg-white  text-black  shadow-sm fixed top-0 w-full z-50">
@@ -179,6 +185,15 @@ export default function Navbar() {
 
         {/* RIGHT: Cart + Sign In + Mobile Menu */}
         <div className="flex items-center gap-4">
+          <a
+            href={hireMeHref}
+            target={hireMeHref !== "#" ? "_blank" : undefined}
+            rel={hireMeHref !== "#" ? "noopener noreferrer" : undefined}
+            className="hidden md:inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: "var(--theme-primary)" }}
+          >
+            Hire Me
+          </a>
           {/* Cart icon (always visible) */}
           <Link to="/cart" className="relative" style={{ cursor: "pointer" }}>
   <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 " />

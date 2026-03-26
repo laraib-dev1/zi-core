@@ -1,4 +1,5 @@
 import API from "./axios";
+import { getApplications } from "./application.api";
 
 // ==================== BLOG OPERATIONS ====================
 
@@ -28,6 +29,9 @@ export const incrementBlogView = async (id: string) => {
 
 /** Fetch published catalog items for a type (e.g. "services") for public landing pages */
 export const getPublishedCatalogItems = async (catalogType: string) => {
+  if (String(catalogType || "").toLowerCase() === "applications") {
+    return getApplications("published");
+  }
   return getBlogs("published", catalogType);
 };
 

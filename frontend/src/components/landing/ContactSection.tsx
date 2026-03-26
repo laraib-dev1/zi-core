@@ -20,12 +20,12 @@ export default function ContactSection() {
           showBatch={false}
           showHeading
           heading="Contact"
-          showCutDivider
           cutDividerVariant="withSides"
           showMiniInfo
           miniInfo="Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit"
-          showDividerLine={false}
-          align="center"
+          showCutDivider={false}
+          showDividerLine={true}
+          align="left"
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 mt-8 lg:mt-10">

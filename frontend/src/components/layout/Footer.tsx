@@ -35,6 +35,7 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
   const [companyData, setCompanyData] = useState({
     company: "VERES",
     copyright: "",
+    description: "",
     socialPosts: [] as Array<{ image: string; url: string; order: number }>,
     socialLinks: {} as Record<string, string>,
   });
@@ -70,6 +71,7 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
           setCompanyData({
             company: cachedCompany.company || "VERES",
             copyright: cachedCompany.copyright || "",
+            description: cachedCompany.description || "",
             socialPosts: (cachedCompany.socialPosts || [])
               .filter((post: any) => post && post.image && post.image.trim() !== "")
               .slice(0, 8),
@@ -212,6 +214,7 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
         setCompanyData({
           company: company.company || "VERES",
           copyright: company.copyright || "",
+          description: company.description || "",
           socialPosts: finalValidPosts,
           socialLinks: company.socialLinks || {},
         });
@@ -245,6 +248,7 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
           setCompanyData({
             company: cachedCompany.company || "VERES",
             copyright: cachedCompany.copyright || "",
+            description: cachedCompany.description || "",
             socialPosts: (cachedCompany.socialPosts || [])
               .filter((post: any) => post && post.image && post.image.trim() !== "")
               .slice(0, 8),
@@ -486,14 +490,11 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
       <div className="max-w-6xl mx-auto px-6 py-12 text-center">
 
         {/* Name */}
-        <h2 className="text-2xl font-semibold text-white">
-  Dr. Muskan
-</h2>
+        <h2 className="text-2xl font-semibold text-white">{companyData.company || "VERES"}</h2>
 
 {/* Description */}
 <p className="text-gray-100 text-sm mt-3 max-w-xl mx-auto">
-  We are updating our Premium products with real-time support and a
-  dedicated consultant to guide your soulmate search
+  {companyData.description || "We are updating our premium products with real-time support and a dedicated consultant."}
 </p>
 
         {/* Social Icons - controlled by admin panel toggle */}
@@ -529,9 +530,7 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-gray-100">
           <span>
             All Rights Reserved{" "}
-            <span className="text-var(--theme-primary)">
-              Dr. Muskan & SpFolio Developers
-            </span>
+            <span className="text-var(--theme-primary)">{companyData.company || "VERES"}</span>
           </span>
           <span className="text-gray-100 hover:text-var(--theme-primary) cursor-pointer">
             Join SpFolio

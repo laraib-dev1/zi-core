@@ -134,12 +134,12 @@ export default function CatalogSection({
             showBatch={false}
             showHeading
             heading={title || catalogTypeSlug}
-            showCutDivider
             cutDividerVariant="withSides"
             showMiniInfo
             miniInfo={subtitle}
-            showDividerLine={false}
-            align="center"
+            showCutDivider={false}
+            showDividerLine={true}
+            align="left"
           />
         </div>
 

@@ -75,12 +75,12 @@ export default function FAQsSection({
             showBatch={false}
             showHeading={true}
             heading={title}
-            showCutDivider={true}
+            showCutDivider={false}
             cutDividerVariant="withSides"
             showMiniInfo={true}
             miniInfo={subtitle}
-            showDividerLine={false}
-            align="center"
+            showDividerLine={true}
+            align="left"
           />
         </div>
 

@@ -7,7 +7,9 @@ import FilterTabs from "@/components/ui/FilterTabs";
 import { List, Grid } from "lucide-react";
 import BlogModal from "./BlogModal";
 import BlogGrid from "./BlogGrid";
+import ApplicationModal from "@/components/admin/applications/ApplicationModal";
 import { getBlogs, deleteBlog } from "@/api/blog.api";
+import { getApplications, deleteApplication } from "@/api/application.api";
 import { useToast } from "@/components/ui/toast";
 import DeleteModal from "@/components/admin/product/DeleteModal";
 
@@ -58,7 +60,10 @@ export default function BlogsTab({ catalogType = "blog", typeLabel = "Blog" }: B
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const data = await getBlogs(statusFilter === "all" ? undefined : statusFilter, catalogType);
+      const data =
+        catalogType === "applications"
+          ? await getApplications(statusFilter === "all" ? undefined : statusFilter)
+          : await getBlogs(statusFilter === "all" ? undefined : statusFilter, catalogType);
       const mapped = data.map((blog: any) => ({
         id: blog._id || blog.id,
         _id: blog._id || blog.id,
@@ -66,11 +71,11 @@ export default function BlogsTab({ catalogType = "blog", typeLabel = "Blog" }: B
         subTag: blog.subTag || "",
         description: blog.description || "",
         image: blog.image || "",
-        category: typeof blog.category === "object" ? blog.category._id : blog.category,
+        category: typeof blog.category === "object" ? blog.category._id : blog.category || "",
         categoryName: typeof blog.category === "object" ? blog.category.name : "",
         niche: blog.niche ? (typeof blog.niche === "object" ? blog.niche._id : blog.niche) : null,
         nicheName: blog.niche ? (typeof blog.niche === "object" ? blog.niche.name : "") : "",
-        author: typeof blog.author === "object" ? blog.author._id : blog.author,
+        author: typeof blog.author === "object" ? blog.author._id : blog.author || "",
         authorName: typeof blog.author === "object" ? blog.author.name : "",
         tags: blog.tags || [],
         status: blog.status || "draft",
@@ -78,6 +83,7 @@ export default function BlogsTab({ catalogType = "blog", typeLabel = "Blog" }: B
         shares: blog.shares || 0,
         comments: blog.comments || 0,
         links: blog.links || 0,
+        createdAt: blog.createdAt || "",
       }));
       setBlogs(mapped);
       setFiltered(mapped);
@@ -134,7 +140,11 @@ export default function BlogsTab({ catalogType = "blog", typeLabel = "Blog" }: B
     }
 
     try {
-      await deleteBlog(deleteTarget.id);
+      if (catalogType === "applications") {
+        await deleteApplication(deleteTarget.id);
+      } else {
+        await deleteBlog(deleteTarget.id);
+      }
       success("Blog deleted successfully!");
       setDeleteOpen(false);
       setDeleteTarget(null);
@@ -274,6 +284,22 @@ export default function BlogsTab({ catalogType = "blog", typeLabel = "Blog" }: B
       )}
 
       {/* Modals */}
+      {catalogType === "applications" ? (
+      <ApplicationModal
+        open={modalOpen}
+        mode={modalMode}
+        data={selected || undefined}
+        onClose={() => {
+          setModalOpen(false);
+          setSelected(null);
+        }}
+        onSubmit={async () => {
+          setModalOpen(false);
+          setSelected(null);
+          fetchBlogs();
+        }}
+      />
+      ) : (
       <BlogModal
         open={modalOpen}
         mode={modalMode}
@@ -290,6 +316,7 @@ export default function BlogsTab({ catalogType = "blog", typeLabel = "Blog" }: B
           fetchBlogs();
         }}
       />
+      )}
 
       <DeleteModal
         open={deleteOpen}

@@ -70,12 +70,12 @@ export default function PortfolioGridSection({
           showBatch={false}
           showHeading
           heading={title}
-          showCutDivider
           cutDividerVariant="withSides"
           showMiniInfo
           miniInfo={subtitle}
-          showDividerLine={false}
-          align="center"
+          showCutDivider={false}
+          showDividerLine={true}
+          align="left"
         />
 
         {loading ? (

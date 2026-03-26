@@ -63,10 +63,21 @@ export interface Navbar2Props {
   socialLinks?: Array<{ href: string; icon: React.ComponentType<{ className?: string }>; label: string }>;
   /** Items for "Other Pages" dropdown (only enabled sections not in main nav). When empty, dropdown shows no items or hides. */
   otherPagesItems?: OtherPagesItem[];
+  /** Company name from developer panel */
+  companyName?: string;
+  /** Dynamic WhatsApp/Contact link for hire button */
+  hireMeHref?: string;
   className?: string;
 }
 
-export default function Navbar2({ bottomDivHasColor = false, socialLinks: socialLinksProp, otherPagesItems = [], className }: Navbar2Props) {
+export default function Navbar2({
+  bottomDivHasColor = false,
+  socialLinks: socialLinksProp,
+  otherPagesItems = [],
+  companyName = "Grace by Anu",
+  hireMeHref = "#",
+  className,
+}: Navbar2Props) {
   const { pathname, hash } = useLocation();
   const navigate = useNavigate();
   const currentHash = hash?.replace("#", "") || "home";
@@ -153,7 +164,7 @@ export default function Navbar2({ bottomDivHasColor = false, socialLinks: social
           window.location.href = "/";
         }}
       >
-        Dr. Ali Athar
+        {companyName}
       </a>
 
       {/* Part 2: Nav links - hidden on small, visible md+ */}
@@ -204,8 +215,17 @@ export default function Navbar2({ bottomDivHasColor = false, socialLinks: social
         )}
       </nav>
 
-      {/* Part 3: Social icons */}
+      {/* Part 3: Social icons + hire me */}
       <div className="hidden md:flex items-center gap-3 shrink-0">
+        <a
+          href={hireMeHref}
+          target={hireMeHref !== "#" ? "_blank" : undefined}
+          rel={hireMeHref !== "#" ? "noopener noreferrer" : undefined}
+          className="inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          style={{ backgroundColor: "var(--theme-primary)" }}
+        >
+          Hire Me
+        </a>
         {socialLinks.map(({ href, icon: Icon, label }) => (
           <a
             key={label}
@@ -280,7 +300,7 @@ export default function Navbar2({ bottomDivHasColor = false, socialLinks: social
                     window.location.href = "/";
                   }}
                 >
-                  Dr. Ali Athar
+                  {companyName}
                 </a>
                 <nav className="flex flex-col gap-1.5 mt-6">
                   {navLinks.map((item) =>
@@ -336,6 +356,15 @@ export default function Navbar2({ bottomDivHasColor = false, socialLinks: social
                     )
                   )}
                 </nav>
+                <a
+                  href={hireMeHref}
+                  target={hireMeHref !== "#" ? "_blank" : undefined}
+                  rel={hireMeHref !== "#" ? "noopener noreferrer" : undefined}
+                  className="mt-3 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold text-white"
+                  style={{ backgroundColor: "var(--theme-primary)" }}
+                >
+                  Hire Me
+                </a>
                 <div className="flex gap-3 pt-4 mt-4">
                   {socialLinks.map(({ href, icon: Icon, label }) => (
                     <a

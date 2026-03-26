@@ -89,12 +89,12 @@ export default function PortfolioDetailSection({
               showBatch={false}
               showHeading={true}
               heading={sectionTitle}
-              showCutDivider={true}
+              showCutDivider={false}
               cutDividerVariant="withSides"
               showMiniInfo={!!sectionSubtitle}
               miniInfo={sectionSubtitle ?? ""}
-              showDividerLine={false}
-              align="center"
+              showDividerLine={true}
+              align="left"
             />
           </div>
         )}

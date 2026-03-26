@@ -116,12 +116,12 @@ export default function ComingSoonSection({
             showBatch={false}
             showHeading={true}
             heading={title}
-            showCutDivider={true}
+            showCutDivider={false}
             cutDividerVariant="withSides"
             showMiniInfo={!!tagline}
             miniInfo={tagline ?? ""}
-            showDividerLine={false}
-            align="center"
+            showDividerLine={true}
+            align="left"
             variant="dark"
           />
         </div>

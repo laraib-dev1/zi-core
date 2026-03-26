@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import ImageCropperModal from "@/components/admin/product/ImageCropperModal";
 import { getBlogCategories, getBlogNiches, getBlogAuthors } from "@/api/blog.api";
 import { createBlog, updateBlog } from "@/api/blog.api";
+import { createApplication, updateApplication } from "@/api/application.api";
 import { useToast } from "@/components/ui/toast";
 
 interface Blog {
@@ -53,6 +54,7 @@ export default function BlogModal({ open, mode, data, catalogType = "blog", type
   const [authors, setAuthors] = useState<any[]>([]);
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [selectedFileForCrop, setSelectedFileForCrop] = useState<File | null>(null);
+  const isApplication = catalogType === "applications";
 
   const getCategoryId = (cat: string | { _id: string; name: string } | undefined): string => {
     if (!cat) return "";
@@ -80,6 +82,18 @@ export default function BlogModal({ open, mode, data, catalogType = "blog", type
     tags: data?.tags?.join(", ") || "",
     status: data?.status || "draft",
     imageFile: null as File | null,
+    shortDescription: (data as any)?.shortDescription || "",
+    latestVersionLabel: (data as any)?.latestVersionLabel || "",
+    latestVersionSize: (data as any)?.latestVersionSize || "",
+    downloadsList: ((data as any)?.downloadsList || []) as Array<{
+      type: string;
+      label: string;
+      url: string;
+      fileUrl?: string;
+      fileName?: string;
+      fileSize?: number;
+      file?: File | null;
+    }>,
   });
 
   useEffect(() => {
@@ -96,6 +110,10 @@ export default function BlogModal({ open, mode, data, catalogType = "blog", type
         tags: data?.tags?.join(", ") || "",
         status: data?.status || "draft",
         imageFile: null,
+        shortDescription: (data as any)?.shortDescription || "",
+        latestVersionLabel: (data as any)?.latestVersionLabel || "",
+        latestVersionSize: (data as any)?.latestVersionSize || "",
+        downloadsList: ((data as any)?.downloadsList || []).map((x: any) => ({ ...x, file: null })),
       });
     }
   }, [open, data, catalogType]);
@@ -166,12 +184,16 @@ export default function BlogModal({ open, mode, data, catalogType = "blog", type
       return;
     }
     if (!form.category) {
-      error("Category is required");
-      return;
+      if (!isApplication) {
+        error("Category is required");
+        return;
+      }
     }
     if (!form.author) {
-      error("Author is required");
-      return;
+      if (!isApplication) {
+        error("Author is required");
+        return;
+      }
     }
 
     try {
@@ -183,27 +205,60 @@ export default function BlogModal({ open, mode, data, catalogType = "blog", type
             .filter((t) => t.length > 0)
         : [];
 
-      const blogData = {
-        catalogType,
-        title: form.title,
-        subTag: form.subTag,
-        description: form.description,
-        category: form.category,
-        niche: form.niche || undefined,
-        author: form.author,
-        tags: tagsArray,
-        status: form.status,
-        imageFile: form.imageFile || undefined,
-      };
+      if (isApplication) {
+        const appPayload = {
+          title: form.title,
+          subTag: form.subTag,
+          shortDescription: form.shortDescription,
+          description: form.description,
+          tags: tagsArray,
+          status: form.status,
+          imageFile: form.imageFile || undefined,
+          latestVersionLabel: form.latestVersionLabel,
+          latestVersionSize: form.latestVersionSize,
+          downloadsList: form.downloadsList.map((x) => ({
+            type: x.type || "other",
+            label: x.label || "",
+            url: x.url || "",
+            fileUrl: x.fileUrl || "",
+            fileName: x.fileName || "",
+            fileSize: x.fileSize || 0,
+            file: x.file || undefined,
+          })),
+        };
+        if (mode === "add") {
+          await createApplication(appPayload);
+          success(`${typeLabel} created successfully!`);
+        } else if (mode === "edit" && (data?.id || data?._id)) {
+          const appId = data?.id || data?._id;
+          if (appId) {
+            await updateApplication(appId, appPayload);
+            success(`${typeLabel} updated successfully!`);
+          }
+        }
+      } else {
+        const blogData = {
+          catalogType,
+          title: form.title,
+          subTag: form.subTag,
+          description: form.description,
+          category: form.category,
+          niche: form.niche || undefined,
+          author: form.author,
+          tags: tagsArray,
+          status: form.status,
+          imageFile: form.imageFile || undefined,
+        };
 
-      if (mode === "add") {
-        await createBlog(blogData);
-        success(`${typeLabel} created successfully!`);
-      } else if (mode === "edit" && (data?.id || data?._id)) {
-        const blogId = data.id || data._id;
-        if (blogId) {
-          await updateBlog(blogId, blogData);
-          success(`${typeLabel} updated successfully!`);
+        if (mode === "add") {
+          await createBlog(blogData);
+          success(`${typeLabel} created successfully!`);
+        } else if (mode === "edit" && (data?.id || data?._id)) {
+          const blogId = data.id || data._id;
+          if (blogId) {
+            await updateBlog(blogId, blogData);
+            success(`${typeLabel} updated successfully!`);
+          }
         }
       }
 
@@ -219,6 +274,10 @@ export default function BlogModal({ open, mode, data, catalogType = "blog", type
         tags: "",
         status: "draft",
         imageFile: null,
+        shortDescription: "",
+        latestVersionLabel: "",
+        latestVersionSize: "",
+        downloadsList: [],
       });
       
       onClose();
@@ -260,7 +319,7 @@ export default function BlogModal({ open, mode, data, catalogType = "blog", type
             </div>
 
             {/* Sub Tag and Category in same row */}
-            <div className="grid grid-cols-2 gap-4">
+            {!isApplication && <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-900">Sub Tag</label>
                 <Input
@@ -294,10 +353,10 @@ export default function BlogModal({ open, mode, data, catalogType = "blog", type
                   </SelectContent>
                 </Select>
               </div>
-            </div>
+            </div>}
 
             {/* Sub Niche */}
-            {form.category && (
+            {!isApplication && form.category && (
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-900">Sub Niche (Optional)</label>
                 <div className="flex gap-2">
@@ -348,6 +407,136 @@ export default function BlogModal({ open, mode, data, catalogType = "blog", type
               />
             </div>
 
+            {isApplication && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-900">Short Description</label>
+                  <Input
+                    value={form.shortDescription}
+                    onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
+                    placeholder="Small description for app tiles"
+                    disabled={isView}
+                    className="w-full text-gray-900"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-900">Latest Version Label</label>
+                    <Input
+                      value={form.latestVersionLabel}
+                      onChange={(e) => setForm({ ...form, latestVersionLabel: e.target.value })}
+                      placeholder="APK - v35MB"
+                      disabled={isView}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-900">Latest Version Size</label>
+                    <Input
+                      value={form.latestVersionSize}
+                      onChange={(e) => setForm({ ...form, latestVersionSize: e.target.value })}
+                      placeholder="35MB"
+                      disabled={isView}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-900">Download Options</label>
+                    {!isView && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          setForm({
+                            ...form,
+                            downloadsList: [...form.downloadsList, { type: "other", label: "", url: "", file: null }],
+                          })
+                        }
+                      >
+                        + Add Option
+                      </Button>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {form.downloadsList.map((item, idx) => (
+                      <div key={idx} className="grid grid-cols-12 gap-2 items-center">
+                        <div className="col-span-2">
+                          <Select
+                            value={item.type || "other"}
+                            onValueChange={(value) => {
+                              const next = [...form.downloadsList];
+                              next[idx] = { ...next[idx], type: value };
+                              setForm({ ...form, downloadsList: next });
+                            }}
+                            disabled={isView}
+                          >
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent className="bg-white">
+                              {["apk", "ios", "windows", "website", "exe", "other"].map((t) => (
+                                <SelectItem key={t} value={t}>{t}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="col-span-3">
+                          <Input
+                            value={item.label || ""}
+                            onChange={(e) => {
+                              const next = [...form.downloadsList];
+                              next[idx] = { ...next[idx], label: e.target.value };
+                              setForm({ ...form, downloadsList: next });
+                            }}
+                            placeholder="Label"
+                            disabled={isView}
+                          />
+                        </div>
+                        <div className="col-span-4">
+                          <Input
+                            value={item.url || ""}
+                            onChange={(e) => {
+                              const next = [...form.downloadsList];
+                              next[idx] = { ...next[idx], url: e.target.value };
+                              setForm({ ...form, downloadsList: next });
+                            }}
+                            placeholder="URL (website/store)"
+                            disabled={isView}
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          {!isView && (
+                            <input
+                              type="file"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0] || null;
+                                const next = [...form.downloadsList];
+                                next[idx] = { ...next[idx], file: f, fileName: f?.name || item.fileName || "" };
+                                setForm({ ...form, downloadsList: next });
+                              }}
+                            />
+                          )}
+                          {isView && <span className="text-xs text-gray-600 truncate">{item.fileName || "-"}</span>}
+                        </div>
+                        <div className="col-span-1">
+                          {!isView && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => {
+                                const next = form.downloadsList.filter((_, i) => i !== idx);
+                                setForm({ ...form, downloadsList: next });
+                              }}
+                            >
+                              X
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
             {/* Image Upload */}
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-900">Image</label>
@@ -381,8 +570,8 @@ export default function BlogModal({ open, mode, data, catalogType = "blog", type
             </div>
 
             {/* Author and Status */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+            <div className={`grid ${isApplication ? "grid-cols-1" : "grid-cols-2"} gap-4`}>
+              {!isApplication && <div>
                 <label className="block text-sm font-medium mb-1 text-gray-900">Author</label>
                 <Select
                   value={form.author}
@@ -404,7 +593,7 @@ export default function BlogModal({ open, mode, data, catalogType = "blog", type
                     )}
                   </SelectContent>
                 </Select>
-              </div>
+              </div>}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-900">Status</label>
                 <Select

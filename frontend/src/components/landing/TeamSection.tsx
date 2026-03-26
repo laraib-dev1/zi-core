@@ -67,12 +67,12 @@ export default function TeamSection({
             showBatch={false}
             showHeading={true}
             heading={title}
-            showCutDivider={true}
+            showCutDivider={false}
             cutDividerVariant="withSides"
             showMiniInfo={!!subtitle}
             miniInfo={subtitle}
-            showDividerLine={false}
-            align="center"
+            showDividerLine={true}
+            align="left"
             variant="light"
           />
         </div>

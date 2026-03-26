@@ -45,12 +45,12 @@ export default function FeaturesDetailsSection({
             showBatch={false}
             showHeading={true}
             heading={title}
-            showCutDivider={true}
+            showCutDivider={false}
             cutDividerVariant="withSides"
             showMiniInfo={true}
             miniInfo={description}
-            showDividerLine={false}
-            align="center"
+            showDividerLine={true}
+            align="left"
           />
         </div>
 
