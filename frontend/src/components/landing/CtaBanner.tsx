@@ -63,22 +63,33 @@ export default function CtaBanner({
             </Link>
           </div> */}
           <div className="col-span-12 md:col-span-3 flex md:justify-end mt-4 md:mt-0">
-  <Link
-    to={buttonHref || "#"}
-    className={cn(
-      "inline-block w-full md:w-auto text-center px-6 py-3 font-medium rounded transition-colors text-sm sm:text-base",
-      isDark ? "bg-white hover:bg-gray-100 text-black" : "bg-gray-700 hover:bg-gray-800 text-white"
-    )}
-    onClick={(e) => {
-      if (onButtonClick) {
-        e.preventDefault(); // prevent navigation if we handle click
-        onButtonClick();
-      }
-    }}
-  >
-    {buttonText}
-  </Link>
-</div>
+            {(() => {
+              const href = buttonHref || "#";
+              const isExternal = /^https?:\/\//i.test(href);
+              const className = cn(
+                "inline-block w-full md:w-auto text-center px-6 py-3 font-medium rounded transition-colors text-sm sm:text-base",
+                isDark ? "bg-white hover:bg-gray-100 text-black" : "bg-gray-700 hover:bg-gray-800 text-white"
+              );
+              const handleClick = (e: React.MouseEvent) => {
+                if (onButtonClick) {
+                  e.preventDefault();
+                  onButtonClick();
+                }
+              };
+              if (isExternal) {
+                return (
+                  <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+                    {buttonText}
+                  </a>
+                );
+              }
+              return (
+                <Link to={href} className={className} onClick={handleClick}>
+                  {buttonText}
+                </Link>
+              );
+            })()}
+          </div>
         </div>
       </div>
     </section>

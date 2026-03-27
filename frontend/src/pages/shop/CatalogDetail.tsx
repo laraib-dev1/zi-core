@@ -7,6 +7,9 @@ import DetailWithLeftSidebar from "@/components/landing/DetailWithLeftSidebar";
 import { spacing } from "@/utils/spacing";
 import { getBlogById, getPublishedCatalogItems, incrementBlogView } from "@/api/blog.api";
 import { getApplicationById, getApplications, incrementApplicationView } from "@/api/application.api";
+import { getCompany } from "@/api/company.api";
+import { getCachedData, CACHE_KEYS } from "@/utils/cache";
+import { buildWhatsAppUrl } from "@/utils/companyBrand";
 import PageLoader from "@/components/ui/PageLoader";
 import ApplicationTileCard from "@/components/applications/ApplicationTileCard";
 import ProductImageGallery from "@/components/products/ProductImageGallery";
@@ -44,6 +47,10 @@ export default function CatalogDetail() {
   const [downloadsAccordionOpen, setDownloadsAccordionOpen] = useState(false);
   const [loading, setLoading] = useState(!!id);
   const [notFound, setNotFound] = useState(false);
+  const [companyPhone, setCompanyPhone] = useState<string>(() => {
+    const c = getCachedData<any>(CACHE_KEYS.COMPANY);
+    return (c?.phone as string) || "";
+  });
 
   useEffect(() => {
     if (!id || !type) {
@@ -123,6 +130,18 @@ export default function CatalogDetail() {
       });
     return () => { cancelled = true; };
   }, [id, type]);
+
+  useEffect(() => {
+    const loadCompanyPhone = async () => {
+      try {
+        const c = await getCompany();
+        if (c?.phone) setCompanyPhone(String(c.phone));
+      } catch {
+        /* keep cache */
+      }
+    };
+    loadCompanyPhone();
+  }, []);
 
   useEffect(() => {
     const isApplications = String(type || "").toLowerCase() === "applications";
@@ -242,11 +261,7 @@ export default function CatalogDetail() {
                       isTopRated: Boolean(appInfo.starsEnabled && Number(appInfo.stars || 0) >= 4),
                     }}
                     compact={true}
-                    onActionClick={() => {
-                      const el = document.getElementById("app-download-section");
-                      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }}
-                    viewLabel="Get Latest Version"
+                    hideActionButton
                     className="bg-transparent"
                   />
                 </section>
@@ -526,7 +541,7 @@ export default function CatalogDetail() {
                     title="Like what you see?"
                     description="Donec rutrum congue leo eget malesuada. Vivamus suscipit tortor eget felis porttitor volutpat."
                     buttonText="Let's Work Together"
-                    buttonHref="#contact"
+                    buttonHref={buildWhatsAppUrl(companyPhone, "Hi! I'd like to work together.")}
                   />
                 </section>
 

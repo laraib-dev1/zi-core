@@ -22,6 +22,8 @@ interface ApplicationTileCardProps {
   viewHref?: string;
   viewLabel?: string;
   onActionClick?: () => void;
+  /** Hide the primary action button (e.g. top tile on detail page where downloads live below). */
+  hideActionButton?: boolean;
   compact?: boolean;
   className?: string;
 }
@@ -31,6 +33,7 @@ export default function ApplicationTileCard({
   viewHref,
   viewLabel = "View",
   onActionClick,
+  hideActionButton = false,
   compact = false,
   className,
 }: ApplicationTileCardProps) {
@@ -89,24 +92,25 @@ export default function ApplicationTileCard({
           {item.ratingCount ? <span>{item.ratingCount.toLocaleString()}</span> : null}
         </div>
 
-        {onActionClick ? (
-          <button
-            type="button"
-            onClick={onActionClick}
-            className="rounded-md px-4 py-2 text-xs md:text-sm font-medium text-white min-w-[92px]"
-            style={{ backgroundColor: "var(--theme-primary)" }}
-          >
-            {viewLabel}
-          </button>
-        ) : (
-          <Link
-            to={viewHref || "#"}
-            className="rounded-md px-4 py-2 text-xs md:text-sm font-medium text-center text-white min-w-[92px]"
-            style={{ backgroundColor: "var(--theme-primary)" }}
-          >
-            {viewLabel}
-          </Link>
-        )}
+        {!hideActionButton &&
+          (onActionClick ? (
+            <button
+              type="button"
+              onClick={onActionClick}
+              className="rounded-md px-4 py-2 text-xs md:text-sm font-medium text-white min-w-[92px]"
+              style={{ backgroundColor: "var(--theme-primary)" }}
+            >
+              {viewLabel}
+            </button>
+          ) : (
+            <Link
+              to={viewHref || "#"}
+              className="rounded-md px-4 py-2 text-xs md:text-sm font-medium text-center text-white min-w-[92px]"
+              style={{ backgroundColor: "var(--theme-primary)" }}
+            >
+              {viewLabel}
+            </Link>
+          ))}
       </div>
     </div>
   );

@@ -14,6 +14,8 @@ export interface FAQsSectionProps {
   title?: string;
   subtitle?: string;
   items?: FAQItem[];
+  /** While true, shows a loading state instead of items (avoids flashing placeholder data). */
+  loading?: boolean;
   /** Index of item to expand by default (0 = first). Use null for all collapsed */
   defaultExpandedIndex?: number | null;
   className?: string;
@@ -55,10 +57,14 @@ const defaultItems: FAQItem[] = [
 export default function FAQsSection({
   title = "FAQs",
   subtitle = "Mini info section details",
-  items = defaultItems,
+  items,
+  loading = false,
   defaultExpandedIndex = 0,
   className,
 }: FAQsSectionProps) {
+  const displayItems = loading ? [] : items ?? defaultItems;
+  const showEmpty = !loading && items !== undefined && items.length === 0;
+
   const [expandedIndex, setExpandedIndex] = useState<number | null>(
     defaultExpandedIndex
   );
@@ -85,7 +91,19 @@ export default function FAQsSection({
         </div>
 
         <div className="space-y-3 w-full">
-          {items.map((item, i) => {
+          {loading && (
+            <div className="rounded-lg border border-gray-200 bg-gray-50 px-5 py-8 text-center text-sm text-gray-500">
+              Loading FAQs…
+            </div>
+          )}
+          {showEmpty && (
+            <p className="text-center text-sm text-gray-500 py-8">
+              No FAQs available yet. Admins can add them under Assets → FAQs in the admin panel.
+            </p>
+          )}
+          {!loading &&
+            !showEmpty &&
+            displayItems.map((item, i) => {
             const isExpanded = expandedIndex === i;
             return (
               <div
@@ -123,9 +141,10 @@ export default function FAQsSection({
                 </button>
                 {isExpanded && (
                   <div className="px-4 py-3 sm:px-5 sm:py-4 bg-gray-50/50 border-t border-gray-100">
-                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                      {item.answer}
-                    </p>
+                    <div
+                      className="text-sm sm:text-base text-gray-600 leading-relaxed prose prose-sm max-w-none faq-answer"
+                      dangerouslySetInnerHTML={{ __html: item.answer || "" }}
+                    />
                   </div>
                 )}
               </div>

@@ -2,19 +2,20 @@ import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 
 export interface ContactFormProps {
-  onSubmit?: (data: { name: string; email: string; subject: string; message: string }) => void;
+  onSubmit?: (data: { name: string; email: string; subject: string; message: string }) => void | Promise<void>;
+  submitting?: boolean;
   className?: string;
 }
 
-export default function ContactForm({ onSubmit, className }: ContactFormProps) {
+export default function ContactForm({ onSubmit, submitting = false, className }: ContactFormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit?.({ name, email, subject, message });
+    await onSubmit?.({ name, email, subject, message });
   };
 
   return (
@@ -52,10 +53,11 @@ export default function ContactForm({ onSubmit, className }: ContactFormProps) {
       <div className="flex justify-end">
         <button
           type="submit"
-          className="w-full px-6 py-4 rounded-lg font-medium text-sm sm:text-base text-white transition-colors hover:opacity-90"
+          disabled={submitting}
+          className="w-full px-6 py-4 rounded-lg font-medium text-sm sm:text-base text-white transition-colors hover:opacity-90 disabled:opacity-60 disabled:pointer-events-none"
           style={{ backgroundColor: "var(--theme-primary)" }}
         >
-          Send Message
+          {submitting ? "Sending…" : "Send Message"}
         </button>
       </div>
     </form>

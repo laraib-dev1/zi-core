@@ -117,7 +117,7 @@ export default function HeroBannerFull({
   const primaryBtnStyle = { backgroundColor: "var(--theme-primary, #8B5E3C)" };
   const secondaryBtnClass = isDark
     ? "bg-gray-800 text-white border border-gray-600 hover:bg-gray-700"
-    : "bg-transparent text-white border border-gray-400 hover:bg-white/10";
+    : "bg-white text-gray-900 border border-white hover:bg-gray-100";
 
   const sectionStyle: React.CSSProperties = {
     backgroundImage: `url(${backgroundImage})`,

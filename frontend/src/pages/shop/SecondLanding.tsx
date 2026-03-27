@@ -39,6 +39,8 @@ import PageLoader from "@/components/ui/PageLoader";
 import { Search, Lightbulb, Settings, Rocket, Package } from "lucide-react";
 import { smoothScrollToElement } from "@/lib/utils";
 import { getCompany } from "@/api/company.api";
+import { getContentByType } from "@/api/content.api";
+import type { FAQ } from "@/api/content.api";
 import { applyCompanyBranding, buildWhatsAppUrl, DEFAULT_COMPANY_NAME } from "@/utils/companyBrand";
 
 const myProjectsHtmlContent = `
@@ -88,7 +90,22 @@ const DEFAULT_SECTION_ORDER = [
 
 type ImgFn = (slot: string) => string;
 
-function createSectionRenderers(img: ImgFn, companyName: string): Record<string, () => React.ReactNode> {
+type HeroCompany = {
+  companyName: string;
+  slogan?: string;
+  description?: string;
+};
+
+type FaqPageSlice = { title: string; subTitle: string; items: FAQ[]; loaded: boolean };
+
+function createSectionRenderers(
+  img: ImgFn,
+  company: HeroCompany,
+  faqPage: FaqPageSlice,
+  workTogetherWhatsAppHref: string
+): Record<string, () => React.ReactNode> {
+  const slogan = company.slogan?.trim();
+  const desc = company.description?.trim();
   return {
     hero: () => (
       <div id="home" className="pb-12px sm:pb-5">
@@ -100,11 +117,10 @@ function createSectionRenderers(img: ImgFn, companyName: string): Record<string,
           rightImageSrc={img("hero-right") || "/hero.png"}
           rightImageAlt="Hero"
           introduction="I'm"
-          title={companyName}
+          title={company.companyName}
           titleClassName="theme-text-primary"
-          subtitle="FCPS, Surgeon"
-          description="Where surgery meets storytelling.
-This platform showcases my journey as a surgeon and medical photographer, capturing the precision, discipline, and artistry behind every procedure. Through both scalpel and lens, I document the science, the skill, and the human side of surgery."
+          subtitle={slogan || undefined}
+          description={desc || undefined}
           buttons={[
             { label: "View Portfolio", href: "#portfolio", variant: "primary" },
             { label: "Contact Me", href: "#contact", variant: "secondary" },
@@ -191,7 +207,13 @@ This platform showcases my journey as a surgeon and medical photographer, captur
     ),
     "cta-banner-3": () => (
       <div id="cta-banner-3" className={spacing.section.gap}>
-        <CtaBanner variant="dark" title="Like what you see?" description="Donec rutrum congue leo eget malesuada. Vivamus suscipit tortor eget felis porttitor volutpat." buttonText="Let's Work Together" buttonHref="#" />
+        <CtaBanner
+          variant="dark"
+          title="Like what you see?"
+          description="Donec rutrum congue leo eget malesuada. Vivamus suscipit tortor eget felis porttitor volutpat."
+          buttonText="Let's Work Together"
+          buttonHref={workTogetherWhatsAppHref}
+        />
       </div>
     ),
     "other-pages": () => (
@@ -223,7 +245,12 @@ This platform showcases my journey as a surgeon and medical photographer, captur
     ),
     faqs: () => (
       <div id="faqs" className={spacing.section.gap}>
-        <FAQsSection />
+        <FAQsSection
+          title={faqPage.title}
+          subtitle={faqPage.subTitle || "Mini info section details"}
+          items={faqPage.items}
+          loading={!faqPage.loaded}
+        />
       </div>
     ),
     "help-banner-1": () => (
@@ -389,14 +416,29 @@ function parseBanner2Map(list: { slot?: string; imageUrl?: string }[]) {
 
 export default function SecondLanding() {
   const { hash } = useLocation();
-  const [companyData, setCompanyData] = useState<{ company: string; logo?: string; favicon?: string; phone?: string }>(() => {
+  const [companyData, setCompanyData] = useState<{
+    company: string;
+    logo?: string;
+    favicon?: string;
+    phone?: string;
+    slogan?: string;
+    description?: string;
+  }>(() => {
     const cachedCompany = getCachedData<any>(CACHE_KEYS.COMPANY);
     return {
       company: cachedCompany?.company || DEFAULT_COMPANY_NAME,
       logo: cachedCompany?.logo || "",
       favicon: cachedCompany?.favicon || "",
       phone: cachedCompany?.phone || "",
+      slogan: cachedCompany?.slogan || "",
+      description: cachedCompany?.description || "",
     };
+  });
+  const [faqPage, setFaqPage] = useState<FaqPageSlice>({
+    title: "FAQs",
+    subTitle: "",
+    items: [],
+    loaded: false,
   });
   const [enabledSectionIds, setEnabledSectionIds] = useState<string[] | null>(() => {
     const cached = getCachedData<string[]>(CACHE_KEYS.ENABLED_LANDING_SECTIONS);
@@ -449,6 +491,8 @@ export default function SecondLanding() {
             logo: cachedCompany.logo || "",
             favicon: cachedCompany.favicon || "",
             phone: cachedCompany.phone || "",
+            slogan: cachedCompany.slogan || "",
+            description: cachedCompany.description || "",
           };
           setCompanyData(normalized);
           applyCompanyBranding(normalized);
@@ -460,6 +504,8 @@ export default function SecondLanding() {
           logo: latestCompany?.logo || "",
           favicon: latestCompany?.favicon || "",
           phone: latestCompany?.phone || "",
+          slogan: latestCompany?.slogan || "",
+          description: latestCompany?.description || "",
         };
         setCompanyData(normalized);
         setCachedData(CACHE_KEYS.COMPANY, latestCompany);
@@ -472,6 +518,23 @@ export default function SecondLanding() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const loadFaqs = async () => {
+      try {
+        const data = await getContentByType("faqs");
+        setFaqPage({
+          title: data.title || "FAQs",
+          subTitle: data.subTitle || "",
+          items: Array.isArray(data.faqs) ? data.faqs : [],
+          loaded: true,
+        });
+      } catch {
+        setFaqPage((p) => ({ ...p, loaded: true }));
+      }
+    };
+    loadFaqs();
+  }, []);
+
   const img = (slot: string) => banner2Map[slot] || "";
 
   const sectionsReady = enabledSectionIds !== null;
@@ -481,8 +544,18 @@ export default function SecondLanding() {
       : DEFAULT_SECTION_ORDER;
 
   const sectionRenderers = React.useMemo(
-    () => createSectionRenderers(img, companyData.company || DEFAULT_COMPANY_NAME),
-    [banner2Map, companyData.company]
+    () =>
+      createSectionRenderers(
+        img,
+        {
+          companyName: companyData.company || DEFAULT_COMPANY_NAME,
+          slogan: companyData.slogan,
+          description: companyData.description,
+        },
+        faqPage,
+        buildWhatsAppUrl(companyData.phone, "Hi! I'd like to work together.")
+      ),
+    [banner2Map, companyData.company, companyData.slogan, companyData.description, companyData.phone, faqPage]
   );
 
   const otherPagesItems: { id: string; label: string }[] =

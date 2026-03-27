@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import EnhancedDataTable from "../../../pages/admin/components/table/EnhancedDataTable";
 import { DataTableSkeleton } from "@/components/ui/TableSkeleton";
 import { Input } from "@/components/ui/input";
 import StatusBadge from "@/components/ui/StatusBadge";
 import FilterTabs from "@/components/ui/FilterTabs";
+import { getQueries } from "@/api/query.api";
+import { useToast } from "@/components/ui/toast";
 
 interface Query {
   id?: string;
@@ -14,12 +16,64 @@ interface Query {
   createdAt: string;
 }
 
+/** Map MongoDB query document to table row (contact form stores body in `description`). */
+function mapDocToQuery(doc: Record<string, unknown>): Query {
+  const rawDesc = String(doc.description ?? "");
+  let name = "—";
+  const nameLine = rawDesc.match(/^Name:\s*(.+?)(?:\r?\n|$)/);
+  if (nameLine) name = nameLine[1].trim();
+  const messageBody = nameLine ? rawDesc.replace(/^Name:\s*.+?\r?\n\r?\n?/, "").trim() : rawDesc;
+  const id = doc._id != null ? String(doc._id) : doc.id != null ? String(doc.id) : undefined;
+  const created = doc.createdAt;
+  const createdAt =
+    created instanceof Date
+      ? created.toISOString()
+      : typeof created === "string"
+        ? created
+        : new Date().toISOString();
+
+  return {
+    id,
+    name,
+    email: String(doc.email ?? ""),
+    message: messageBody || String(doc.subject ?? ""),
+    status: String(doc.status ?? "Pending"),
+    createdAt,
+  };
+}
+
 export default function QueriesTable() {
+  const { error: showError } = useToast();
   const [queries, setQueries] = useState<Query[]>([]);
   const [filteredQueries, setFilteredQueries] = useState<Query[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedTab, setSelectedTab] = useState<"All" | "read" | "pending" | "replied">("All");
+
+  const loadQueries = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getQueries();
+      const list = Array.isArray(data) ? data : [];
+      setQueries(list.map((row) => mapDocToQuery(row as Record<string, unknown>)));
+    } catch (e: unknown) {
+      setQueries([]);
+      const err = e as Error & { response?: { data?: { message?: string } } };
+      const silent = err?.name === "SilentError" || String(err?.message || "").includes("Unauthorized");
+      if (silent) {
+        showError("Could not load queries. Please sign in again as admin.");
+      } else {
+        const msg = err.response?.data?.message || err.message || "Failed to load queries.";
+        showError(String(msg));
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadQueries();
+  }, [loadQueries]);
 
   // Filter queries by tab and search
   React.useEffect(() => {
