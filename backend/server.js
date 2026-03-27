@@ -109,16 +109,16 @@ app.use((err, req, res, next) => {
 
 /** Run as long-running server when NOT on Vercel (local dev) */
 const startServer = async () => {
+  const PORT = process.env.PORT || 3000;
   try {
     await connectDB();
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-      console.log(`✅ Server running on http://localhost:${PORT}`);
-    });
   } catch (error) {
-    console.error("❌ Server failed to start:", error.message);
-    process.exit(1);
+    // Keep API alive in degraded mode so frontend doesn't get ECONNREFUSED.
+    console.error("⚠️ MongoDB unavailable at startup. Running in degraded mode:", error.message);
   }
+  app.listen(PORT, () => {
+    console.log(`✅ Server running on http://localhost:${PORT}`);
+  });
 };
 
 /** Set CORS headers on response so errors (500) sent from handler still have them */

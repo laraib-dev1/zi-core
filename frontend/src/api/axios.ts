@@ -30,6 +30,8 @@ function ensureApiPath(url: string): string {
 }
 
 const API_URL = ensureApiPath(rawApiUrl);
+const FALLBACK_API_URL = ensureApiPath(urls[1] || "");
+const canFallbackFromLocal = isLocalhost && Boolean(FALLBACK_API_URL) && FALLBACK_API_URL !== API_URL;
 
 console.log("API Base URL:", API_URL); // debug
 
@@ -61,7 +63,20 @@ API.interceptors.request.use((config) => {
 // Response interceptor to suppress 401 errors in console for unauthenticated requests
 API.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const originalConfig = error?.config as (any | undefined);
+    const errorCode = String(error?.code || "");
+    const isNetworkRefused =
+      errorCode === "ERR_NETWORK" ||
+      errorCode === "ECONNREFUSED" ||
+      String(error?.message || "").toLowerCase().includes("network error");
+
+    if (canFallbackFromLocal && isNetworkRefused && originalConfig && !originalConfig.__fallbackRetried) {
+      originalConfig.__fallbackRetried = true;
+      originalConfig.baseURL = FALLBACK_API_URL;
+      return API.request(originalConfig);
+    }
+
     // Suppress 401 errors completely - they're expected when user is not logged in or token expired
     if (error?.response?.status === 401) {
       // Create a silent error that won't trigger console logs

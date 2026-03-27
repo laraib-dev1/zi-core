@@ -32,7 +32,12 @@ export const createApplication = async (data: any) => {
   formData.append("tags", Array.isArray(data.tags) ? data.tags.join(",") : (data.tags || ""));
 
   const list = Array.isArray(data.downloadsList) ? data.downloadsList : [];
-  formData.append("downloadsList", JSON.stringify(list));
+  const listForApi = list.map((item: any) => {
+    if (!item || typeof item !== "object") return item;
+    const { file: _f, ...rest } = item;
+    return rest;
+  });
+  formData.append("downloadsList", JSON.stringify(listForApi));
   formData.append("appInfo", JSON.stringify(data.appInfo || {}));
   formData.append("media", JSON.stringify({ screenshots: data.media?.screenshots || [] }));
   formData.append("featuresHtml", data.featuresHtml || "");
@@ -72,7 +77,12 @@ export const updateApplication = async (id: string, data: any) => {
   formData.append("tags", Array.isArray(data.tags) ? data.tags.join(",") : (data.tags || ""));
 
   const list = Array.isArray(data.downloadsList) ? data.downloadsList : [];
-  formData.append("downloadsList", JSON.stringify(list));
+  const listForApi = list.map((item: any) => {
+    if (!item || typeof item !== "object") return item;
+    const { file: _f, ...rest } = item;
+    return rest;
+  });
+  formData.append("downloadsList", JSON.stringify(listForApi));
   formData.append("appInfo", JSON.stringify(data.appInfo || {}));
   formData.append("media", JSON.stringify({ screenshots: data.media?.screenshots || [] }));
   formData.append("featuresHtml", data.featuresHtml || "");

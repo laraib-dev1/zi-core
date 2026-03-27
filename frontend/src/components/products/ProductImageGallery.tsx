@@ -4,9 +4,15 @@ type Props = {
   images: string[];
   /** Show thumbnail images below main image. Default true. */
   showThumbnails?: boolean;
+  /** Use transparent tile backgrounds instead of gray fills. */
+  transparentBackground?: boolean;
 };
 
-export default function ProductImageGallery({ images, showThumbnails = true }: Props) {
+export default function ProductImageGallery({
+  images,
+  showThumbnails = true,
+  transparentBackground = false,
+}: Props) {
   // Filter out empty, null, undefined, or placeholder images
   const validImages = images.filter(img => 
     img && 
@@ -28,7 +34,11 @@ export default function ProductImageGallery({ images, showThumbnails = true }: P
   return (
     <div className="flex flex-col gap-2 w-full">
       {/* Main Image - 1:1 aspect ratio (square) */}
-      <div className="w-full max-w-[26rem] aspect-square bg-gray-100 overflow-hidden rounded-lg border border-gray-200 flex items-center justify-center">
+      <div
+        className={`w-full max-w-[26rem] aspect-square overflow-hidden rounded-lg border border-gray-200 flex items-center justify-center ${
+          transparentBackground ? "bg-transparent" : "bg-gray-100"
+        }`}
+      >
         <img
           src={selected}
           alt="Product"
@@ -46,7 +56,9 @@ export default function ProductImageGallery({ images, showThumbnails = true }: P
           <div
             key={i}
             onClick={() => setSelected(img)}
-            className={`w-full aspect-square bg-gray-100 overflow-hidden rounded-lg border-2 cursor-pointer transition-all
+            className={`w-full aspect-square overflow-hidden rounded-lg border-2 cursor-pointer transition-all ${
+              transparentBackground ? "bg-transparent" : "bg-gray-100"
+            }
               ${selected === img ? "" : "border-gray-200"}`}
             style={selected === img ? { borderColor: "var(--theme-primary)" } : {}}
           >

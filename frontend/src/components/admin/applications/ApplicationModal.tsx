@@ -20,10 +20,40 @@ interface Props {
 const appTabs = ["app", "meta", "setups", "media", "description", "features", "guide", "help"] as const;
 type AppTab = (typeof appTabs)[number];
 const tabClass =
-  "rounded-md px-4 py-2 text-sm font-medium data-[state=active]:bg-[var(--theme-primary)] data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-gray-600 border border-gray-200";
+  "rounded-lg px-4 py-2 text-sm font-medium transition-colors data-[state=active]:bg-[var(--theme-primary)] data-[state=active]:text-white data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:bg-[color-mix(in_srgb,var(--theme-primary)_15%,transparent)]";
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return <label className="block text-xs font-semibold uppercase tracking-wide text-gray-600 mb-1">{children}</label>;
+}
+
+function SectionToggle({
+  title,
+  enabled,
+  onChange,
+  disabled,
+}: {
+  title: string;
+  enabled: boolean;
+  onChange: (next: boolean) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-sm font-semibold theme-text-primary whitespace-nowrap">{title}</span>
+      <div className="h-px flex-1 bg-[color-mix(in_srgb,var(--theme-primary)_35%,#d1d5db)]" />
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onChange(!enabled)}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${enabled ? "bg-(--theme-primary)" : "bg-gray-300"} ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
+        aria-pressed={enabled}
+      >
+        <span
+          className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${enabled ? "translate-x-5" : "translate-x-1"}`}
+        />
+      </button>
+    </div>
+  );
 }
 
 function isRichTextEmpty(html: string): boolean {
@@ -42,6 +72,7 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
   const [tab, setTab] = useState<AppTab>("app");
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [cropTarget, setCropTarget] = useState<"icon" | "banner" | "inner" | "screenshot" | null>(null);
+  const [cropScreenshotIndex, setCropScreenshotIndex] = useState<number | null>(null);
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [form, setForm] = useState<any>({
     title: "",
@@ -61,6 +92,14 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
       stars: 0,
       ratingCount: 0,
       downloadsEnabled: false,
+      datesEnabled: false,
+      thumbnailEnabled: true,
+      bannerEnabled: true,
+      imagesEnabled: true,
+      descriptionTabEnabled: true,
+      featuresTabEnabled: true,
+      guideTabEnabled: true,
+      supportTabEnabled: true,
       downloadsDisplay: "",
       releaseDate: "",
       updateDate: "",
@@ -79,15 +118,61 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
     image: "",
   });
   const currentTabIndex = useMemo(() => appTabs.indexOf(tab), [tab]);
+  const setupOrder = ["website", "apk", "exe", "windows"] as const;
+  const getSetup = (typeKey: string) => {
+    const existing = (form.downloadsList || []).find((x: any) => String(x?.type || "").toLowerCase() === typeKey);
+    return {
+      type: typeKey,
+      label: existing?.label || (typeKey === "website" ? "Web" : typeKey === "apk" ? "APK" : typeKey === "exe" ? "Desktop" : "Windows"),
+      url: existing?.url || "",
+      file: existing?.file || null,
+      fileName: existing?.fileName || "",
+      fileSize: existing?.fileSize || 0,
+      sizeText: existing?.sizeText || "",
+      description: existing?.description || "",
+      enabled: existing?.enabled !== false,
+    };
+  };
+  const updateSetup = (typeKey: string, patch: Record<string, any>) => {
+    setForm((prev: any) => {
+      const list = Array.isArray(prev.downloadsList) ? [...prev.downloadsList] : [];
+      const idx = list.findIndex((x: any) => String(x?.type || "").toLowerCase() === typeKey);
+      const current =
+        idx >= 0
+          ? list[idx]
+          : {
+              type: typeKey,
+              label: typeKey === "website" ? "Web" : typeKey === "apk" ? "APK" : typeKey === "exe" ? "Desktop" : "Windows",
+              url: "",
+              file: null,
+              fileName: "",
+              fileSize: 0,
+              sizeText: "",
+              description: "",
+              enabled: true,
+            };
+      const nextItem = { ...current, ...patch, type: typeKey };
+      if (idx >= 0) list[idx] = nextItem;
+      else list.push(nextItem);
+      const sorted = setupOrder
+        .map((t) => list.find((x: any) => String(x?.type || "").toLowerCase() === t))
+        .filter(Boolean);
+      return { ...prev, downloadsList: sorted };
+    });
+  };
 
   useEffect(() => {
     if (!open) return;
     setTab("app");
     if (data) {
+      const mergedAppInfo = { ...form.appInfo, ...(data.appInfo || {}) };
+      if (typeof mergedAppInfo.supportTabEnabled !== "boolean") {
+        mergedAppInfo.supportTabEnabled = Boolean(data.helpEnabled);
+      }
       setForm({
         ...form,
         ...data,
-        appInfo: { ...form.appInfo, ...(data.appInfo || {}) },
+        appInfo: mergedAppInfo,
         media: { banner: "", inner: "", screenshots: [], ...(data.media || {}) },
         downloadsList: Array.isArray(data.downloadsList) ? data.downloadsList : [],
         tags: Array.isArray(data.tags) ? data.tags.join(", ") : (data.tags || ""),
@@ -118,6 +203,7 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
       const payload = {
         ...form,
         tags: String(form.tags || "").split(",").map((x) => x.trim()).filter(Boolean),
+        helpEnabled: Boolean(form.appInfo?.supportTabEnabled),
       };
       if (mode === "add") {
         await createApplication(payload);
@@ -148,28 +234,41 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
         if (!(form.image || form.iconFile || form.imageFile)) return "App tab: App logo is required.";
         return null;
       case "meta":
-        if (Number(form.appInfo?.stars || 0) < 1 || Number(form.appInfo?.stars || 0) > 5) return "Meta tab: Stars must be between 1 and 5.";
-        if (Number(form.appInfo?.ratingCount || 0) < 0) return "Meta tab: Rating count is invalid.";
-        if (!form.appInfo?.releaseDate) return "Meta tab: Release date is required.";
-        if (!form.appInfo?.updateDate) return "Meta tab: Update date is required.";
+        if (form.appInfo?.starsEnabled) {
+          if (Number(form.appInfo?.stars || 0) < 1 || Number(form.appInfo?.stars || 0) > 5) return "Meta tab: Stars must be between 1 and 5 when Rating is enabled.";
+          if (Number(form.appInfo?.ratingCount || 0) < 0) return "Meta tab: Rating count is invalid.";
+        }
+        if (form.appInfo?.downloadsEnabled && !String(form.appInfo?.downloadsDisplay || "").trim()) return "Meta tab: Downloads text is required when Downloads is enabled.";
+        if (form.appInfo?.datesEnabled) {
+          if (!form.appInfo?.releaseDate) return "Meta tab: Release date is required when Dates is enabled.";
+          if (!form.appInfo?.updateDate) return "Meta tab: Update date is required when Dates is enabled.";
+        }
         return null;
       case "setups":
         if (!Array.isArray(form.downloadsList) || form.downloadsList.length === 0) return "Setups tab: Add at least one setup option.";
-        if (form.downloadsList.some((x: any) => !x?.label?.trim() || (!x?.url?.trim() && !x?.file))) return "Setups tab: Each setup needs a label and URL or file.";
+        if (!form.downloadsList.some((x: any) => x?.enabled !== false)) return "Setups tab: Enable at least one setup option.";
+        if (form.downloadsList.some((x: any) => x?.enabled !== false && !x?.label?.trim())) return "Setups tab: Each enabled setup needs a label.";
+        if (form.downloadsList.some((x: any) => x?.enabled !== false && !x?.url?.trim() && !x?.file && !x?.fileUrl)) return "Setups tab: Each enabled setup needs a link or file.";
         return null;
       case "media":
-        if (!(form.media?.banner || form.bannerFile)) return "Media tab: Banner image is required.";
-        if (!Array.isArray(form.media?.screenshots) && !(form.screenshotFiles?.length > 0)) return "Media tab: Add screenshots.";
-        if (Array.isArray(form.media?.screenshots) && form.media.screenshots.length === 0 && !(form.screenshotFiles?.length > 0)) return "Media tab: Add screenshots.";
+        if (form.appInfo?.thumbnailEnabled && !(form.media?.banner || form.bannerFile)) return "Media tab: Thumbnail image is required when Thumbnail is enabled.";
+        if (form.appInfo?.bannerEnabled && !(form.media?.inner || form.innerFile)) return "Media tab: Banner image is required when Banner is enabled.";
+        if (form.appInfo?.imagesEnabled) {
+          const shots = Array.isArray(form.media?.screenshots) ? form.media.screenshots.filter(Boolean) : [];
+          if (shots.length !== 5) return "Media tab: Add exactly 5 images (1 main + 4 others) when Images is enabled.";
+        }
         return null;
       case "description":
-        return isRichTextEmpty(form.description) ? "Description tab: Description is required." : null;
+        if (form.appInfo?.descriptionTabEnabled && isRichTextEmpty(form.description)) return "Description tab: Description is required when enabled.";
+        return null;
       case "features":
-        return isRichTextEmpty(form.featuresHtml) ? "Features tab: Features content is required." : null;
+        if (form.appInfo?.featuresTabEnabled && isRichTextEmpty(form.featuresHtml)) return "Features tab: Features content is required when enabled.";
+        return null;
       case "guide":
-        return isRichTextEmpty(form.guideHtml) ? "Guide tab: Guide content is required." : null;
+        if (form.appInfo?.guideTabEnabled && isRichTextEmpty(form.guideHtml)) return "Guide tab: Guide content is required when enabled.";
+        return null;
       case "help":
-        if (form.helpEnabled && isRichTextEmpty(form.helpHtml)) return "Help tab: Help content is required when help is enabled.";
+        if (form.appInfo?.supportTabEnabled && isRichTextEmpty(form.helpHtml)) return "Support tab: Support content is required when enabled.";
         return null;
       default:
         return null;
@@ -197,9 +296,10 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
     setTab(target);
   };
 
-  const openCropper = (target: "icon" | "banner" | "inner" | "screenshot", file?: File | null) => {
+  const openCropper = (target: "icon" | "banner" | "inner" | "screenshot", file?: File | null, screenshotIndex?: number) => {
     if (!file) return;
     setCropTarget(target);
+    setCropScreenshotIndex(typeof screenshotIndex === "number" ? screenshotIndex : null);
     setCropFile(file);
     setCropModalOpen(true);
   };
@@ -216,12 +316,26 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
     } else if (cropTarget === "screenshot") {
       setForm((prev: any) => ({
         ...prev,
-        screenshotFiles: [...(prev.screenshotFiles || []), file],
-        media: { ...prev.media, screenshots: [...(prev.media?.screenshots || []), url] },
+        screenshotFiles: (() => {
+          const files = [...(prev.screenshotFiles || [])];
+          if (typeof cropScreenshotIndex === "number") files[cropScreenshotIndex] = file;
+          else files.push(file);
+          return files;
+        })(),
+        media: {
+          ...prev.media,
+          screenshots: (() => {
+            const shots = [...(prev.media?.screenshots || [])];
+            const idx = typeof cropScreenshotIndex === "number" ? cropScreenshotIndex : shots.length;
+            shots[idx] = url;
+            return shots.slice(0, 5);
+          })(),
+        },
       }));
     }
     setCropModalOpen(false);
     setCropTarget(null);
+    setCropScreenshotIndex(null);
     setCropFile(null);
   };
 
@@ -236,7 +350,7 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
         </DialogHeader>
 
         <Tabs value={tab} onValueChange={handleTabChange} className="w-full px-6 py-4">
-          <TabsList className="w-full justify-start overflow-x-auto bg-transparent p-0 gap-2 h-auto">
+          <TabsList className="inline-flex w-full justify-start overflow-x-auto gap-1 p-1.5 rounded-xl h-auto border-0 shadow-none bg-[color-mix(in_srgb,var(--theme-primary)_10%,#e8f0f3)]">
             <TabsTrigger value="app" className={tabClass}>App</TabsTrigger>
             <TabsTrigger value="meta" className={tabClass}>Meta</TabsTrigger>
             <TabsTrigger value="setups" className={tabClass}>Setups</TabsTrigger>
@@ -244,10 +358,26 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
             <TabsTrigger value="description" className={tabClass}>Description</TabsTrigger>
             <TabsTrigger value="features" className={tabClass}>Features</TabsTrigger>
             <TabsTrigger value="guide" className={tabClass}>Guide</TabsTrigger>
-            <TabsTrigger value="help" className={tabClass}>Help</TabsTrigger>
+            <TabsTrigger value="help" className={tabClass}>Support</TabsTrigger>
           </TabsList>
 
           <TabsContent value="app" className="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5 space-y-4">
+            <div>
+              <FieldLabel>App Logo</FieldLabel>
+              <div className="flex items-center gap-3">
+                <div className="h-20 w-20 rounded-lg border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center">
+                  {form.image ? <img src={form.image} alt="App icon" className="h-full w-full object-cover" /> : <span className="text-xs text-gray-400">No logo</span>}
+                </div>
+                {!isView && (
+                  <input
+                    className="block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-(--theme-primary) file:px-3 file:py-2 file:text-white"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => openCropper("icon", e.target.files?.[0] || null)}
+                  />
+                )}
+              </div>
+            </div>
             <div>
               <FieldLabel>Application Title</FieldLabel>
               <Input disabled={isView} placeholder="Enter application title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
@@ -285,140 +415,353 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
             </div>
             <div>
               <FieldLabel>Intro</FieldLabel>
-              <Input disabled={isView} placeholder="One-line intro" value={form.appInfo.intro} onChange={(e) => updateAppInfo("intro", e.target.value)} />
-            </div>
-            <div>
-              <FieldLabel>App Icon</FieldLabel>
-              <div className="flex items-center gap-3">
-                <div className="h-20 w-20 rounded-lg border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center">
-                  {form.image ? <img src={form.image} alt="App icon" className="h-full w-full object-cover" /> : <span className="text-xs text-gray-400">No logo</span>}
-                </div>
-                {!isView && (
-                  <input
-                    className="block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-[var(--theme-primary)] file:px-3 file:py-2 file:text-white"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => openCropper("icon", e.target.files?.[0] || null)}
-                  />
-                )}
-              </div>
+              <textarea
+                disabled={isView}
+                placeholder="Write app intro / about text"
+                value={form.appInfo.intro}
+                onChange={(e) => updateAppInfo("intro", e.target.value)}
+                rows={4}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-(--theme-primary) focus:ring-1 focus:ring-(--theme-primary)"
+              />
             </div>
           </TabsContent>
 
           <TabsContent value="meta" className="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <SectionToggle
+              title="Rating"
+              enabled={!!form.appInfo.starsEnabled}
+              onChange={(next) => updateAppInfo("starsEnabled", next)}
+              disabled={isView}
+            />
+            <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${!form.appInfo.starsEnabled ? "opacity-60" : ""}`}>
               <div>
                 <FieldLabel>Stars (1-5)</FieldLabel>
-                <Input disabled={isView} type="number" min={1} max={5} placeholder="3" value={form.appInfo.stars} onChange={(e) => updateAppInfo("stars", Math.max(1, Math.min(5, Number(e.target.value || 0))))} />
+                <Input
+                  disabled={isView || !form.appInfo.starsEnabled}
+                  type="number"
+                  min={1}
+                  max={5}
+                  placeholder="3"
+                  value={form.appInfo.stars}
+                  onChange={(e) => updateAppInfo("stars", Math.max(1, Math.min(5, Number(e.target.value || 0))))}
+                />
               </div>
               <div>
                 <FieldLabel>Rating Count</FieldLabel>
-                <Input disabled={isView} type="number" placeholder="250" value={form.appInfo.ratingCount} onChange={(e) => updateAppInfo("ratingCount", Number(e.target.value || 0))} />
+                <Input
+                  disabled={isView || !form.appInfo.starsEnabled}
+                  type="number"
+                  placeholder="250"
+                  value={form.appInfo.ratingCount}
+                  onChange={(e) => updateAppInfo("ratingCount", Number(e.target.value || 0))}
+                />
               </div>
             </div>
-            <div>
+            <SectionToggle
+              title="Downloads"
+              enabled={!!form.appInfo.downloadsEnabled}
+              onChange={(next) => updateAppInfo("downloadsEnabled", next)}
+              disabled={isView}
+            />
+            <div className={!form.appInfo.downloadsEnabled ? "opacity-60" : ""}>
               <FieldLabel>Show Downloads</FieldLabel>
-              <Input disabled={isView} placeholder="3000" value={form.appInfo.downloadsDisplay} onChange={(e) => updateAppInfo("downloadsDisplay", e.target.value)} />
+              <Input
+                disabled={isView || !form.appInfo.downloadsEnabled}
+                placeholder="3000"
+                value={form.appInfo.downloadsDisplay}
+                onChange={(e) => updateAppInfo("downloadsDisplay", e.target.value)}
+              />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <SectionToggle
+              title="Dates"
+              enabled={!!form.appInfo.datesEnabled}
+              onChange={(next) => updateAppInfo("datesEnabled", next)}
+              disabled={isView}
+            />
+            <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${!form.appInfo.datesEnabled ? "opacity-60" : ""}`}>
               <div>
                 <FieldLabel>Release Date</FieldLabel>
-                <Input disabled={isView} type="date" value={form.appInfo.releaseDate} onChange={(e) => updateAppInfo("releaseDate", e.target.value)} />
+                <Input
+                  disabled={isView || !form.appInfo.datesEnabled}
+                  type="date"
+                  value={form.appInfo.releaseDate}
+                  onChange={(e) => updateAppInfo("releaseDate", e.target.value)}
+                  className="[&::-webkit-calendar-picker-indicator]:ml-auto"
+                />
               </div>
               <div>
                 <FieldLabel>Update Date</FieldLabel>
-                <Input disabled={isView} type="date" value={form.appInfo.updateDate} onChange={(e) => updateAppInfo("updateDate", e.target.value)} />
+                <Input
+                  disabled={isView || !form.appInfo.datesEnabled}
+                  type="date"
+                  value={form.appInfo.updateDate}
+                  onChange={(e) => updateAppInfo("updateDate", e.target.value)}
+                  className="[&::-webkit-calendar-picker-indicator]:ml-auto"
+                />
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="setups" className="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-sm text-gray-700">Downloads / Links</span>
-              {!isView && <Button type="button" className="theme-button text-white" onClick={() => setForm({ ...form, downloadsList: [...form.downloadsList, { type: "website", label: "", url: "" }] })}>Add New</Button>}
+            <div className="space-y-5">
+              {[
+                { type: "website", title: "Web", hasFile: false, hasSize: false },
+                { type: "apk", title: "APK", hasFile: true, hasSize: true },
+                { type: "exe", title: "Desktop", hasFile: true, hasSize: true },
+                { type: "windows", title: "Windows", hasFile: true, hasSize: true },
+              ].map((block) => {
+                const setup = getSetup(block.type);
+                return (
+                  <div key={block.type} className="space-y-3">
+                    <SectionToggle
+                      title={block.title}
+                      enabled={!!setup.enabled}
+                      onChange={(next) => updateSetup(block.type, { enabled: next })}
+                      disabled={isView}
+                    />
+                    <div className={`${!setup.enabled ? "opacity-60" : ""} space-y-3`}>
+                      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                        <div className={`${block.hasSize ? "sm:col-span-8" : "sm:col-span-12"}`}>
+                          <FieldLabel>Link</FieldLabel>
+                          <Input
+                            disabled={isView || !setup.enabled}
+                            placeholder={block.type === "website" ? "https://www.example.com" : "https://download-link.com/file"}
+                            value={setup.url || ""}
+                            onChange={(e) => updateSetup(block.type, { url: e.target.value })}
+                          />
+                        </div>
+                        {block.hasSize && (
+                          <div className="sm:col-span-4">
+                            <FieldLabel>Size</FieldLabel>
+                            <Input
+                              disabled={isView || !setup.enabled}
+                              placeholder="5 MB"
+                              value={setup.sizeText || ""}
+                              onChange={(e) => updateSetup(block.type, { sizeText: e.target.value })}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      {block.hasFile && (
+                        <div>
+                          <FieldLabel>File</FieldLabel>
+                          {!isView && (
+                            <input
+                              className="block w-full text-xs text-gray-600 file:mr-2 file:rounded-md file:border file:border-gray-300 file:bg-white file:px-2 file:py-1"
+                              type="file"
+                              disabled={!setup.enabled}
+                              onChange={(e) => {
+                                const f = e.target.files?.[0] || null;
+                                updateSetup(block.type, { file: f, fileName: f?.name || setup.fileName, fileSize: f?.size || setup.fileSize || 0 });
+                              }}
+                            />
+                          )}
+                          {setup.fileName ? <p className="mt-1 text-xs text-gray-500">Selected: {setup.fileName}</p> : null}
+                        </div>
+                      )}
+                      <div>
+                        <FieldLabel>{block.title} Guide / Description</FieldLabel>
+                        <textarea
+                          disabled={isView || !setup.enabled}
+                          rows={3}
+                          placeholder="Write guide / details for this setup"
+                          value={setup.description || ""}
+                          onChange={(e) => updateSetup(block.type, { description: e.target.value })}
+                          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-(--theme-primary) focus:ring-1 focus:ring-(--theme-primary)"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            {form.downloadsList.map((d: any, i: number) => (
-              <div key={i} className="grid grid-cols-1 sm:grid-cols-12 gap-2 rounded-lg border border-gray-200 p-3 bg-gray-50">
-                <div className="sm:col-span-2">
-                  <Select value={d.type || "other"} onValueChange={(v) => {
-                    const n = [...form.downloadsList];
-                    n[i] = { ...n[i], type: v };
-                    setForm({ ...form, downloadsList: n });
-                  }} disabled={isView}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-white">
-                      {["website", "apk", "desktop", "windows", "ios", "exe", "other"].map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Input className="sm:col-span-3" disabled={isView} placeholder="Label" value={d.label || ""} onChange={(e) => {
-                  const n = [...form.downloadsList];
-                  n[i] = { ...n[i], label: e.target.value };
-                  setForm({ ...form, downloadsList: n });
-                }} />
-                <Input className="sm:col-span-4" disabled={isView} placeholder="URL" value={d.url || ""} onChange={(e) => {
-                  const n = [...form.downloadsList];
-                  n[i] = { ...n[i], url: e.target.value };
-                  setForm({ ...form, downloadsList: n });
-                }} />
-                <div className="sm:col-span-3">
-                  {!isView && <input className="block w-full text-xs text-gray-600 file:mr-2 file:rounded-md file:border file:border-gray-300 file:bg-white file:px-2 file:py-1" type="file" onChange={(e) => {
-                    const f = e.target.files?.[0] || null;
-                    const n = [...form.downloadsList];
-                    n[i] = { ...n[i], file: f, fileName: f?.name || n[i]?.fileName };
-                    setForm({ ...form, downloadsList: n });
-                  }} />}
-                </div>
-              </div>
-            ))}
           </TabsContent>
 
           <TabsContent value="media" className="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5 space-y-4">
-            <div>
-              <FieldLabel>Thumbnail</FieldLabel>
+            <SectionToggle
+              title="Thumbnail"
+              enabled={!!form.appInfo.thumbnailEnabled}
+              onChange={(next) => updateAppInfo("thumbnailEnabled", next)}
+              disabled={isView}
+            />
+            <div className={!form.appInfo.thumbnailEnabled ? "opacity-60" : ""}>
               <div className="h-48 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center">
                 {form.media?.banner ? <img src={form.media.banner} alt="Thumbnail" className="h-full w-full object-cover" /> : <span className="text-sm text-gray-400">Upload Thumbnail</span>}
               </div>
-              {!isView && <input className="mt-2 block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-[var(--theme-primary)] file:px-3 file:py-2 file:text-white" type="file" accept="image/*" onChange={(e) => openCropper("banner", e.target.files?.[0] || null)} />}
+              {!isView && <input disabled={!form.appInfo.thumbnailEnabled} className="mt-2 block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-(--theme-primary) file:px-3 file:py-2 file:text-white" type="file" accept="image/*" onChange={(e) => openCropper("banner", e.target.files?.[0] || null)} />}
             </div>
-            <div>
-              <FieldLabel>Banner</FieldLabel>
+
+            <SectionToggle
+              title="Banner"
+              enabled={!!form.appInfo.bannerEnabled}
+              onChange={(next) => updateAppInfo("bannerEnabled", next)}
+              disabled={isView}
+            />
+            <div className={!form.appInfo.bannerEnabled ? "opacity-60" : ""}>
               <div className="h-24 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center">
                 {form.media?.inner ? <img src={form.media.inner} alt="Banner" className="h-full w-full object-cover" /> : <span className="text-sm text-gray-400">Upload Banner</span>}
               </div>
-              {!isView && <input className="mt-2 block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-[var(--theme-primary)] file:px-3 file:py-2 file:text-white" type="file" accept="image/*" onChange={(e) => openCropper("inner", e.target.files?.[0] || null)} />}
+              {!isView && <input disabled={!form.appInfo.bannerEnabled} className="mt-2 block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-(--theme-primary) file:px-3 file:py-2 file:text-white" type="file" accept="image/*" onChange={(e) => openCropper("inner", e.target.files?.[0] || null)} />}
             </div>
-            <div>
-              <FieldLabel>Images</FieldLabel>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {(form.media?.screenshots || []).slice(0, 8).map((src: string, index: number) => (
-                  <div key={`${src}-${index}`} className="relative h-28 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                    <img src={src} alt={`Screenshot ${index + 1}`} className="h-full w-full object-cover" />
-                    {!isView && (
-                      <button
-                        type="button"
-                        className="absolute top-1 right-1 bg-black/60 text-white text-xs rounded px-1"
-                        onClick={() => setForm((prev: any) => ({ ...prev, media: { ...prev.media, screenshots: prev.media.screenshots.filter((_: string, i: number) => i !== index) } }))}
-                      >
-                        x
-                      </button>
+
+            <SectionToggle
+              title="Images"
+              enabled={!!form.appInfo.imagesEnabled}
+              onChange={(next) => updateAppInfo("imagesEnabled", next)}
+              disabled={isView}
+            />
+            <div className={!form.appInfo.imagesEnabled ? "opacity-60" : ""}>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div
+                  className="sm:col-span-2 relative group cursor-pointer"
+                  onClick={() => {
+                    if (isView || !form.appInfo.imagesEnabled) return;
+                    const el = document.getElementById("app-shot-0") as HTMLInputElement | null;
+                    el?.click();
+                  }}
+                >
+                  <div className="w-full h-[260px] bg-gray-50 rounded overflow-hidden border flex items-center justify-center">
+                    {(form.media?.screenshots?.[0]) ? (
+                      <img src={form.media.screenshots[0]} className="w-full h-full object-cover" alt="Main screenshot" />
+                    ) : (
+                      <span className="text-sm text-gray-400">Main image</span>
                     )}
                   </div>
-                ))}
+                  {!isView && form.media?.screenshots?.[0] && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setForm((prev: any) => {
+                          const shots = [...(prev.media?.screenshots || [])];
+                          shots[0] = "";
+                          return { ...prev, media: { ...prev.media, screenshots: shots } };
+                        });
+                      }}
+                      className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                    >
+                      x
+                    </button>
+                  )}
+                  {!isView && (
+                    <input
+                      id="app-shot-0"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => openCropper("screenshot", e.target.files?.[0] || null, 0)}
+                    />
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {[1, 2, 3, 4].map((idx) => (
+                    <div
+                      key={idx}
+                      className="relative group cursor-pointer h-[124px] bg-gray-50 rounded border overflow-hidden flex items-center justify-center"
+                      onClick={() => {
+                        if (isView || !form.appInfo.imagesEnabled) return;
+                        const el = document.getElementById(`app-shot-${idx}`) as HTMLInputElement | null;
+                        el?.click();
+                      }}
+                    >
+                      {(form.media?.screenshots?.[idx]) ? (
+                        <img src={form.media.screenshots[idx]} className="w-full h-full object-cover" alt={`Screenshot ${idx + 1}`} />
+                      ) : (
+                        <span className="text-xs text-gray-400">Image {idx + 1}</span>
+                      )}
+                      {!isView && form.media?.screenshots?.[idx] && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setForm((prev: any) => {
+                              const shots = [...(prev.media?.screenshots || [])];
+                              shots[idx] = "";
+                              return { ...prev, media: { ...prev.media, screenshots: shots } };
+                            });
+                          }}
+                          className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                        >
+                          x
+                        </button>
+                      )}
+                      {!isView && (
+                        <input
+                          id={`app-shot-${idx}`}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => openCropper("screenshot", e.target.files?.[0] || null, idx)}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-              {!isView && <input className="mt-2 block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-[var(--theme-primary)] file:px-3 file:py-2 file:text-white" type="file" accept="image/*" onChange={(e) => openCropper("screenshot", e.target.files?.[0] || null)} />}
+              <p className="mt-2 text-xs text-gray-500">Use exactly 5 images: 1 main + 4 others.</p>
             </div>
           </TabsContent>
 
-          <TabsContent value="description" className="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5"><RichTextEditor value={form.description || "<p></p>"} onChange={(v) => setForm({ ...form, description: v })} readOnly={isView} /></TabsContent>
-          <TabsContent value="features" className="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5"><RichTextEditor value={form.featuresHtml || "<p></p>"} onChange={(v) => setForm({ ...form, featuresHtml: v })} readOnly={isView} /></TabsContent>
-          <TabsContent value="guide" className="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5"><RichTextEditor value={form.guideHtml || "<p></p>"} onChange={(v) => setForm({ ...form, guideHtml: v })} readOnly={isView} /></TabsContent>
-          <TabsContent value="help" className="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
-            <div className="mb-3 flex items-center gap-2">
-              <input type="checkbox" checked={!!form.helpEnabled} onChange={(e) => setForm({ ...form, helpEnabled: e.target.checked })} disabled={isView} />
-              <span className="text-sm font-medium text-gray-700">Help enabled</span>
+          <TabsContent value="description" className="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5 space-y-3">
+            <SectionToggle
+              title="Description"
+              enabled={!!form.appInfo.descriptionTabEnabled}
+              onChange={(next) => updateAppInfo("descriptionTabEnabled", next)}
+              disabled={isView}
+            />
+            <div className={!form.appInfo.descriptionTabEnabled ? "opacity-60" : ""}>
+              <RichTextEditor
+                value={form.description || "<p></p>"}
+                onChange={(v) => setForm({ ...form, description: v })}
+                readOnly={isView || !form.appInfo.descriptionTabEnabled}
+              />
             </div>
-            <RichTextEditor value={form.helpHtml || "<p></p>"} onChange={(v) => setForm({ ...form, helpHtml: v })} readOnly={isView} />
+          </TabsContent>
+          <TabsContent value="features" className="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5 space-y-3">
+            <SectionToggle
+              title="Features"
+              enabled={!!form.appInfo.featuresTabEnabled}
+              onChange={(next) => updateAppInfo("featuresTabEnabled", next)}
+              disabled={isView}
+            />
+            <div className={!form.appInfo.featuresTabEnabled ? "opacity-60" : ""}>
+              <RichTextEditor
+                value={form.featuresHtml || "<p></p>"}
+                onChange={(v) => setForm({ ...form, featuresHtml: v })}
+                readOnly={isView || !form.appInfo.featuresTabEnabled}
+              />
+            </div>
+          </TabsContent>
+          <TabsContent value="guide" className="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5 space-y-3">
+            <SectionToggle
+              title="Guide"
+              enabled={!!form.appInfo.guideTabEnabled}
+              onChange={(next) => updateAppInfo("guideTabEnabled", next)}
+              disabled={isView}
+            />
+            <div className={!form.appInfo.guideTabEnabled ? "opacity-60" : ""}>
+              <RichTextEditor
+                value={form.guideHtml || "<p></p>"}
+                onChange={(v) => setForm({ ...form, guideHtml: v })}
+                readOnly={isView || !form.appInfo.guideTabEnabled}
+              />
+            </div>
+          </TabsContent>
+          <TabsContent value="help" className="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
+            <div className="mb-3">
+              <SectionToggle
+                title="Support"
+                enabled={!!form.appInfo.supportTabEnabled}
+                onChange={(next) => {
+                  updateAppInfo("supportTabEnabled", next);
+                  setForm((prev: any) => ({ ...prev, helpEnabled: next }));
+                }}
+                disabled={isView}
+              />
+            </div>
+            <div className={!form.appInfo.supportTabEnabled ? "opacity-60" : ""}>
+              <RichTextEditor value={form.helpHtml || "<p></p>"} onChange={(v) => setForm({ ...form, helpHtml: v })} readOnly={isView || !form.appInfo.supportTabEnabled} />
+            </div>
           </TabsContent>
         </Tabs>
 
@@ -435,6 +778,7 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
           setCropModalOpen(false);
           setCropFile(null);
           setCropTarget(null);
+          setCropScreenshotIndex(null);
         }}
         file={cropFile}
         onCropDone={onCropDone}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Menu, ChevronDown, Facebook, Instagram, X } from "lucide-react";
-import { cn, smoothScrollToElement } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 const navLinks = [
   { to: "#home", label: "Home", hash: "home" },
@@ -89,15 +89,12 @@ export default function Navbar2({
   const handleNavClick = (e: React.MouseEvent, itemHash: string) => {
     setMenuOpen(false);
     e.preventDefault();
+    const hashValue = itemHash.startsWith("#") ? itemHash : `#${itemHash}`;
     if (!isLanding) {
-      navigate({ pathname: "/", hash: itemHash });
+      navigate({ pathname: "/", hash: hashValue });
       return;
     }
-    const el = document.getElementById(itemHash);
-    if (el) {
-      smoothScrollToElement(el, { duration: 5000 });
-      navigate({ pathname, hash: itemHash }, { replace: true });
-    }
+    navigate({ pathname, hash: hashValue }, { replace: true });
   };
   const [menuOpen, setMenuOpen] = useState(false);
   const [slideIn, setSlideIn] = useState(false);

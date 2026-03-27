@@ -4,6 +4,7 @@ import SalesChart from "../../../components/admin/dashboard/SalesChart";
 import { ExternalLink } from "lucide-react";
 import { getCatalogTypes } from "@/api/catalogtype.api";
 import { getBlogStats } from "@/api/blog.api";
+import { getApplications } from "@/api/application.api";
 import PageLoader from "@/components/ui/PageLoader";
 
 interface CatalogTypeCard {
@@ -12,6 +13,7 @@ interface CatalogTypeCard {
   label: string;
   published: number;
   total: number;
+  href: string;
 }
 
 export default function DashboardPage() {
@@ -40,9 +42,23 @@ export default function DashboardPage() {
               label: t.label,
               published: data?.published ?? 0,
               total: data?.totalBlogs ?? 0,
+              href: `/admin/catalog/${t.slug}`,
             };
           })
         );
+        const hasApplicationsType = cards.some((card) => card.slug === "applications");
+        if (!hasApplicationsType) {
+          const apps = await getApplications("all").catch(() => []);
+          const list = Array.isArray(apps) ? apps : [];
+          cards.push({
+            _id: "applications",
+            slug: "applications",
+            label: "Applications",
+            published: list.filter((a: any) => String(a?.status || "").toLowerCase() === "published").length,
+            total: list.length,
+            href: "/admin/applications",
+          });
+        }
         setCatalogCards(cards);
       } catch (error) {
         console.error("Failed to load catalog stats:", error);
@@ -75,7 +91,7 @@ export default function DashboardPage() {
             {catalogCards.map((card) => (
               <Link
                 key={card._id}
-                to={`/admin/catalog/${card.slug}`}
+                to={card.href}
                 className="flex rounded-lg p-4 items-center justify-between text-white shadow-sm transition hover:opacity-90"
                 style={{ backgroundColor: "var(--theme-dark)" }}
               >

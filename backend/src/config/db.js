@@ -17,7 +17,17 @@ const connectDB = async () => {
   }
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(uri).then((m) => m);
+    cached.promise = mongoose
+      .connect(uri, {
+        serverSelectionTimeoutMS: 8000,
+        connectTimeoutMS: 8000,
+      })
+      .then((m) => m)
+      .catch((err) => {
+        // Allow next request/startup attempt to retry the connection.
+        cached.promise = null;
+        throw err;
+      });
   }
 
   cached.conn = await cached.promise;

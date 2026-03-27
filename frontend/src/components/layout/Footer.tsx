@@ -532,9 +532,17 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
             All Rights Reserved{" "}
             <span className="text-var(--theme-primary)">{companyData.company || "VERES"}</span>
           </span>
-          <span className="text-gray-100 hover:text-var(--theme-primary) cursor-pointer">
-            Join SpFolio
-          </span>
+          <a
+            href="/"
+            className="text-gray-100 hover:opacity-90 cursor-pointer underline-offset-2 hover:underline"
+            style={{ color: "inherit" }}
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.assign("/");
+            }}
+          >
+            Join {companyData.company || "Company"}
+          </a>
         </div>
       </div>
     </footer>

@@ -500,15 +500,15 @@ export default function SecondLanding() {
 
   useEffect(() => {
     const hashId = hash?.replace("#", "");
-    if (hashId) {
-      const el = document.getElementById(hashId);
-      if (el) {
-        setTimeout(() => {
-          smoothScrollToElement(el, { duration: 5000 });
-        }, 100);
-      }
+    if (!hashId || !sectionsReady) return;
+    const el = document.getElementById(hashId);
+    if (el) {
+      const t = window.setTimeout(() => {
+        smoothScrollToElement(el, { duration: 5000 });
+      }, 100);
+      return () => window.clearTimeout(t);
     }
-  }, [hash]);
+  }, [hash, sectionsReady]);
 
   return (
     <div className="min-h-screen flex flex-col bg-transparent second-landing-page">
