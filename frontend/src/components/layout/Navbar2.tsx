@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Menu, ChevronDown, Facebook, Instagram, X } from "lucide-react";
+import { Menu, ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import LandingSocialIconButtons from "@/components/landing/LandingSocialIconButtons";
+import { getCompany } from "@/api/company.api";
+import { getCachedData, CACHE_KEYS } from "@/utils/cache";
+import { DEFAULT_LANDING_SOCIAL, pickSocialLinksOrDefault } from "@/utils/landingSocial";
 
 const navLinks = [
   { to: "#home", label: "Home", hash: "home" },
@@ -10,24 +14,6 @@ const navLinks = [
   { to: "#testimonials", label: "Testimonials", hash: "testimonials" }, // section to be added later
   { to: "#other-pages", label: "Other Pages", hash: "other-pages", hasDropdown: true },
   { to: "#contact", label: "Contact us", hash: "contact" },
-];
-
-const TikTokIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
-    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88 6.24A4.82 4.82 0 0 1 5 18.5V22h3.45v-3.26a4.83 4.83 0 0 0 3.77 4.25V22h3.45V2h-3.45v4.48a4.83 4.83 0 0 0 3.77-4.25H19.59z" />
-  </svg>
-);
-
-const PLATFORM_URLS = {
-  facebook: "https://www.facebook.com",
-  instagram: "https://www.instagram.com",
-  tiktok: "https://www.tiktok.com",
-} as const;
-
-const defaultSocialLinks = [
-  { href: PLATFORM_URLS.facebook, icon: Facebook, label: "Facebook" },
-  { href: PLATFORM_URLS.instagram, icon: Instagram, label: "Instagram" },
-  { href: PLATFORM_URLS.tiktok, icon: TikTokIcon, label: "TikTok" },
 ];
 
 // When bottom div has NO color: rounded pill, light pinkish-beige. Fixed height so page content can align with no gap.
@@ -59,23 +45,26 @@ export interface OtherPagesItem {
 export interface Navbar2Props {
   /** When true, use white navbar with dark borders (2nd ss). When false, use rounded beige navbar (1st ss). */
   bottomDivHasColor?: boolean;
-  /** Optional social links - uses company API URLs when provided */
-  socialLinks?: Array<{ href: string; icon: React.ComponentType<{ className?: string }>; label: string }>;
   /** Items for "Other Pages" dropdown (only enabled sections not in main nav). When empty, dropdown shows no items or hides. */
   otherPagesItems?: OtherPagesItem[];
   /** Company name from developer panel */
   companyName?: string;
   /** Dynamic WhatsApp/Contact link for hire button */
   hireMeHref?: string;
+  /**
+   * Social URLs from developer company panel. Pass from landing when preloaded.
+   * When omitted, Navbar loads `/api/company` so detail pages match without prop drilling.
+   */
+  companySocialLinks?: Record<string, string | undefined> | null;
   className?: string;
 }
 
 export default function Navbar2({
   bottomDivHasColor = false,
-  socialLinks: socialLinksProp,
   otherPagesItems = [],
   companyName = "Grace by Anu",
   hireMeHref = "#",
+  companySocialLinks,
   className,
 }: Navbar2Props) {
   const { pathname, hash } = useLocation();
@@ -84,6 +73,8 @@ export default function Navbar2({
   const isLanding = !pathname.startsWith("/project");
   /** Only show a nav item as active when we're on the landing page; on detail pages (service, course, project, blog, etc.) no item is active */
   const isOnLandingPage = pathname === "/";
+  /** Second landing home: full nav + mobile drawer. Detail routes: brand + Hire Me + socials only (no section links / burger). */
+  const isLandingHome = pathname === "/";
   const getHref = (to: string) => (isLanding ? to : `/${to}`);
 
   const handleNavClick = (e: React.MouseEvent, itemHash: string) => {
@@ -102,7 +93,19 @@ export default function Navbar2({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
 
-  const socialLinks = socialLinksProp ?? defaultSocialLinks;
+  const [landingSocial, setLandingSocial] = useState<Record<string, string | undefined>>(DEFAULT_LANDING_SOCIAL);
+
+  useEffect(() => {
+    if (companySocialLinks !== undefined) {
+      setLandingSocial(pickSocialLinksOrDefault(companySocialLinks));
+      return;
+    }
+    const cached = getCachedData<any>(CACHE_KEYS.COMPANY);
+    setLandingSocial(pickSocialLinksOrDefault(cached?.socialLinks));
+    getCompany()
+      .then((c) => setLandingSocial(pickSocialLinksOrDefault(c?.socialLinks)))
+      .catch(() => {});
+  }, [companySocialLinks]);
 
   // Same slide logic as Navbar.tsx / AppSidebar: open -> next frame slide in
   useEffect(() => {
@@ -119,6 +122,7 @@ export default function Navbar2({
   }, [menuOpen]);
 
   useEffect(() => {
+    if (!isLandingHome) return;
     if (!(menuOpen || isClosing)) return;
     const prevBodyOverflow = document.body.style.overflow;
     const prevHtmlOverflow = document.documentElement.style.overflow;
@@ -128,7 +132,11 @@ export default function Navbar2({
       document.body.style.overflow = prevBodyOverflow;
       document.documentElement.style.overflow = prevHtmlOverflow;
     };
-  }, [menuOpen, isClosing]);
+  }, [menuOpen, isClosing, isLandingHome]);
+
+  useEffect(() => {
+    if (!isLandingHome) setMenuOpen(false);
+  }, [isLandingHome]);
 
   const handleCloseMenu = () => {
     if (isClosing) return;
@@ -164,7 +172,8 @@ export default function Navbar2({
         {companyName}
       </a>
 
-      {/* Part 2: Nav links - hidden on small, visible md+ */}
+      {/* Part 2: Nav links — only on second landing home; hidden on detail / portfolio routes */}
+      {isLandingHome && (
       <nav className="hidden md:flex items-center justify-center gap-6 flex-1">
         {navLinks.map((item) =>
           item.hasDropdown ? (
@@ -211,9 +220,15 @@ export default function Navbar2({
           )
         )}
       </nav>
+      )}
 
-      {/* Part 3: Social icons + hire me */}
-      <div className="hidden md:flex items-center gap-3 shrink-0">
+      {/* Part 3: Social icons + hire me — on detail pages always visible (including mobile); on home, desktop only until burger opens */}
+      <div
+        className={cn(
+          "flex items-center gap-3 shrink-0",
+          isLandingHome ? "hidden md:flex" : "flex"
+        )}
+      >
         <a
           href={hireMeHref}
           target={hireMeHref !== "#" ? "_blank" : undefined}
@@ -223,21 +238,7 @@ export default function Navbar2({
         >
           Hire Me
         </a>
-        {socialLinks.map(({ href, icon: Icon, label }) => (
-          <a
-            key={label}
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={label}
-            className={cn(
-              "flex items-center justify-center w-9 h-9 rounded-full border-2 transition-colors hover:opacity-80",
-              "border-[#7D7D7D] bg-[#7D7D7D] text-white"
-            )}
-          >
-            <Icon className="w-4 h-4" />
-          </a>
-        ))}
+        <LandingSocialIconButtons links={landingSocial} size="sm" />
       </div>
     </>
   );
@@ -248,7 +249,8 @@ export default function Navbar2({
         <div className={cn(v.bar, v.barBg, "shadow-sm")}>
           <NavContent />
 
-          {/* Burger: visible only on small screens — same slide panel as Navbar.tsx / AppSidebar */}
+          {/* Burger + drawer: only on second landing home (section nav is not used on detail pages) */}
+          {isLandingHome && (
                 <button
                   type="button"
                   className={cn("md:hidden flex items-center justify-center w-10 h-10 rounded-lg text-[var(--theme-primary)]")}
@@ -257,9 +259,9 @@ export default function Navbar2({
                 >
                   <Menu className="w-6 h-6" />
                 </button>
+          )}
 
-          {/* Slide-in menu (right): overlay + panel, white bg, same transition as AppSidebar */}
-          {(menuOpen || isClosing) && (
+          {isLandingHome && (menuOpen || isClosing) && (
             <>
               <div
                 role="presentation"
@@ -362,22 +364,8 @@ export default function Navbar2({
                 >
                   Hire Me
                 </a>
-                <div className="flex gap-3 pt-4 mt-4">
-                  {socialLinks.map(({ href, icon: Icon, label }) => (
-                    <a
-                      key={label}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={label}
-                      className={cn(
-                        "flex items-center justify-center w-9 h-9 rounded-full border-2",
-                        "border-[var(--theme-primary)] bg-[var(--theme-primary)] text-white"
-                      )}
-                    >
-                      <Icon className="w-4 h-4" />
-                    </a>
-                  ))}
+                <div className="pt-4 mt-4 justify-start">
+                  <LandingSocialIconButtons links={landingSocial} size="sm" />
                 </div>
               </div>
             </>

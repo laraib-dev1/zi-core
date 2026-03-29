@@ -93,7 +93,7 @@ export default function ContactSection() {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 sm:p-8">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8">
               <ContactForm
                 submitting={submitting}
                 onSubmit={async (data) => {

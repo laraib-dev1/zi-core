@@ -6,25 +6,7 @@ import ProductImageGallery from "@/components/products/ProductImageGallery";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { spacing } from "@/utils/spacing";
 import { cn } from "@/lib/utils";
-import { Facebook, Instagram } from "lucide-react";
-
-const TikTokIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
-    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88 6.24A4.82 4.82 0 0 1 5 18.5V22h3.45v-3.26a4.83 4.83 0 0 0 3.77 4.25V22h3.45V2h-3.45v4.48a4.83 4.83 0 0 0 3.77-4.25H19.59z" />
-  </svg>
-);
-
-const PLATFORM_URLS = {
-  facebook: "https://www.facebook.com",
-  instagram: "https://www.instagram.com",
-  tiktok: "https://www.tiktok.com",
-} as const;
-
-const defaultSocialLinks = [
-  { href: PLATFORM_URLS.facebook, icon: Facebook, label: "Facebook" },
-  { href: PLATFORM_URLS.instagram, icon: Instagram, label: "Instagram" },
-  { href: PLATFORM_URLS.tiktok, icon: TikTokIcon, label: "TikTok" },
-];
+import LandingSocialIconButtons from "@/components/landing/LandingSocialIconButtons";
 
 export interface PortfolioDetailSectionProps {
   /** Optional section heading above content (e.g. "About me") */
@@ -42,8 +24,8 @@ export interface PortfolioDetailSectionProps {
   tabDescription?: string;
   /** Optional demo video URL (YouTube watch or embed) */
   demoVideoUrl?: string;
-  /** Optional social links - when not provided, fetches from company API */
-  socialLinks?: Array<{ href: string; icon: React.ComponentType<{ className?: string }>; label: string }>;
+  /** Company panel social URLs — same four icons as navbar/footer/team (X, Facebook, LinkedIn, Instagram). */
+  companySocialLinks?: Record<string, string | undefined> | null;
   className?: string;
 }
 
@@ -74,11 +56,10 @@ export default function PortfolioDetailSection({
   images = ["/hero.png", "/hero.png", "/hero.png", "/hero.png"],
   tabDescription = defaultTabDescription,
   demoVideoUrl,
-  socialLinks: socialLinksProp,
+  companySocialLinks,
   className,
 }: PortfolioDetailSectionProps) {
   const accentColor = "var(--theme-primary, #8B5E3C)";
-  const socialLinks = socialLinksProp ?? defaultSocialLinks;
 
   return (
     <section className={cn("py-0 bg-white w-full", className)}>
@@ -130,21 +111,7 @@ export default function PortfolioDetailSection({
             </div>
             <div className="pt-2">
               <p className="text-sm text-gray-600 mb-2">Stay connected for updates, insights, and medical photography highlights from my surgical journey.</p>
-              <div className="flex gap-3">
-                {socialLinks.map(({ href, icon: Icon, label }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={label}
-                    className="flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors text-white border-[#7D7D7D] bg-[#7D7D7D] hover:opacity-80"
-                    // style={{ borderColor: accentColor, color: accentColor }}
-                  >
-                    <Icon className="w-5 h-5" />
-                  </a>
-                ))}
-              </div>
+              <LandingSocialIconButtons links={companySocialLinks} className="justify-start" />
             </div>
           </div>
         </div>

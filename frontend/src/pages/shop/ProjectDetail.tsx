@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar2 from "@/components/layout/Navbar2";
+import { useSecondLandingNavbarProps } from "@/hooks/useSecondLandingNavbarProps";
 import Footer from "@/components/layout/Footer";
 import DetailWithLeftSidebar from "@/components/landing/DetailWithLeftSidebar";
 import { spacing } from "@/utils/spacing";
@@ -16,6 +17,7 @@ function formatDate(value: string | Date | undefined): string {
 }
 
 export default function ProjectDetail() {
+  const landingNav = useSecondLandingNavbarProps();
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<any>(null);
   const [relatedProjects, setRelatedProjects] = useState<{ title: string; href: string }[]>([]);
@@ -77,8 +79,14 @@ export default function ProjectDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-transparent pt-20">
-        <Navbar2 bottomDivHasColor={false} />
+      <div className="min-h-screen flex flex-col bg-transparent pt-20 landing-detail-page">
+        <Navbar2
+          bottomDivHasColor={false}
+          otherPagesItems={landingNav.otherPagesItems}
+          companyName={landingNav.companyName}
+          hireMeHref={landingNav.hireMeHref}
+          companySocialLinks={landingNav.companySocialLinks}
+        />
         <main className="flex-1 flex items-center justify-center">
           <PageLoader />
         </main>
@@ -88,8 +96,14 @@ export default function ProjectDetail() {
 
   if (notFound || !project) {
     return (
-      <div className="min-h-screen flex flex-col bg-transparent pt-20">
-        <Navbar2 bottomDivHasColor={false} />
+      <div className="min-h-screen flex flex-col bg-transparent pt-20 landing-detail-page">
+        <Navbar2
+          bottomDivHasColor={false}
+          otherPagesItems={landingNav.otherPagesItems}
+          companyName={landingNav.companyName}
+          hireMeHref={landingNav.hireMeHref}
+          companySocialLinks={landingNav.companySocialLinks}
+        />
         <main className="flex-1 pt-0">
           <div className={spacing.section.gap}>
             <div className="text-center py-16">
@@ -112,8 +126,14 @@ export default function ProjectDetail() {
     project.author && (typeof project.author === "object" ? project.author.name : null);
 
   return (
-    <div className="min-h-screen flex flex-col bg-transparent pt-20" style={{ overflow: "visible" }}>
-      <Navbar2 bottomDivHasColor={false} />
+    <div className="min-h-screen flex flex-col bg-transparent pt-20 landing-detail-page" style={{ overflow: "visible" }}>
+      <Navbar2
+        bottomDivHasColor={false}
+        otherPagesItems={landingNav.otherPagesItems}
+        companyName={landingNav.companyName}
+        hireMeHref={landingNav.hireMeHref}
+        companySocialLinks={landingNav.companySocialLinks}
+      />
       <main className="flex-1 pt-0" style={{ overflow: "visible" }}>
         <div className={spacing.section.gap}>
           <DetailWithLeftSidebar

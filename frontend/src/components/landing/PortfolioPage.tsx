@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar2 from "@/components/layout/Navbar2";
+import { useSecondLandingNavbarProps } from "@/hooks/useSecondLandingNavbarProps";
 import Footer from "@/components/layout/Footer";
 import Container12 from "@/components/layout/Container12";
 import PortfolioCard from "@/components/landing/PortfolioCard";
@@ -35,6 +36,7 @@ function getCategoryName(item: any): string {
 }
 
 export default function PortfolioPage() {
+  const landingNav = useSecondLandingNavbarProps();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [portfolioBanner, setPortfolioBanner] = useState<BannerType | null>(null);
@@ -85,7 +87,13 @@ export default function PortfolioPage() {
 
   return (
     <div className="bg-white text-black min-h-screen flex flex-col w-full">
-      <Navbar2 bottomDivHasColor={false} otherPagesItems={[]} />
+      <Navbar2
+        bottomDivHasColor={false}
+        otherPagesItems={landingNav.otherPagesItems}
+        companyName={landingNav.companyName}
+        hireMeHref={landingNav.hireMeHref}
+        companySocialLinks={landingNav.companySocialLinks}
+      />
       <main className={`${spacing.navbar.offset} ${spacing.navbar.gapBottom} flex-1 w-full`}>
         <Container12 grid gap="gap-6" className={spacing.section.gap}>
           {/* Banner: full 12 cols */}

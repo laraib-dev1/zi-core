@@ -60,6 +60,7 @@ const SpFolioPage = React.lazy(() => import("./pages/developer/pages/SpFolioPage
 const LoaderSettingsPage = React.lazy(() => import("./pages/developer/pages/LoaderSettingsPage"));
 const PortfolioPage = React.lazy(() => import("@/components/landing/PortfolioPage"));
 const CatalogDetail = React.lazy(() => import("@/pages/shop/CatalogDetail"));
+const BlogCatalogDetail = React.lazy(() => import("@/pages/shop/BlogCatalogDetail"));
 
 export default function App() {
   useEffect(() => {
@@ -94,6 +95,7 @@ export default function App() {
         <Route path="/project/:id" element={<ProjectDetail />} />
         <Route path="/service/:id" element={<ServiceDetail />} />
         <Route path="/course/:id" element={<CourseDetail />} />
+        <Route path="/blog/:id" element={<BlogCatalogDetail />} />
         <Route path="/catalog/:type/:id" element={<CatalogDetail />} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<SecondLanding />} />

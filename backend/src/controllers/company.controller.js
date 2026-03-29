@@ -189,7 +189,7 @@ const defaultCompany = () => ({
   address: "",
   logo: "",
   favicon: "",
-  socialLinks: { facebook: "", tiktok: "", instagram: "", youtube: "", linkedin: "", other: "" },
+  socialLinks: { facebook: "", tiktok: "", instagram: "", youtube: "", linkedin: "", twitter: "", skype: "", other: "" },
   socialPosts: [],
   brandTheme: { primary: "#8C5934", accent: "", dark: "", light: "" },
   copyright: "",
@@ -278,6 +278,7 @@ export const updateCompany = async (req, res) => {
     if (req.body.supportEmail !== undefined) updateData.supportEmail = req.body.supportEmail;
     if (req.body.address !== undefined) updateData.address = req.body.address;
     if (req.body.description !== undefined) updateData.description = req.body.description;
+    if (req.body.copyright !== undefined) updateData.copyright = req.body.copyright;
 
     // Handle social links (JSON string)
     if (req.body.socialLinks) {
@@ -330,19 +331,27 @@ export const updateCompany = async (req, res) => {
       
       console.log("Files map keys:", Object.keys(filesMap));
 
-      // Upload logo if provided
+      // Upload logo if provided (do not fail whole update if Cloudinary/env is misconfigured)
       if (filesMap.logo && filesMap.logo[0]) {
-        const logoUrl = await uploadImage(filesMap.logo[0], "company");
-        if (logoUrl) {
-          updateData.logo = logoUrl;
+        try {
+          const logoUrl = await uploadImage(filesMap.logo[0], "company");
+          if (logoUrl) {
+            updateData.logo = logoUrl;
+          }
+        } catch (e) {
+          console.error("Company logo upload failed:", e?.message || e);
         }
       }
 
       // Upload favicon if provided
       if (filesMap.favicon && filesMap.favicon[0]) {
-        const faviconUrl = await uploadImage(filesMap.favicon[0], "company");
-        if (faviconUrl) {
-          updateData.favicon = faviconUrl;
+        try {
+          const faviconUrl = await uploadImage(filesMap.favicon[0], "company");
+          if (faviconUrl) {
+            updateData.favicon = faviconUrl;
+          }
+        } catch (e) {
+          console.error("Company favicon upload failed:", e?.message || e);
         }
       }
 

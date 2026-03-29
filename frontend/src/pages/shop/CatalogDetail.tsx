@@ -18,6 +18,7 @@ import CtaBanner from "@/components/landing/CtaBanner";
 import HelpBanner from "@/components/landing/HelpBanner";
 import PortfolioCard from "@/components/landing/PortfolioCard";
 import { cn } from "@/lib/utils";
+import { useSecondLandingNavbarProps } from "@/hooks/useSecondLandingNavbarProps";
 
 const defaultHtml = `<p>No content available.</p>`;
 
@@ -37,8 +38,17 @@ const SECTION_IDS: Record<string, string> = {
   websites: "#catalog-websites",
 };
 
-export default function CatalogDetail() {
-  const { type, id } = useParams<{ type: string; id: string }>();
+/** Props let `/blog/:id` reuse this page with the same layout as `/catalog/blog/:id`. */
+export interface CatalogDetailProps {
+  typeOverride?: string;
+  idOverride?: string;
+}
+
+export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetailProps = {}) {
+  const landingNav = useSecondLandingNavbarProps();
+  const params = useParams<{ type: string; id: string }>();
+  const type = (typeOverride ?? params.type ?? "").toString();
+  const id = (idOverride ?? params.id ?? "").toString();
   const [item, setItem] = useState<any>(null);
   const [related, setRelated] = useState<{ title: string; href: string }[]>([]);
   const [topApplications, setTopApplications] = useState<any[]>([]);
@@ -156,8 +166,14 @@ export default function CatalogDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-transparent pt-20">
-        <Navbar2 bottomDivHasColor={false} />
+      <div className="min-h-screen flex flex-col bg-transparent pt-20 landing-detail-page">
+        <Navbar2
+          bottomDivHasColor={false}
+          otherPagesItems={landingNav.otherPagesItems}
+          companyName={landingNav.companyName}
+          hireMeHref={landingNav.hireMeHref}
+          companySocialLinks={landingNav.companySocialLinks}
+        />
         <main className="flex-1 flex items-center justify-center">
           <PageLoader />
         </main>
@@ -169,8 +185,14 @@ export default function CatalogDetail() {
     const normalizedType = String(type || "").toLowerCase();
     const backHref = SECTION_IDS[normalizedType] || `/#catalog-${normalizedType}`;
     return (
-      <div className="min-h-screen flex flex-col bg-transparent pt-20">
-        <Navbar2 bottomDivHasColor={false} />
+      <div className="min-h-screen flex flex-col bg-transparent pt-20 landing-detail-page">
+        <Navbar2
+          bottomDivHasColor={false}
+          otherPagesItems={landingNav.otherPagesItems}
+          companyName={landingNav.companyName}
+          hireMeHref={landingNav.hireMeHref}
+          companySocialLinks={landingNav.companySocialLinks}
+        />
         <main className="flex-1 pt-0">
           <div className={spacing.section.gap}>
             <div className="text-center py-16">
@@ -232,8 +254,14 @@ export default function CatalogDetail() {
     };
 
     return (
-      <div className="min-h-screen flex flex-col bg-transparent pt-20" style={{ overflow: "visible" }}>
-        <Navbar2 bottomDivHasColor={false} />
+      <div className="min-h-screen flex flex-col bg-transparent pt-20 landing-detail-page" style={{ overflow: "visible" }}>
+        <Navbar2
+          bottomDivHasColor={false}
+          otherPagesItems={landingNav.otherPagesItems}
+          companyName={landingNav.companyName}
+          hireMeHref={landingNav.hireMeHref}
+          companySocialLinks={landingNav.companySocialLinks}
+        />
         <main className="flex-1 pt-0">
           <div>
             <div className={`mx-auto max-w-[1232px] ${spacing.container.paddingSmall}`}>
@@ -588,8 +616,14 @@ export default function CatalogDetail() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-transparent pt-20" style={{ overflow: "visible" }}>
-      <Navbar2 bottomDivHasColor={false} />
+    <div className="min-h-screen flex flex-col bg-transparent pt-20 landing-detail-page" style={{ overflow: "visible" }}>
+      <Navbar2
+        bottomDivHasColor={false}
+        otherPagesItems={landingNav.otherPagesItems}
+        companyName={landingNav.companyName}
+        hireMeHref={landingNav.hireMeHref}
+        companySocialLinks={landingNav.companySocialLinks}
+      />
       <main className="flex-1 pt-0" style={{ overflow: "visible" }}>
         <div className={spacing.section.gap}>
           <DetailWithLeftSidebar

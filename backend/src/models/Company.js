@@ -15,6 +15,8 @@ const CompanySchema = new mongoose.Schema({
     instagram: { type: String, default: "" },
     youtube: { type: String, default: "" },
     linkedin: { type: String, default: "" },
+    twitter: { type: String, default: "" },
+    skype: { type: String, default: "" },
     other: { type: String, default: "" },
   },
   socialPosts: [{

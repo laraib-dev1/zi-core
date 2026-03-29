@@ -29,6 +29,8 @@ export default function CompanyPage() {
       instagram: "",
       youtube: "",
       linkedin: "",
+      twitter: "",
+      skype: "",
       other: "",
     },
     socialPosts: INITIAL_SOCIAL_POSTS,
@@ -70,7 +72,7 @@ export default function CompanyPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update favicon and title when company data changes
+  // Update favicon and title when company data changes (favicon → logo → default)
   useEffect(() => {
     let link = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
     if (!link) {
@@ -78,29 +80,31 @@ export default function CompanyPage() {
       link.rel = "icon";
       document.getElementsByTagName("head")[0].appendChild(link);
     }
-    
+
+    const apiUrl = typeof import.meta.env.VITE_API_URL === "string" ? import.meta.env.VITE_API_URL : "";
+    const toAbsolute = (path: string) =>
+      path.startsWith("http")
+        ? path
+        : `${apiUrl.replace(/\/$/, "")}${path.startsWith("/") ? "" : "/"}${path}`;
+
     if (companyData.favicon && companyData.favicon.trim() !== "") {
-      // If favicon is a Cloudinary URL (starts with http/https), use it directly
-      // Otherwise, prepend API URL
-      const apiUrl = typeof import.meta.env.VITE_API_URL === 'string' ? import.meta.env.VITE_API_URL : '';
-      const faviconUrl = companyData.favicon.startsWith("http") 
-        ? companyData.favicon 
-        : `${apiUrl.replace(/\/$/, "")}${companyData.favicon.startsWith("/") ? "" : "/"}${companyData.favicon}`;
-      
-      link.href = faviconUrl;
+      link.href = toAbsolute(companyData.favicon.trim());
       link.onerror = () => {
-        // Fallback to default logo if favicon fails to load
+        link.href = "/logo-removebg-preview.png";
+      };
+    } else if (companyData.logo && companyData.logo.trim() !== "") {
+      link.href = toAbsolute(companyData.logo.trim());
+      link.onerror = () => {
         link.href = "/logo-removebg-preview.png";
       };
     } else {
-      // Use default logo as favicon if no favicon is set
       link.href = "/logo-removebg-preview.png";
     }
-    
+
     if (companyData.company) {
       document.title = companyData.company || "Grace by Anu";
     }
-  }, [companyData.favicon, companyData.company]);
+  }, [companyData.favicon, companyData.logo, companyData.company]);
 
   const loadCompanyData = async () => {
     try {
@@ -133,6 +137,18 @@ export default function CompanyPage() {
         // If no socialPosts in data, start with empty array
         data.socialPosts = [];
       }
+
+      data.socialLinks = {
+        facebook: "",
+        tiktok: "",
+        instagram: "",
+        youtube: "",
+        linkedin: "",
+        twitter: "",
+        skype: "",
+        other: "",
+        ...(data.socialLinks || {}),
+      };
       
       setCompanyData(data);
       setOriginalData(data);
@@ -482,12 +498,16 @@ export default function CompanyPage() {
         document.getElementsByTagName("head")[0].appendChild(link);
       }
       
+      const apiUrl = typeof import.meta.env.VITE_API_URL === "string" ? import.meta.env.VITE_API_URL : "";
+      const toAbs = (path: string) =>
+        path.startsWith("http") ? path : `${apiUrl.replace(/\/$/, "")}${path.startsWith("/") ? "" : "/"}${path}`;
       if (updated.favicon && updated.favicon.trim() !== "") {
-        const apiUrl = typeof import.meta.env.VITE_API_URL === 'string' ? import.meta.env.VITE_API_URL : '';
-        const faviconUrl = updated.favicon.startsWith("http") 
-          ? updated.favicon 
-          : `${apiUrl.replace(/\/$/, "")}${updated.favicon.startsWith("/") ? "" : "/"}${updated.favicon}`;
-        link.href = faviconUrl;
+        link.href = toAbs(updated.favicon.trim());
+        link.onerror = () => {
+          link.href = "/logo-removebg-preview.png";
+        };
+      } else if (updated.logo && updated.logo.trim() !== "") {
+        link.href = toAbs(updated.logo.trim());
         link.onerror = () => {
           link.href = "/logo-removebg-preview.png";
         };

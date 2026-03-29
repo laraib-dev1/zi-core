@@ -1,4 +1,5 @@
 // backend/src/controllers/blog.controller.js
+import mongoose from "mongoose";
 import Blog from "../models/Blog.js";
 import BlogCategory from "../models/BlogCategory.js";
 import BlogNiche from "../models/BlogNiche.js";
@@ -10,6 +11,17 @@ import connectDB from "../config/db.js";
 function normalizeCatalogType(value) {
   const t = (value && String(value).trim().toLowerCase()) || "";
   return t || "blog";
+}
+
+/** Normalize Mongo id from string or populated object; invalid → null */
+function toObjectIdString(value) {
+  if (value == null || value === "") return null;
+  if (typeof value === "object" && value._id) {
+    value = value._id;
+  }
+  const s = String(value).trim();
+  if (!mongoose.Types.ObjectId.isValid(s)) return null;
+  return s;
 }
 
 // Build query for a catalog type: only that type; for "blog" include legacy (missing/empty)
@@ -87,13 +99,38 @@ export const incrementBlogView = async (req, res) => {
 export const createBlog = async (req, res) => {
   try {
     await connectDB();
-    
+
+    const categoryId = toObjectIdString(req.body.category);
+    const authorId = toObjectIdString(req.body.author);
+    const nicheId = req.body.niche ? toObjectIdString(req.body.niche) : null;
+
+    if (!categoryId || !authorId) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid category and author are required (check that IDs are saved, not objects).",
+      });
+    }
+    if (!req.body.title || !String(req.body.title).trim()) {
+      return res.status(400).json({ success: false, message: "Title is required" });
+    }
+    if (req.body.description == null || !String(req.body.description).trim()) {
+      return res.status(400).json({ success: false, message: "Description is required" });
+    }
+
     let imageUrl = "";
     if (req.file) {
-      const upload = await uploadToCloudinary(req.file.buffer, "blogs");
-      imageUrl = upload.secure_url;
+      try {
+        const upload = await uploadToCloudinary(req.file.buffer, "blogs");
+        imageUrl = upload.secure_url;
+      } catch (imgErr) {
+        console.error("Blog image upload failed:", imgErr?.message || imgErr);
+        return res.status(500).json({
+          success: false,
+          message: imgErr?.message || "Image upload failed. Check Cloudinary configuration.",
+        });
+      }
     }
-    
+
     const tags = req.body.tags ? (Array.isArray(req.body.tags) ? req.body.tags : req.body.tags.split(",").map(t => t.trim())) : [];
     const catalogType = normalizeCatalogType(req.body.catalogType);
 
@@ -103,23 +140,23 @@ export const createBlog = async (req, res) => {
       subTag: req.body.subTag || "",
       description: req.body.description,
       image: imageUrl,
-      category: req.body.category,
-      niche: req.body.niche || null,
-      author: req.body.author,
+      category: categoryId,
+      niche: nicheId,
+      author: authorId,
       tags,
       status: req.body.status || "draft",
     });
-    
+
     // Update category blog count
-    await BlogCategory.findByIdAndUpdate(req.body.category, { $inc: { blogs: 1 } });
-    
+    await BlogCategory.findByIdAndUpdate(categoryId, { $inc: { blogs: 1 } });
+
     // Update niche blog count if provided
-    if (req.body.niche) {
-      await BlogNiche.findByIdAndUpdate(req.body.niche, { $inc: { blogs: 1 } });
+    if (nicheId) {
+      await BlogNiche.findByIdAndUpdate(nicheId, { $inc: { blogs: 1 } });
     }
-    
+
     // Update author blog count
-    await BlogAuthor.findByIdAndUpdate(req.body.author, { $inc: { blogs: 1 } });
+    await BlogAuthor.findByIdAndUpdate(authorId, { $inc: { blogs: 1 } });
     
     const populatedBlog = await Blog.findById(blog._id)
       .populate("category", "name")

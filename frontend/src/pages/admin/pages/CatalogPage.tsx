@@ -34,6 +34,15 @@ export default function CatalogPage({ forcedType, forcedLabel }: CatalogPageProp
       .catch(() => {});
   }, [catalogType, forcedLabel]);
 
+  /** Applications: single title row + Add live in BlogsTab; skip duplicate page heading and tab pill. */
+  if (isApplications) {
+    return (
+      <div className="bg-white shadow rounded-lg p-6">
+        <BlogsTab catalogType={catalogType} typeLabel={typeLabel} />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <h1 className="text-3xl font-bold theme-heading mb-6">{typeLabel}</h1>

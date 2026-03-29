@@ -5,14 +5,8 @@ import { getFooter } from "@/api/footer.api";
 import { getCategories } from "@/api/category.api";
 import { getProducts } from "@/api/product.api";
 import { getCachedData, setCachedData, CACHE_KEYS } from "@/utils/cache";
-import { Facebook, Instagram, Linkedin } from "lucide-react";
-import { FaSkype } from "react-icons/fa";
-
-const XIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-  </svg>
-);
+import LandingSocialIconButtons from "@/components/landing/LandingSocialIconButtons";
+import { pickSocialLinksOrDefault } from "@/utils/landingSocial";
 import { spacing } from "@/utils/spacing";
 
 type FooterVariant = "default" | "landing2";
@@ -499,38 +493,20 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
 
         {/* Social Icons - controlled by admin panel toggle */}
         {footerData.showSocialIcons && (
-          <div className="flex justify-center gap-3 mt-6">
-            {[
-              { href: companyData.socialLinks?.twitter || companyData.socialLinks?.x, Icon: XIcon, label: "X" },
-              { href: companyData.socialLinks?.facebook, Icon: Facebook, label: "Facebook" },
-              { href: companyData.socialLinks?.instagram, Icon: Instagram, label: "Instagram" },
-              { href: companyData.socialLinks?.skype, Icon: FaSkype, label: "Skype" },
-              { href: companyData.socialLinks?.linkedin, Icon: Linkedin, label: "LinkedIn" },
-            ]
-              .filter(({ href }) => href && href !== "#")
-              .map(({ href, Icon, label }, i) => (
-                <a
-                  key={i}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="flex items-center justify-center w-9 h-9 rounded-full text-white transition hover:opacity-80"
-                  style={{ backgroundColor: "#7D7D7D" }}
-                >
-                  <Icon className="w-4 h-4" />
-                </a>
-              ))}
-          </div>
+          <LandingSocialIconButtons
+            links={pickSocialLinksOrDefault(companyData.socialLinks as Record<string, string | undefined>)}
+            className="mt-6"
+          />
         )}
       </div>
 
       {/* Bottom Bar */}
       <div className="border-t border-gray-100 py-4 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-gray-100">
-          <span>
-            All Rights Reserved{" "}
-            <span className="text-var(--theme-primary)">{companyData.company || "VERES"}</span>
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-gray-100 gap-2">
+          <span className="text-center md:text-left">
+            {companyData.copyright?.trim() ||
+              footerData.copyright?.trim() ||
+              `© ${new Date().getFullYear()} ${companyData.company || "VERES"}. All rights reserved.`}
           </span>
           <a
             href="/"

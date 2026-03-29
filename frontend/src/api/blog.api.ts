@@ -1,6 +1,14 @@
 import API from "./axios";
 import { getApplications } from "./application.api";
 
+function idString(value: unknown): string {
+  if (value == null || value === "") return "";
+  if (typeof value === "object" && value !== null && "_id" in (value as Record<string, unknown>)) {
+    return String((value as { _id?: unknown })._id ?? "").trim();
+  }
+  return String(value).trim();
+}
+
 // ==================== BLOG OPERATIONS ====================
 
 export const getBlogs = async (status?: string, catalogType?: string) => {
@@ -42,9 +50,10 @@ export const createBlog = async (blog: any) => {
   formData.append("title", blog.title);
   formData.append("subTag", blog.subTag || "");
   formData.append("description", blog.description);
-  formData.append("category", blog.category);
-  if (blog.niche) formData.append("niche", blog.niche);
-  formData.append("author", blog.author);
+  formData.append("category", idString(blog.category));
+  const nicheId = idString(blog.niche);
+  if (nicheId) formData.append("niche", nicheId);
+  formData.append("author", idString(blog.author));
   formData.append("status", blog.status || "draft");
   
   if (blog.tags && Array.isArray(blog.tags)) {
@@ -71,9 +80,10 @@ export const updateBlog = async (id: string, blog: any) => {
   formData.append("title", blog.title);
   formData.append("subTag", blog.subTag || "");
   formData.append("description", blog.description);
-  formData.append("category", blog.category);
-  if (blog.niche) formData.append("niche", blog.niche);
-  formData.append("author", blog.author);
+  formData.append("category", idString(blog.category));
+  const nicheUp = idString(blog.niche);
+  if (nicheUp) formData.append("niche", nicheUp);
+  formData.append("author", idString(blog.author));
   formData.append("status", blog.status || "draft");
   
   if (blog.tags && Array.isArray(blog.tags)) {

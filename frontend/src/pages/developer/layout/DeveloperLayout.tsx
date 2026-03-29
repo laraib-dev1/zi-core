@@ -21,11 +21,47 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import PageLoader from "@/components/ui/PageLoader";
+import { getCompany } from "@/api/company.api";
+import { getCachedData, CACHE_KEYS } from "@/utils/cache";
+
+function companyAssetUrl(path: string): string {
+  const p = (path || "").trim();
+  if (!p) return "";
+  if (p.startsWith("http")) return p;
+  const apiUrl = typeof import.meta.env.VITE_API_URL === "string" ? import.meta.env.VITE_API_URL : "";
+  return `${apiUrl.replace(/\/$/, "")}${p.startsWith("/") ? "" : "/"}${p}`;
+}
 
 export default function DeveloperLayout() {
   const loc = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Tab icon: company favicon, else logo from Company page (same as public site branding)
+  useEffect(() => {
+    const apply = (c: { favicon?: string; logo?: string } | null | undefined) => {
+      let link = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "icon";
+        document.head.appendChild(link);
+      }
+      const fav = c?.favicon?.trim();
+      const logo = c?.logo?.trim();
+      if (fav) {
+        link.href = companyAssetUrl(fav);
+      } else if (logo) {
+        link.href = companyAssetUrl(logo);
+      } else {
+        link.href = "/logo-removebg-preview.png";
+      }
+    };
+    const cached = getCachedData<{ favicon?: string; logo?: string }>(CACHE_KEYS.COMPANY);
+    if (cached) apply(cached);
+    getCompany()
+      .then((c) => apply(c))
+      .catch(() => {});
+  }, []);
 
   // Check developer authentication
   useEffect(() => {

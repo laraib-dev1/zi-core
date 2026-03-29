@@ -94,10 +94,10 @@ export default function TeamCard({
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-[#7D7D7D] bg-[#7D7D7D] text-white flex items-center justify-center hover:opacity-90 transition-colors"
+                className="group w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-[#7D7D7D] bg-[#7D7D7D] text-white flex items-center justify-center hover:opacity-90 transition-colors"
                 aria-label={key}
               >
-                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
               </a>
             );
           })}

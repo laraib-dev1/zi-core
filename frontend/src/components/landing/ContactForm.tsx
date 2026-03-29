@@ -26,14 +26,14 @@ export default function ContactForm({ onSubmit, submitting = false, className }:
           placeholder="Your Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-4 py-6 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)]/30 focus:border-[var(--theme-primary)]"
+          className="w-full px-4 py-6 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-500 shadow-none focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)]/30 focus:border-[var(--theme-primary)]"
         />
         <input
           type="email"
           placeholder="Your Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-6 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)]/30 focus:border-[var(--theme-primary)]"
+          className="w-full px-4 py-6 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-500 shadow-none focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)]/30 focus:border-[var(--theme-primary)]"
         />
       </div>
       <input
@@ -41,14 +41,14 @@ export default function ContactForm({ onSubmit, submitting = false, className }:
         placeholder="Subject"
         value={subject}
         onChange={(e) => setSubject(e.target.value)}
-        className="w-full px-4 py-6 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)]/30 focus:border-[var(--theme-primary)]"
+        className="w-full px-4 py-6 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-500 shadow-none focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)]/30 focus:border-[var(--theme-primary)]"
       />
       <textarea
         placeholder="Message"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         rows={5}
-        className="w-full px-4 py-6 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)]/30 focus:border-[var(--theme-primary)] resize-y"
+        className="w-full px-4 py-6 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-500 shadow-none focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)]/30 focus:border-[var(--theme-primary)] resize-y"
       />
       <div className="flex justify-end">
         <button

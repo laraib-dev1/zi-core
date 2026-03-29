@@ -15,7 +15,7 @@ export default function ContactCard({ icon: Icon, title, detail, href, className
   return (
     <div
       className={cn(
-        "flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-white border border-gray-200 shadow-sm",
+        "flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-white border border-gray-200",
         className
       )}
     >

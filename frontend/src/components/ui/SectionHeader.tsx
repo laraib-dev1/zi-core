@@ -96,7 +96,7 @@ export default function SectionHeader({
         {showHeading && (
           <h2
             className={cn(
-              "text-xl sm:text-2xl md:text-3xl font-bold",
+              "text-xl sm:text-2xl md:text-3xl font-semibold font-['Poppins',sans-serif]",
               headingColor
             )}
           >

@@ -94,6 +94,7 @@ type HeroCompany = {
   companyName: string;
   slogan?: string;
   description?: string;
+  socialLinks?: Record<string, string>;
 };
 
 type FaqPageSlice = { title: string; subTitle: string; items: FAQ[]; loaded: boolean };
@@ -116,7 +117,7 @@ function createSectionRenderers(
           showImage={true}
           rightImageSrc={img("hero-right") || "/hero.png"}
           rightImageAlt="Hero"
-          introduction="I'm"
+          introduction=""
           title={company.companyName}
           titleClassName="theme-text-primary"
           subtitle={slogan || undefined}
@@ -138,6 +139,7 @@ function createSectionRenderers(
           title="We Take Surgery Beyond the Operating Room"
           tagline="User Role or Tag Line"
           images={[img("about-1") || "/hero.png", img("about-2") || "/hero.png", img("about-3") || "/hero.png", img("about-4") || "/hero.png"]}
+          companySocialLinks={company.socialLinks}
         />
       </div>
     ),
@@ -423,6 +425,8 @@ export default function SecondLanding() {
     phone?: string;
     slogan?: string;
     description?: string;
+    copyright?: string;
+    socialLinks?: Record<string, string>;
   }>(() => {
     const cachedCompany = getCachedData<any>(CACHE_KEYS.COMPANY);
     return {
@@ -432,6 +436,8 @@ export default function SecondLanding() {
       phone: cachedCompany?.phone || "",
       slogan: cachedCompany?.slogan || "",
       description: cachedCompany?.description || "",
+      copyright: cachedCompany?.copyright || "",
+      socialLinks: cachedCompany?.socialLinks || {},
     };
   });
   const [faqPage, setFaqPage] = useState<FaqPageSlice>({
@@ -493,6 +499,8 @@ export default function SecondLanding() {
             phone: cachedCompany.phone || "",
             slogan: cachedCompany.slogan || "",
             description: cachedCompany.description || "",
+            copyright: cachedCompany.copyright || "",
+            socialLinks: cachedCompany.socialLinks || {},
           };
           setCompanyData(normalized);
           applyCompanyBranding(normalized);
@@ -506,6 +514,8 @@ export default function SecondLanding() {
           phone: latestCompany?.phone || "",
           slogan: latestCompany?.slogan || "",
           description: latestCompany?.description || "",
+          copyright: latestCompany?.copyright || "",
+          socialLinks: latestCompany?.socialLinks || {},
         };
         setCompanyData(normalized);
         setCachedData(CACHE_KEYS.COMPANY, latestCompany);
@@ -551,11 +561,12 @@ export default function SecondLanding() {
           companyName: companyData.company || DEFAULT_COMPANY_NAME,
           slogan: companyData.slogan,
           description: companyData.description,
+          socialLinks: companyData.socialLinks,
         },
         faqPage,
         buildWhatsAppUrl(companyData.phone, "Hi! I'd like to work together.")
       ),
-    [banner2Map, companyData.company, companyData.slogan, companyData.description, companyData.phone, faqPage]
+    [banner2Map, companyData.company, companyData.slogan, companyData.description, companyData.socialLinks, companyData.phone, faqPage]
   );
 
   const otherPagesItems: { id: string; label: string }[] =
@@ -590,6 +601,7 @@ export default function SecondLanding() {
         otherPagesItems={otherPagesItems}
         companyName={companyData.company || DEFAULT_COMPANY_NAME}
         hireMeHref={buildWhatsAppUrl(companyData.phone, "Hi, I want to hire you.")}
+        companySocialLinks={companyData.socialLinks}
       />
 
       {/* Section gap from spacing.ts = outer padding (wrapper), not on section div */}

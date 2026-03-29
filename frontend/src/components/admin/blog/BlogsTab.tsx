@@ -16,10 +16,11 @@ import DeleteModal from "@/components/admin/product/DeleteModal";
 interface Blog {
   id?: string;
   _id?: string;
+  /** Application / catalog thumbnail */
+  image?: string;
   title: string;
   subTag?: string;
   description?: string;
-  image?: string;
   category: string | { _id: string; name: string };
   categoryName?: string;
   niche?: string | { _id: string; name: string };
@@ -109,15 +110,20 @@ export default function BlogsTab({ catalogType = "blog", typeLabel = "Blog" }: B
       setFiltered(blogs);
       return;
     }
-    const filteredBlogs = blogs.filter(
-      (blog) =>
-        blog.title.toLowerCase().includes(search.toLowerCase()) ||
-        blog.categoryName?.toLowerCase().includes(search.toLowerCase()) ||
-        blog.nicheName?.toLowerCase().includes(search.toLowerCase()) ||
-        blog.authorName?.toLowerCase().includes(search.toLowerCase())
-    );
+    const q = search.toLowerCase();
+    const filteredBlogs = blogs.filter((blog) => {
+      if (catalogType === "applications") {
+        return blog.title.toLowerCase().includes(q);
+      }
+      return (
+        blog.title.toLowerCase().includes(q) ||
+        blog.categoryName?.toLowerCase().includes(q) ||
+        blog.nicheName?.toLowerCase().includes(q) ||
+        blog.authorName?.toLowerCase().includes(q)
+      );
+    });
     setFiltered(filteredBlogs);
-  }, [search, blogs]);
+  }, [search, blogs, catalogType]);
 
   const openAdd = () => {
     setSelected(null);
@@ -163,7 +169,84 @@ export default function BlogsTab({ catalogType = "blog", typeLabel = "Blog" }: B
     }
   };
 
+  const apiBase = (typeof import.meta.env.VITE_API_URL === "string" ? import.meta.env.VITE_API_URL : "").replace(
+    /\/$/,
+    ""
+  );
+
+  const resolveImageSrc = (raw: string | undefined) => {
+    const s = (raw || "").trim();
+    if (!s) return "";
+    if (s.startsWith("http")) return s;
+    return `${apiBase}${s.startsWith("/") ? "" : "/"}${s}`;
+  };
+
   const getColumns = () => {
+    if (catalogType === "applications") {
+      return [
+        {
+          name: "Icon",
+          width: "72px",
+          cell: (row: Blog) => {
+            const src = resolveImageSrc(row.image);
+            if (!src) {
+              return <div className="w-10 h-10 rounded-md bg-gray-100 shrink-0 border border-gray-200" aria-hidden />;
+            }
+            return (
+              <img
+                src={src}
+                alt=""
+                className="w-10 h-10 rounded-md object-cover border border-gray-200"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
+            );
+          },
+        },
+        {
+          name: "ID",
+          width: "64px",
+          cell: (_row: Blog, rowIndex?: number) => <span className="tabular-nums">{(rowIndex ?? 0) + 1}</span>,
+        },
+        {
+          name: "Title",
+          selector: (row: Blog) => row.title,
+          sortable: true,
+          wrap: true,
+        },
+        {
+          name: "Views",
+          selector: (row: Blog) => row.views || 0,
+          sortable: true,
+          width: "80px",
+        },
+        {
+          name: "Comments",
+          selector: (row: Blog) => row.comments || 0,
+          sortable: true,
+          width: "100px",
+        },
+        {
+          name: "Status",
+          cell: (row: Blog) => (
+            <span
+              className={`px-2 py-1 rounded text-xs font-medium ${
+                row.status === "published"
+                  ? "bg-green-100 text-green-800"
+                  : row.status === "unpublished"
+                  ? "bg-yellow-100 text-yellow-800"
+                  : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              {row.status}
+            </span>
+          ),
+          sortable: true,
+        },
+      ];
+    }
+
     return [
       {
         name: "ID",
@@ -230,11 +313,17 @@ export default function BlogsTab({ catalogType = "blog", typeLabel = "Blog" }: B
     { id: "unpublished", label: "Unpublished" },
   ];
 
+  const isApplicationsPage = catalogType === "applications";
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold theme-heading">{typeLabel}</h2>
-        <Button className="theme-button text-white" onClick={openAdd}>
+      <div className="flex items-center justify-between gap-4 mb-6">
+        {isApplicationsPage ? (
+          <h1 className="text-3xl font-bold theme-heading">{typeLabel}</h1>
+        ) : (
+          <h2 className="text-2xl font-semibold theme-heading">{typeLabel}</h2>
+        )}
+        <Button className="theme-button text-white shrink-0" onClick={openAdd}>
           + Add {typeLabel}
         </Button>
       </div>
@@ -285,7 +374,7 @@ export default function BlogsTab({ catalogType = "blog", typeLabel = "Blog" }: B
             onView={openView}
             onEdit={openEdit}
             onDelete={handleDeleteClick}
-            pagination
+            pagination={catalogType !== "applications"}
           />
         </div>
       ) : (

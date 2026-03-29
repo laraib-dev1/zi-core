@@ -72,6 +72,13 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 0;
   font-family: "Poppins", sans-serif;
 }
+
+/* Second landing + catalog detail: hero / page titles use semibold (600), not heavy bold */
+.second-landing-page h1.font-serif,
+.second-landing-page h1.theme-heading,
+.landing-detail-page h1.theme-heading {
+  font-weight: 600;
+}
 /* Fix Mantine RTE toolbar jumping */
 .mantine-RichTextEditor-root {
   width: 100% !important;
