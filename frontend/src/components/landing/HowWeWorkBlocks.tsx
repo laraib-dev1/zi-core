@@ -40,13 +40,13 @@ export default function HowWeWorkBlocks({
           />
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-y-4 gap-x-2 sm:gap-x-3 md:gap-x-4">
           {items.map((item, i) => {
             const Icon = item.icon;
             return (
               <div
                 key={i}
-                className="flex flex-col items-center text-center p-4 sm:p-5 rounded-lg transition-shadow hover:shadow-md"
+                className="flex flex-col items-center text-center p-3 sm:p-4 rounded-lg transition-shadow hover:shadow-md"
               >
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center mb-3 shrink-0"

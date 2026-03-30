@@ -49,7 +49,7 @@ export default function ServicesCard({
       </div>
 
       {/* Title */}
-      <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-2 line-clamp-2">
+      <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-2 line-clamp-2">
         {title}
       </h3>
 

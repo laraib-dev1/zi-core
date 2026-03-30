@@ -100,7 +100,7 @@ export default function ScaleOperationsBanner({
             <Zap className="w-4 h-4 shrink-0" />
             {tag}
           </div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight">
+          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white leading-tight">
             {heading}
           </h2>
           <p className="mt-3 sm:mt-4 text-sm sm:text-base text-gray-300 leading-relaxed max-w-xl">

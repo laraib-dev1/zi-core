@@ -52,7 +52,7 @@ export default function PortfolioCard({
           </div>
           <div className="px-1 py-1 sm:p-2">
             {title && (
-              <h3 className="font-bold text-gray-900 text-sm sm:text-base mb-2 line-clamp-2">
+              <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-2 line-clamp-2">
                 {title}
               </h3>
             )}

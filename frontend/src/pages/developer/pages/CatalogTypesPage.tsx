@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FolderTree, Plus, X } from "lucide-react";
+import { FolderTree, Plus, X, Pencil } from "lucide-react";
 import {
   getCatalogTypes,
   createCatalogType,
@@ -34,6 +34,8 @@ export default function CatalogTypesPage() {
   const [deleteLoading, setDeleteLoading] = useState<Record<string, boolean>>({});
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [newType, setNewType] = useState({ slug: "", label: "", showInAdmin: true });
+  const [editTypeId, setEditTypeId] = useState<string | null>(null);
+  const [editType, setEditType] = useState({ slug: "", label: "", showInAdmin: true });
   const [errors, setErrors] = useState<{ slug?: string; label?: string }>({});
 
   useEffect(() => {
@@ -118,6 +120,46 @@ export default function CatalogTypesPage() {
     }
   };
 
+  const openEdit = (type: CatalogTypeItem) => {
+    setEditTypeId(type._id);
+    setEditType({
+      slug: type.slug,
+      label: type.label,
+      showInAdmin: type.showInAdmin,
+    });
+    setErrors({});
+  };
+
+  const handleEditSave = async () => {
+    if (!editTypeId) return;
+    const err: { slug?: string; label?: string } = {};
+    const slug = (editType.slug || "").trim().toLowerCase().replace(/\s+/g, "-");
+    if (!slug) err.slug = "Slug is required";
+    if (!(editType.label || "").trim()) err.label = "Label is required";
+    setErrors(err);
+    if (Object.keys(err).length > 0) {
+      error("Please fill required fields.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await updateCatalogType(editTypeId, {
+        slug,
+        label: editType.label.trim(),
+        showInAdmin: editType.showInAdmin,
+      });
+      invalidateCatalogCache();
+      await loadTypes();
+      setEditTypeId(null);
+      success("Catalog type updated.");
+    } catch (err: any) {
+      error(err.response?.data?.message || "Failed to update catalog type");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (loading) {
     return <PageLoader />;
   }
@@ -163,6 +205,13 @@ export default function CatalogTypesPage() {
                   <p className="text-sm text-gray-500">Slug: {t.slug} · Path: /admin/catalog/{t.slug}</p>
                 </div>
                 <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => openEdit(t)}
+                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="Edit type"
+                  >
+                    <Pencil size={16} />
+                  </button>
                   <span className="text-xs text-gray-500">Show in Admin</span>
                   <button
                     onClick={() => toggleShow(t._id, t.showInAdmin)}
@@ -262,6 +311,75 @@ export default function CatalogTypesPage() {
                 >
                   {isLoading && <CircularLoader size={16} color="white" />}
                   Add Type
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editTypeId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Edit Catalog Type</h3>
+              <button onClick={() => setEditTypeId(null)} className="text-gray-400 hover:text-gray-600">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Label *</label>
+                <input
+                  type="text"
+                  value={editType.label}
+                  onChange={(e) => {
+                    setEditType((prev) => ({ ...prev, label: e.target.value }));
+                    if (errors.label) setErrors((prev) => ({ ...prev, label: undefined }));
+                  }}
+                  className={`w-full px-4 py-2.5 border rounded-lg outline-none ${errors.label ? "border-red-500" : "border-gray-300"}`}
+                  placeholder="e.g. Projects"
+                />
+                {errors.label && <p className="text-red-500 text-xs mt-1">{errors.label}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Slug * (URL-friendly)</label>
+                <input
+                  type="text"
+                  value={editType.slug}
+                  onChange={(e) => {
+                    setEditType((prev) => ({ ...prev, slug: e.target.value.toLowerCase().replace(/\s+/g, "-") }));
+                    if (errors.slug) setErrors((prev) => ({ ...prev, slug: undefined }));
+                  }}
+                  className={`w-full px-4 py-2.5 border rounded-lg outline-none ${errors.slug ? "border-red-500" : "border-gray-300"}`}
+                  placeholder="e.g. projects"
+                />
+                {errors.slug && <p className="text-red-500 text-xs mt-1">{errors.slug}</p>}
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={editType.showInAdmin}
+                  onChange={(e) => setEditType((prev) => ({ ...prev, showInAdmin: e.target.checked }))}
+                  className="w-4 h-4 border-gray-300 rounded"
+                  style={{ accentColor: "var(--theme-primary)" }}
+                />
+                <label className="text-sm text-gray-700">Show in Admin Catalog dropdown</label>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <button
+                  onClick={() => setEditTypeId(null)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleEditSave}
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-2 text-white rounded-lg theme-button disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isLoading && <CircularLoader size={16} color="white" />}
+                  Save Changes
                 </button>
               </div>
             </div>

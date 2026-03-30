@@ -83,7 +83,7 @@ export default function CoursesCard({
         {/* <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-2 line-clamp-1 sm:line-clamp-2">
           {title}
         </h3> */}
-        <h3 className="font-bold text-sm sm:text-base mb-1 line-clamp-1 sm:line-clamp-2">
+        <h3 className="font-semibold text-sm sm:text-base mb-1 line-clamp-1 sm:line-clamp-2">
   {title}
 </h3>
 

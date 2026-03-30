@@ -69,7 +69,7 @@ export default function FeatureServiceCard({
 
       {/* Text + CTA */}
       <div className="flex-1 min-w-0 pt-0.5">
-        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
           {title}
         </h3>
         {description && (

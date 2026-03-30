@@ -191,7 +191,7 @@ export default function HeroBannerFull({
                 </p>
               )}
               {description && (
-                <p className={cn("text-sm sm:text-base max-w-xl", subTextColor)}>
+                <p className={cn("text-sm sm:text-base max-w-xl", subTextColor, subtitle ? "mt-2 sm:mt-3" : "")}>
                   {description}
                 </p>
               )}

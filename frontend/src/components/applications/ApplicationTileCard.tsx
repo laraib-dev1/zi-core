@@ -70,9 +70,7 @@ export default function ApplicationTileCard({
           {item.version ? ` | ${item.version}` : ""}
         </p>
         {!compact && (
-          <p className="mt-1 text-xs text-gray-500 truncate">
-            {item.description || "Application summary is managed from the admin panel."}
-          </p>
+          <hr className="mt-2 mb-2 border-gray-300" />
         )}
         {!compact && (
           <p className="mt-1 text-xs text-gray-500">

@@ -62,7 +62,7 @@ export default function LimitedOfferBanner({
       <div className="w-full max-w-[1232px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div
           className={cn(
-            "w-full rounded-2xl text-white pt-6 pb-6 sm:pt-8 sm:pb-8 md:pt-10 md:pb-10 px-4 sm:px-6 md:px-10 relative overflow-hidden",
+            "w-full rounded-2xl text-white p-4 sm:p-6 md:p-8 relative overflow-hidden",
             "flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-6 md:gap-8"
           )}
           style={{ backgroundColor: "var(--theme-primary, #8B5E3C)" }}
@@ -76,7 +76,7 @@ export default function LimitedOfferBanner({
 
           {/* Left: heading + description */}
           <div className="relative z-10 flex-1 min-w-0">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3 text-white">{title}</h2>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-3 text-white">{title}</h2>
             <p className="text-sm sm:text-base text-white/90 max-w-xl">{description}</p>
           </div>
 

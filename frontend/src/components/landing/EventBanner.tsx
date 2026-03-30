@@ -52,7 +52,7 @@ export default function EventBanner({
           {/* Event details - top/bottom padding */}
           <div className="col-span-12 sm:col-span-6 md:col-span-8 min-w-0 pt-2 pb-2 sm:pt-4 sm:pb-4">
             <h2
-              className="text-xl sm:text-2xl font-bold mb-1"
+              className="text-lg sm:text-xl md:text-2xl font-semibold mb-1"
               style={{ color: "var(--theme-primary, #8B5E3C)" }}
             >
               {title}

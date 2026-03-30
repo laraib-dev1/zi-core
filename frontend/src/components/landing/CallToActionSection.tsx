@@ -52,7 +52,7 @@ export default function CallToActionSection({
           <div className="absolute inset-0 bg-black/50 rounded-xl" aria-hidden />
 
           {/* Content – minimal top/bottom padding with clearer spacing */}
-          <div className="relative z-10 flex flex-col items-center text-center w-full py-5 md:py-6 px-4 sm:px-6">
+          <div className="relative z-10 flex flex-col items-center text-center w-full p-4 sm:p-5 md:p-6">
             {/* Play button intentionally commented out for now */}
             {/*
             <div className="pt-2" />
@@ -65,7 +65,7 @@ export default function CallToActionSection({
               <Play className="w-7 h-7 md:w-8 md:h-8 text-white fill-white ml-0.5" />
             </Link>
             */}
-            <h2 className="mt-2 sm:mt-2 md:mt-3 text-xl sm:text-2xl md:text-3xl font-bold text-white">
+            <h2 className="mt-2 sm:mt-2 md:mt-3 text-lg sm:text-xl md:text-2xl font-semibold text-white">
               {heading}
             </h2>
             <p className="mt-2 text-sm text-white/90 max-w-2xl mx-auto">

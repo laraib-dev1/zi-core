@@ -29,10 +29,10 @@ export default function HelpBanner({
       <section className={cn("w-full theme-bg-accent", className)}>
         <div className="w-full max-w-[1232px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div
-            className="w-full rounded-2xl text-center pt-6 pb-6 sm:pt-10 sm:pb-10 md:pt-12 md:pb-12 px-4 sm:px-6 md:px-8 lg:px-12 theme-bg-accent"
+            className="w-full rounded-2xl text-center p-4 sm:p-6 md:p-8 lg:p-10 theme-bg-accent"
           >
             <h2
-              className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 max-w-2xl mx-auto"
+              className="text-lg sm:text-xl md:text-2xl font-semibold mb-3 max-w-2xl mx-auto"
               style={{ color: "var(--theme-primary, #8B5E3C)" }}
             >
               {title}
@@ -58,14 +58,14 @@ export default function HelpBanner({
       <div className="w-full max-w-[1232px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div
           className={cn(
-            "w-full rounded-xl text-center text-white pt-10 pb-10 md:pt-14 md:pb-14 px-4 sm:px-6 relative overflow-hidden"
+            "w-full rounded-xl text-center text-white p-5 sm:p-6 md:p-8 relative overflow-hidden"
           )}
           style={{
             backgroundColor: "var(--theme-primary, #8B5E3C)",
             backgroundImage: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%, rgba(0,0,0,0.06) 100%)",
           }}
         >
-          <h2 className="text-2xl sm:text-3xl font-bold mb-2">{title}</h2>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2">{title}</h2>
           <p className="text-sm sm:text-base text-white/95 max-w-3xl mx-auto">{description}</p>
         </div>
       </div>

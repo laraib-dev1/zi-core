@@ -36,8 +36,8 @@ export default function UnlockPotentialSection({
     <section className={cn("w-full", className)}>
       <Container12 grid gap="gap-6">
         {/* Card wrapper: 12 cols, inner 12-col grid */}
-        <div className="col-span-12 rounded-2xl overflow-hidden bg-gray-50 px-4 py-8 sm:px-6 sm:py-10 md:px-8 md:py-12 lg:px-10 lg:py-14 grid grid-cols-12 gap-4 sm:gap-6">
-          <h2 className="col-span-12 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 max-w-2xl mx-auto text-center">
+        <div className="col-span-12 rounded-2xl overflow-hidden bg-gray-50 p-5 sm:p-6 md:p-8 lg:p-10 grid grid-cols-12 gap-4 sm:gap-6">
+          <h2 className="col-span-12 text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900 max-w-2xl mx-auto text-center">
             {heading}
           </h2>
           <p className="col-span-12 text-sm sm:text-base text-gray-600 max-w-xl mx-auto text-center">

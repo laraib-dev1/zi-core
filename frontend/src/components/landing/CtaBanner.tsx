@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { spacing } from "@/utils/spacing";
 import { cn } from "@/lib/utils";
 
 export interface CtaBannerProps {
@@ -37,14 +36,12 @@ export default function CtaBanner({
         {/* BG bar: full width of outer's content area; inner gap top and bottom */}
         <div
           className={cn(
-            "w-full py-0 grid grid-cols-12 gap-6 items-center rounded-xl",
-            isDark ? "bg-black text-white" : "bg-gray-200 text-gray-900",
-            contentPadding,
-            spacing.inner.gap
+            "w-full grid grid-cols-12 gap-6 items-center rounded-xl p-4 sm:p-5 md:p-6",
+            isDark ? "bg-black text-white" : "bg-gray-200 text-gray-900"
           )}
         >
           <div className="col-span-12 md:col-span-9">
-            <h2 className={cn("text-xl sm:text-2xl md:text-3xl font-semibold mb-2", isDark ? "text-white" : "text-gray-900")}>
+            <h2 className={cn("text-base sm:text-lg md:text-xl font-semibold mb-2", isDark ? "text-white" : "text-gray-900")}>
               {title}
             </h2>
             {description && (

@@ -10,7 +10,7 @@ import { getCompany } from "@/api/company.api";
 import { getMe } from "@/api/auth.api";
 import { getCachedData, setCachedData, CACHE_KEYS } from "@/utils/cache";
 import * as LucideIcons from "lucide-react";
-import { buildWhatsAppUrl } from "@/utils/companyBrand";
+import { buildWhatsAppUrl, resolveCompanyAssetUrl } from "@/utils/companyBrand";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -36,7 +36,7 @@ export default function Navbar() {
         if (cachedCompany) {
           // Use cached data
           setCompany({ 
-            logo: cachedCompany.logo || "/logo-removebg-preview.png", 
+            logo: resolveCompanyAssetUrl(cachedCompany.logo) || "/logo-removebg-preview.png",
             company: cachedCompany.company || "Grace by Anu",
             phone: cachedCompany.phone || ""
           });
@@ -44,7 +44,7 @@ export default function Navbar() {
           // Fetch from API
           const data = await getCompany();
           setCompany({ 
-            logo: data.logo || "/logo-removebg-preview.png", 
+            logo: resolveCompanyAssetUrl(data.logo) || "/logo-removebg-preview.png",
             company: data.company || "Grace by Anu",
             phone: data.phone || ""
           });
@@ -57,7 +57,7 @@ export default function Navbar() {
         const cachedCompany = getCachedData<any>(CACHE_KEYS.COMPANY);
         if (cachedCompany) {
           setCompany({ 
-            logo: cachedCompany.logo || "/logo-removebg-preview.png", 
+            logo: resolveCompanyAssetUrl(cachedCompany.logo) || "/logo-removebg-preview.png",
             company: cachedCompany.company || "Grace by Anu",
             phone: cachedCompany.phone || ""
           });
@@ -128,7 +128,7 @@ export default function Navbar() {
         >
           {company.logo && (
             <img
-              src={company.logo.startsWith("http") ? company.logo : (company.logo ? `${import.meta.env.VITE_API_URL?.replace(/\/$/, "")}${company.logo.startsWith("/") ? "" : "/"}${company.logo}` : "/logo-removebg-preview.png")}
+              src={company.logo}
               alt="Logo"
               className="w-10 h-10 sm:w-16 sm:h-16 object-contain"
               onError={(e) => {

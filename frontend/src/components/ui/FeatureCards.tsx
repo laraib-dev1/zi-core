@@ -1,26 +1,26 @@
 import React from "react";
-import { Flag, RotateCcw, Headphones, Truck } from "lucide-react";
+import { Flag, Box, Headphones, Truck } from "lucide-react";
 
 const features = [
   {
     icon: Flag,
-    title: "Locally Owned",
-    description: "Local business, best quality clothes",
+    title: "Well Arranged",
+    description: "Have Arrange team with UX.",
   },
   {
-    icon: RotateCcw,
-    title: "Easy Return",
-    description: "Easy return policy",
+    icon: Box,
+    title: "Serve Best",
+    description: "Serve with own applications.",
   },
   {
     icon: Headphones,
     title: "Online Support",
-    description: "24/7 online support",
+    description: "Give support on your availability",
   },
   {
     icon: Truck,
-    title: "Fast Delivery",
-    description: "Fast delivery for customers",
+    title: "System Driven",
+    description: "Follow system driven approach",
   },
 ];
 
@@ -32,17 +32,17 @@ const FeatureCards = () => {
         return (
           <div
             key={index}
-            className="bg-gray-50 p-4 md:p-6 rounded-lg border border-gray-200 text-center hover:shadow-md transition-shadow"
+            className="bg-[#f5f6f8] p-4 md:p-5 rounded-md border border-gray-200 text-center hover:shadow-sm transition-shadow"
           >
             <div className="flex justify-center mb-3">
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-lg bg-white border-2 flex items-center justify-center theme-heading" style={{ borderColor: "var(--theme-primary, #8B5E3C)" }}>
-                <Icon className="w-6 h-6 md:w-7 md:h-7 theme-heading" style={{ color: "var(--theme-primary, #8B5E3C)" }} />
+              <div className="w-11 h-11 md:w-12 md:h-12 rounded-md bg-white border border-gray-300 flex items-center justify-center">
+                <Icon className="w-5 h-5 md:w-6 md:h-6 text-gray-500" />
               </div>
             </div>
-            <h3 className="font-semibold text-gray-900 text-sm md:text-base mb-2">
+            <h3 className="font-semibold text-gray-800 text-sm md:text-base mb-1">
               {feature.title}
             </h3>
-            <p className="text-xs md:text-sm text-gray-600">
+            <p className="text-xs md:text-sm text-gray-500">
               {feature.description}
             </p>
           </div>

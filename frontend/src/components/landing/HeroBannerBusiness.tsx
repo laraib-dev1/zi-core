@@ -54,7 +54,7 @@ export default function HeroBannerBusiness({
       <Container12 grid gap="gap-8 lg:gap-10">
         {/* Left column: heading, text, CTAs, stats – 6 cols on lg */}
         <div className="col-span-12 lg:col-span-6 flex flex-col justify-center">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-900 leading-tight">
             {heading}
           </h1>
           <p className="mt-4 text-base text-gray-600 leading-relaxed max-w-lg">
