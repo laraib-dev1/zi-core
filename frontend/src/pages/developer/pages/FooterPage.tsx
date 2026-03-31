@@ -525,7 +525,13 @@ export default function FooterPage() {
                 onChange={(e) => setFooter({ ...footer, showCategories: e.target.checked })}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-var(--theme-primary) rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-2px after:left-2px after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-var(--theme-primary)"></div>
+              <div
+                className="w-11 h-6 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-2px after:left-2px after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
+                style={{
+                  backgroundColor: footer.showCategories ? "var(--theme-primary)" : "#E5E7EB",
+                  boxShadow: footer.showCategories ? "0 0 0 2px color-mix(in srgb, var(--theme-primary) 30%, transparent)" : "none",
+                }}
+              />
             </label>
           </div>
 
@@ -547,7 +553,13 @@ export default function FooterPage() {
                 onChange={(e) => setFooter({ ...footer, showProducts: e.target.checked })}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-var(--theme-primary) rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-2px after:left-2px after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-var(--theme-primary)"></div>
+              <div
+                className="w-11 h-6 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-2px after:left-2px after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
+                style={{
+                  backgroundColor: footer.showProducts ? "var(--theme-primary)" : "#E5E7EB",
+                  boxShadow: footer.showProducts ? "0 0 0 2px color-mix(in srgb, var(--theme-primary) 30%, transparent)" : "none",
+                }}
+              />
             </label>
           </div>
         </div>
@@ -578,7 +590,13 @@ export default function FooterPage() {
                 onChange={(e) => setFooter({ ...footer, showSocialIcons: e.target.checked })}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-var(--theme-primary) rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-2px after:left-2px after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-var(--theme-primary)"></div>
+              <div
+                className="w-11 h-6 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-2px after:left-2px after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
+                style={{
+                  backgroundColor: footer.showSocialIcons ? "var(--theme-primary)" : "#E5E7EB",
+                  boxShadow: footer.showSocialIcons ? "0 0 0 2px color-mix(in srgb, var(--theme-primary) 30%, transparent)" : "none",
+                }}
+              />
             </label>
           </div>
 
@@ -600,7 +618,13 @@ export default function FooterPage() {
                 onChange={(e) => setFooter({ ...footer, showSocialLinks: e.target.checked })}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-var(--theme-primary) rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-2px after:left-2px after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-var(--theme-primary)"></div>
+              <div
+                className="w-11 h-6 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-2px after:left-2px after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
+                style={{
+                  backgroundColor: footer.showSocialLinks ? "var(--theme-primary)" : "#E5E7EB",
+                  boxShadow: footer.showSocialLinks ? "0 0 0 2px color-mix(in srgb, var(--theme-primary) 30%, transparent)" : "none",
+                }}
+              />
             </label>
           </div>
         </div>

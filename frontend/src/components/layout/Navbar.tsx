@@ -114,7 +114,7 @@ export default function Navbar() {
   return `${base} ${color}`;
 };
 
-  const hireMeHref = buildWhatsAppUrl(company.phone, "Hi, I want to hire you.");
+  const hireMeHref = buildWhatsAppUrl(company.phone, "Hello, I visited the ZI_Core site. I would like to ask you");
 
   return (
     <header className="bg-white  text-black  shadow-sm fixed top-0 w-full z-50">

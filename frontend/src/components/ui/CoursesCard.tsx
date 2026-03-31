@@ -75,10 +75,6 @@ export default function CoursesCard({
             {price}
           </span>
         </div>
-        {(views ?? 0) > 0 && (
-          <p className="text-xs text-gray-500 mb-2">{views} view{(views ?? 0) !== 1 ? "s" : ""}</p>
-        )}
-
         {/* Title */}
         {/* <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-2 line-clamp-1 sm:line-clamp-2">
           {title}

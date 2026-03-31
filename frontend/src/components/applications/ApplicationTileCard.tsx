@@ -42,20 +42,20 @@ export default function ApplicationTileCard({
   return (
     <div
       className={cn(
-        "relative grid grid-cols-1 md:grid-cols-[88px_minmax(0,1fr)_160px] gap-3 items-center rounded-xl border border-gray-200 bg-[#f5f6f8] p-3 md:p-4",
+        "relative grid grid-cols-1 md:grid-cols-[104px_minmax(0,1fr)_160px] gap-3 md:gap-4 items-center rounded-xl border border-gray-200 bg-[#f5f6f8] p-4 md:p-5",
         className
       )}
     >
       {item.isTopRated && (
         <div
-          className="absolute left-0 top-0 -translate-x-2 -translate-y-2 rotate-[-45deg] rounded px-2 py-0.5 text-[10px] font-semibold text-white"
+          className="absolute left-0 top-0 -translate-x-2 -translate-y-2 -rotate-45 rounded px-2 py-0.5 text-[10px] font-semibold text-white"
           style={{ backgroundColor: "var(--theme-primary)" }}
         >
           Top Rated
         </div>
       )}
 
-      <div className="h-16 w-16 md:h-[72px] md:w-[72px] rounded-md bg-gray-200 overflow-hidden flex items-center justify-center">
+      <div className="h-20 w-20 md:h-[104px] md:w-[104px] rounded-md bg-gray-200 overflow-hidden flex items-center justify-center">
         {item.image ? (
           <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
         ) : (

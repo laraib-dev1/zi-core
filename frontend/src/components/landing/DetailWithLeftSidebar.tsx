@@ -55,7 +55,7 @@ const defaultTopics: ExploreTopic[] = [
   { name: "Fashion", count: 4 },
 ];
 
-const NAV_TOP = 100;
+const NAV_TOP = 76;
 
 export default function DetailWithLeftSidebar({
   sectionTitle,
@@ -211,7 +211,7 @@ export default function DetailWithLeftSidebar({
                   </div>
                   {sidebarFixed.visible && (
                     <div
-                      className="p-4 sm:p-5 md:p-6 space-y-3 sm:space-y-4 z-20 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-lg border border-gray-200 bg-white"
+                      className="p-4 sm:p-5 md:p-6 space-y-3 sm:space-y-4 z-20 max-h-[calc(100vh-5rem)] overflow-y-auto"
                       style={{
                         position: "fixed",
                         top: sidebarFixed.top,

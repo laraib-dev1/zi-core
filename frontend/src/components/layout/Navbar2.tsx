@@ -225,8 +225,8 @@ export default function Navbar2({
       {/* Part 3: Social icons + hire me — on detail pages always visible (including mobile); on home, desktop only until burger opens */}
       <div
         className={cn(
-          "flex items-center gap-3 shrink-0",
-          isLandingHome ? "hidden md:flex" : "flex"
+          "flex items-center gap-2 shrink-0",
+          "hidden md:flex"
         )}
       >
         <a
@@ -249,8 +249,8 @@ export default function Navbar2({
         <div className={cn(v.bar, v.barBg, "shadow-sm")}>
           <NavContent />
 
-          {/* Burger + drawer: only on second landing home (section nav is not used on detail pages) */}
-          {isLandingHome && (
+          {/* Burger + drawer for mobile on home + detail pages */}
+          {(
                 <button
                   type="button"
                   className={cn("md:hidden flex items-center justify-center w-10 h-10 rounded-lg text-[var(--theme-primary)]")}
@@ -261,7 +261,7 @@ export default function Navbar2({
                 </button>
           )}
 
-          {isLandingHome && (menuOpen || isClosing) && (
+          {(menuOpen || isClosing) && (
             <>
               <div
                 role="presentation"
@@ -301,65 +301,70 @@ export default function Navbar2({
                 >
                   {companyName}
                 </a>
-                <nav className="flex flex-col gap-1.5 mt-6">
-                  {navLinks.map((item) =>
-                    item.hasDropdown ? (
-                      <div key={item.to} className="flex flex-col">
-                        <button
-                          type="button"
-                          className={cn(
-                            "py-2 text-sm flex items-center justify-between text-left",
-                            linkClass(item.hash)
-                          )}
-                          onClick={() => setMobileDropdownOpen((open) => !open)}
-                        >
-                          <span>{item.label}</span>
-                          <ChevronDown
+                {isLandingHome && (
+                  <nav className="flex flex-col gap-1.5 mt-6">
+                    {navLinks.map((item) =>
+                      item.hasDropdown ? (
+                        <div key={item.to} className="flex flex-col">
+                          <button
+                            type="button"
                             className={cn(
-                              "w-4 h-4 transition-transform",
-                              mobileDropdownOpen && "rotate-180"
+                              "py-2 text-sm flex items-center justify-between text-left",
+                              linkClass(item.hash)
                             )}
-                          />
-                        </button>
-                        {mobileDropdownOpen && otherPagesItems.length > 0 && (
-                          <div className="pl-3 pb-1 flex flex-col gap-1">
-                            {otherPagesItems.map((opt) => (
-                              <a
-                                key={opt.id}
-                                href={`#${opt.id}`}
-                                className="py-1.5 text-xs text-gray-700 border-l border-gray-200 pl-3"
-                                onClick={(e) => {
-                                  handleNavClick(e, opt.id);
-                                  handleCloseMenu();
-                                  setMobileDropdownOpen(false);
-                                }}
-                              >
-                                {opt.label}
-                              </a>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <a
-                        key={item.to}
-                        href={getHref(item.to)}
-                        className={cn("py-2 text-sm", linkClass(item.hash))}
-                        onClick={(e) => {
-                          handleNavClick(e, item.hash);
-                          handleCloseMenu();
-                        }}
-                      >
-                        {item.label}
-                      </a>
-                    )
-                  )}
-                </nav>
+                            onClick={() => setMobileDropdownOpen((open) => !open)}
+                          >
+                            <span>{item.label}</span>
+                            <ChevronDown
+                              className={cn(
+                                "w-4 h-4 transition-transform",
+                                mobileDropdownOpen && "rotate-180"
+                              )}
+                            />
+                          </button>
+                          {mobileDropdownOpen && otherPagesItems.length > 0 && (
+                            <div className="pl-3 pb-1 flex flex-col gap-1">
+                              {otherPagesItems.map((opt) => (
+                                <a
+                                  key={opt.id}
+                                  href={`#${opt.id}`}
+                                  className="py-1.5 text-xs text-gray-700 border-l border-gray-200 pl-3"
+                                  onClick={(e) => {
+                                    handleNavClick(e, opt.id);
+                                    handleCloseMenu();
+                                    setMobileDropdownOpen(false);
+                                  }}
+                                >
+                                  {opt.label}
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <a
+                          key={item.to}
+                          href={getHref(item.to)}
+                          className={cn("py-2 text-sm", linkClass(item.hash))}
+                          onClick={(e) => {
+                            handleNavClick(e, item.hash);
+                            handleCloseMenu();
+                          }}
+                        >
+                          {item.label}
+                        </a>
+                      )
+                    )}
+                  </nav>
+                )}
                 <a
                   href={hireMeHref}
                   target={hireMeHref !== "#" ? "_blank" : undefined}
                   rel={hireMeHref !== "#" ? "noopener noreferrer" : undefined}
-                  className="mt-3 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold text-white"
+                  className={cn(
+                    "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold text-white",
+                    isLandingHome ? "mt-3" : "mt-6"
+                  )}
                   style={{ backgroundColor: "var(--theme-primary)" }}
                 >
                   Hire Me

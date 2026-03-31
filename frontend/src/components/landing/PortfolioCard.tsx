@@ -67,9 +67,6 @@ export default function PortfolioCard({
                 {niche}
               </span>
               <div className="flex items-center gap-2 ml-auto">
-                {(views ?? 0) > 0 && (
-                  <span className="text-xs text-gray-500">{views} view{(views ?? 0) !== 1 ? "s" : ""}</span>
-                )}
                 <span className="text-xs text-gray-500">{date}</span>
               </div>
             </div>

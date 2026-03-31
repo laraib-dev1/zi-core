@@ -151,7 +151,7 @@ export default function ComingSoonSection({
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center w-10 h-10 rounded-full bg-[#7D7D7D] text-white hover:bg-white/90 hover:scale-105 transition-transform"
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-[#7D7D7D]/50 text-white hover:bg-[#7D7D7D]/65 hover:scale-105 transition-transform"
               aria-label={key}
             >
               <Icon className="w-5 h-5" />

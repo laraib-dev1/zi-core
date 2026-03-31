@@ -564,7 +564,7 @@ export default function SecondLanding() {
           socialLinks: companyData.socialLinks,
         },
         faqPage,
-        buildWhatsAppUrl(companyData.phone, "Hi! I'd like to work together.")
+        buildWhatsAppUrl(companyData.phone, "Hello, I visited the ZI_Core site. I would like to ask you")
       ),
     [banner2Map, companyData.company, companyData.slogan, companyData.description, companyData.socialLinks, companyData.phone, faqPage]
   );
@@ -600,7 +600,7 @@ export default function SecondLanding() {
         bottomDivHasColor={false}
         otherPagesItems={otherPagesItems}
         companyName={companyData.company || DEFAULT_COMPANY_NAME}
-        hireMeHref={buildWhatsAppUrl(companyData.phone, "Hi, I want to hire you.")}
+        hireMeHref={buildWhatsAppUrl(companyData.phone, "Hello, I visited the ZI_Core site. I would like to ask you")}
         companySocialLinks={companyData.socialLinks}
       />
 
@@ -654,7 +654,7 @@ export default function SecondLanding() {
       </section>
       <FloatingWhatsApp
         phoneNumber={companyData.phone || ""}
-        message="Hi, I'd like to get in touch."
+        message="Hello, I visited the ZI_Core site. I would like to ask you"
         label="Chat on WhatsApp"
       />
     </div>

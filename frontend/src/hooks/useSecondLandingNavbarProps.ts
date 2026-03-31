@@ -81,7 +81,7 @@ export function useSecondLandingNavbarProps(): SecondLandingNavbarProps {
 
   return {
     companyName,
-    hireMeHref: buildWhatsAppUrl(phone, "Hi, I want to hire you."),
+    hireMeHref: buildWhatsAppUrl(phone, "Hello, I visited the ZI_Core site. I would like to ask you"),
     companySocialLinks: socialLinks,
     otherPagesItems,
   };

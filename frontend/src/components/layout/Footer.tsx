@@ -6,7 +6,6 @@ import { getCategories } from "@/api/category.api";
 import { getProducts } from "@/api/product.api";
 import { getCachedData, setCachedData, CACHE_KEYS } from "@/utils/cache";
 import LandingSocialIconButtons from "@/components/landing/LandingSocialIconButtons";
-import { pickSocialLinksOrDefault } from "@/utils/landingSocial";
 import { spacing } from "@/utils/spacing";
 
 type FooterVariant = "default" | "landing2";
@@ -277,6 +276,19 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
   };
 
   const enabledSections = footerData.sections.filter(s => s.enabled !== false);
+  const companySocialLinks = companyData.socialLinks || {};
+  const footerSocialLinks = {
+    twitter: companySocialLinks.twitter || companySocialLinks.x || "",
+    facebook: companySocialLinks.facebook || "",
+    linkedin: companySocialLinks.linkedin || "",
+    instagram: companySocialLinks.instagram || "",
+  };
+  const hasAnyFooterSocialLink = Object.values(footerSocialLinks).some((v) => String(v || "").trim() !== "");
+  const hasFooterColumns =
+    (footerData.showCategories && categories.length > 0) ||
+    (footerData.showProducts && products.length > 0) ||
+    enabledSections.length > 0 ||
+    (footerData.showSocialLinks && hasAnyFooterSocialLink);
 
   return (
     <footer className="text-gray-300" style={{ backgroundColor: "var(--theme-dark, #6B4A2C)" }}>
@@ -481,23 +493,94 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
           {/* </div> */}
 
       {/* </div> */}
-      <div className="max-w-6xl mx-auto px-6 py-12 text-center">
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className={hasFooterColumns ? "lg:col-span-1" : "lg:col-span-4 text-center"}>
+            <h2 className="text-2xl font-semibold text-white">{companyData.company || "VERES"}</h2>
+            <p className={`text-gray-100 text-sm mt-3 ${hasFooterColumns ? "max-w-xl" : "max-w-xl mx-auto"}`}>
+              {companyData.description || "We are updating our premium products with real-time support and a dedicated consultant."}
+            </p>
+            {footerData.showSocialIcons && hasAnyFooterSocialLink && (
+              <LandingSocialIconButtons
+                links={footerSocialLinks}
+                useDefaults={false}
+                className={hasFooterColumns ? "mt-6 justify-start" : "mt-6 justify-center"}
+              />
+            )}
+          </div>
 
-        {/* Name */}
-        <h2 className="text-2xl font-semibold text-white">{companyData.company || "VERES"}</h2>
+          {footerData.showCategories && categories.length > 0 && (
+            <div>
+              <h3 className="text-white font-semibold text-lg mb-3">Categories</h3>
+              <div className="space-y-2">
+                {categories.slice(0, 3).map((category) => (
+                  <Link
+                    key={category._id}
+                    to={`/shop?category=${encodeURIComponent(category.name)}`}
+                    className="block text-gray-100 hover:underline"
+                  >
+                    {category.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
-{/* Description */}
-<p className="text-gray-100 text-sm mt-3 max-w-xl mx-auto">
-  {companyData.description || "We are updating our premium products with real-time support and a dedicated consultant."}
-</p>
+          {footerData.showProducts && products.length > 0 && (
+            <div>
+              <h3 className="text-white font-semibold text-lg mb-3">Products</h3>
+              <div className="space-y-2">
+                {products.slice(0, 3).map((product) => (
+                  <Link
+                    key={product._id}
+                    to={`/product/${product._id}`}
+                    className="block text-gray-100 hover:underline"
+                  >
+                    {product.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
-        {/* Social Icons - controlled by admin panel toggle */}
-        {footerData.showSocialIcons && (
-          <LandingSocialIconButtons
-            links={pickSocialLinksOrDefault(companyData.socialLinks as Record<string, string | undefined>)}
-            className="mt-6"
-          />
-        )}
+          {enabledSections.map((section, index) => (
+            <div key={index}>
+              <h3 className="text-white font-semibold text-lg mb-3">{section.title}</h3>
+              <div className="space-y-2">
+                {section.links.map((link, linkIndex) => (
+                  <button
+                    key={linkIndex}
+                    onClick={() => handleLinkClick(link.url)}
+                    className="block text-left text-gray-100 hover:underline"
+                    style={{ cursor: "pointer" }}
+                  >
+                    {link.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {footerData.showSocialLinks && hasAnyFooterSocialLink && (
+            <div>
+              <h3 className="text-white font-semibold text-lg mb-3">Follow Us</h3>
+              <div className="space-y-2">
+                {footerSocialLinks.facebook ? (
+                  <a href={footerSocialLinks.facebook} target="_blank" rel="noopener noreferrer" className="block text-gray-100 hover:underline">Facebook</a>
+                ) : null}
+                {footerSocialLinks.twitter ? (
+                  <a href={footerSocialLinks.twitter} target="_blank" rel="noopener noreferrer" className="block text-gray-100 hover:underline">Twitter</a>
+                ) : null}
+                {footerSocialLinks.linkedin ? (
+                  <a href={footerSocialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="block text-gray-100 hover:underline">LinkedIn</a>
+                ) : null}
+                {footerSocialLinks.instagram ? (
+                  <a href={footerSocialLinks.instagram} target="_blank" rel="noopener noreferrer" className="block text-gray-100 hover:underline">Instagram</a>
+                ) : null}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bottom Bar */}

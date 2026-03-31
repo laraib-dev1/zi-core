@@ -14,11 +14,11 @@ import PageLoader from "@/components/ui/PageLoader";
 import ApplicationTileCard from "@/components/applications/ApplicationTileCard";
 import ProductImageGallery from "@/components/products/ProductImageGallery";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import CtaBanner from "@/components/landing/CtaBanner";
 import HelpBanner from "@/components/landing/HelpBanner";
 import PortfolioCard from "@/components/landing/PortfolioCard";
 import { cn } from "@/lib/utils";
 import { useSecondLandingNavbarProps } from "@/hooks/useSecondLandingNavbarProps";
+import Container12 from "@/components/layout/Container12";
 
 const defaultHtml = `<p>No content available.</p>`;
 
@@ -222,6 +222,8 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
     const filteredDownloads = activeDownloadType
       ? downloadItems.filter((d: any) => String(d.type || "").toLowerCase() === activeDownloadType)
       : downloadItems;
+    const selectedDownload = filteredDownloads[0] || null;
+    const selectedDownloadHref = selectedDownload ? (selectedDownload.fileUrl || selectedDownload.url || "#") : "#";
     const screenshotImages: string[] = Array.isArray(item.media?.screenshots)
       ? item.media.screenshots.filter(Boolean).slice(0, 5)
       : [];
@@ -239,18 +241,27 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
     const firstContentTab = hasDescription ? "description" : hasFeatures ? "features" : hasGuide ? "guide" : hasHelp ? "help" : "";
     const downloadTypeMeta: Record<string, { label: string }> = {
       website: { label: "Web" },
-      apk: { label: "APK" },
-      windows: { label: "Windows" },
+      apk: { label: "App" },
+      windows: { label: "Desktop" },
       exe: { label: ".exe" },
       other: { label: "Other" },
     };
     const orderedDownloadTypes: string[] = ["website", "apk", "exe", "windows", "other"];
-    const selectedType = String(activeDownloadType || orderedDownloadTypes[0]);
+    const availableDownloadTypes = orderedDownloadTypes.filter((typeKey) =>
+      downloadItems.some((d: any) => String(d?.type || "").toLowerCase() === typeKey)
+    );
+    const selectedType = String(activeDownloadType || availableDownloadTypes[0] || orderedDownloadTypes[0]);
     const selectedTypeMeta = downloadTypeMeta[selectedType] || downloadTypeMeta.other;
     const getTypeImage = (typeKey: string): string => {
       const byType = downloadItems.find((d: any) => String(d?.type || "").toLowerCase() === typeKey);
       const imageCandidate = byType?.iconUrl || byType?.icon || byType?.imageUrl || byType?.image || "";
       return String(imageCandidate || "");
+    };
+    const defaultPlatformIconByType: Record<string, string> = {
+      apk: "/file_icons.png",
+      exe: "/file_icons-1.png",
+      website: "/file_icons-2.png",
+      windows: "/file_icons-3.png",
     };
 
     return (
@@ -264,7 +275,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
         />
         <main className="flex-1 pt-0">
           <div>
-            <div className={`mx-auto max-w-[1232px] ${spacing.container.paddingSmall}`}>
+            <Container12 className={spacing.inner.gap}>
               <section>
                 <div className={`${spacing.section.gap} mb-2`}>
                   <h1 className="text-center text-2xl md:text-3xl font-bold theme-heading">Application Details</h1>
@@ -300,8 +311,11 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                     {!downloadsAccordionOpen ? (
                       <div className="grid grid-cols-12 items-center gap-3">
                         <div className="col-span-12 md:col-span-8 min-w-0">
-                          <p className="text-sm text-gray-500 truncate">
-                            By using this, you agree to the terms and policies. View installation guide.
+                          <p className="text-sm text-gray-500">
+                            Built with Zi_Core Libraries.
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Manage on GitHub and we serve good Ui, Ux, Cx, Dx, Px also continuously updating it.
                           </p>
                         </div>
                         <div className="col-span-12 md:col-span-4 flex md:justify-end">
@@ -318,18 +332,18 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 max-w-[900px] mx-auto">
-                          {orderedDownloadTypes.map((typeKey: string) => {
+                        <div className="flex flex-wrap items-center justify-center gap-3 max-w-[900px] mx-auto">
+                          {availableDownloadTypes.map((typeKey: string) => {
                             const meta = downloadTypeMeta[typeKey] || downloadTypeMeta.other;
                             const active = selectedType === typeKey;
-                            const typeImage = getTypeImage(typeKey);
+                            const typeImage = getTypeImage(typeKey) || defaultPlatformIconByType[typeKey] || "";
                             return (
                               <button
                                 key={typeKey}
                                 type="button"
                                 onClick={() => setActiveDownloadType(typeKey)}
                                 className={cn(
-                                  "rounded-2xl p-2 text-center transition-colors min-h-[74px] flex flex-col items-center justify-center",
+                                  "rounded-2xl p-2 text-center transition-colors min-h-[74px] w-[140px] flex flex-col items-center justify-center",
                                   active ? "text-white" : "bg-gray-50 text-gray-600"
                                 )}
                                 style={active ? { backgroundColor: "var(--theme-primary)" } : undefined}
@@ -339,10 +353,13 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                                     <img
                                       src={typeImage}
                                       alt={meta.label}
-                                      className="h-5 w-5 object-contain"
+                                      className="h-10 w-10 object-contain"
+                                      onError={(e) => {
+                                        (e.target as HTMLImageElement).style.display = "none";
+                                      }}
                                     />
                                   ) : (
-                                    <div className="h-5 w-5" />
+                                    <div className="h-10 w-10" />
                                   )}
                                 </div>
                                 <div className="mt-1 text-xs font-medium">{meta.label}</div>
@@ -354,43 +371,37 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                         <div className="border-t border-gray-200" />
 
                         <div className="grid grid-cols-12 items-center gap-3">
-                          <div className="col-span-12 md:col-span-8 min-w-0" />
+                          <div className="col-span-12 md:col-span-8 min-w-0">
+                            <p className="text-base font-semibold text-gray-700">
+                              {selectedTypeMeta.label}
+                              {filteredDownloads?.[0]?.sizeText ? ` - ${filteredDownloads[0].sizeText}` : ""}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              By using this, you agree to the Zi_Core terms and policies.{" "}
+                              <a
+                                href="#"
+                                className="underline underline-offset-2 hover:opacity-80"
+                                style={{ color: "var(--theme-primary)" }}
+                              >
+                                view installation guide.
+                              </a>
+                            </p>
+                          </div>
                           <div className="col-span-12 md:col-span-4 flex md:justify-end">
-                            <button
-                              type="button"
-                              onClick={() => setDownloadsAccordionOpen(false)}
-                              className="inline-flex items-center gap-2 rounded-md px-6 py-2 text-sm font-medium text-white shrink-0"
+                            <a
+                              href={selectedDownloadHref}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={cn(
+                                "inline-flex items-center gap-2 rounded-md px-6 py-2 text-sm font-medium text-white shrink-0",
+                                selectedDownload ? "opacity-100" : "opacity-50 pointer-events-none"
+                              )}
                               style={{ backgroundColor: "var(--theme-primary)" }}
                             >
                               Download Now
                               <ChevronUp className="h-4 w-4" />
-                            </button>
+                            </a>
                           </div>
-                        </div>
-
-                        <div>
-                          {filteredDownloads.length === 0 ? (
-                            <div className="rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-500">
-                              No record
-                            </div>
-                          ) : (
-                            <div className="space-y-2">
-                              {filteredDownloads.map((dl: any, idx: number) => (
-                                <a
-                                  key={`${dl.fileUrl || dl.url || "download"}-${idx}`}
-                                  href={dl.fileUrl || dl.url || "#"}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3 hover:bg-gray-100"
-                                >
-                                  <span className="text-sm font-medium text-gray-800">{dl.label || selectedTypeMeta.label}</span>
-                                  <span className="text-xs text-gray-500">
-                                    {dl.sizeText || (dl.fileSize ? `${Math.max(1, Math.round(Number(dl.fileSize) / (1024 * 1024)))} MB` : "")}
-                                  </span>
-                                </a>
-                              ))}
-                            </div>
-                          )}
                         </div>
                       </div>
                     )}
@@ -402,7 +413,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                   <div className="grid grid-cols-12 gap-4">
                     {appInfo.imagesEnabled !== false && (
                       <div className="col-span-12 lg:col-span-4">
-                        <div className="rounded-xl bg-transparent overflow-hidden h-full min-h-[280px]">
+                      <div className="rounded-xl bg-transparent overflow-hidden h-full min-h-[280px]">
                           <ProductImageGallery images={galleryImages} transparentBackground />
                         </div>
                       </div>
@@ -527,7 +538,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                 {/* 5) Banner 9:6 */}
                 {appInfo.thumbnailEnabled !== false && item.media?.banner && (
                   <section className={spacing.section.gap}>
-                    <div className="w-full" style={{ aspectRatio: "9 / 6" }}>
+                    <div className="w-full rounded-xl overflow-hidden border border-gray-200" style={{ aspectRatio: "9 / 6" }}>
                       <img src={item.media.banner} alt="Application banner" className="w-full h-full object-cover" />
                     </div>
                   </section>
@@ -542,9 +553,9 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                         <Link
                           key={app._id || app.id || i}
                           to={`/catalog/applications/${app._id || app.id}`}
-                          className={`rounded-lg bg-white ${spacing.container.paddingSmall} py-3 hover:shadow-sm transition-shadow`}
+                          className={`rounded-xl bg-white ${spacing.container.paddingSmall} py-3 hover:shadow-sm transition-shadow`}
                         >
-                          <div className="h-32 rounded-md bg-gray-100 overflow-hidden">
+                          <div className="h-32 rounded-xl bg-gray-100 overflow-hidden">
                             <img src={app.image || "/hero.png"} alt={app.title || "Application"} className="w-full h-full object-cover" />
                           </div>
                           <div className="mt-2 font-medium text-sm text-gray-900 line-clamp-1">{app.title || "Untitled"}</div>
@@ -558,19 +569,32 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                 {/* 7) Inner thumbnail */}
                 {appInfo.bannerEnabled !== false && item.media?.inner && (
                   <section className={spacing.section.gap}>
-                    <img src={item.media.inner} alt="Application thumbnail" className="w-full object-cover" />
+                    <div className="rounded-xl overflow-hidden border border-gray-200">
+                      <img src={item.media.inner} alt="Application thumbnail" className="w-full object-cover" />
+                    </div>
                   </section>
                 )}
 
                 {/* 8) CTA from second landing */}
                 <section className={spacing.section.gap}>
-                  <CtaBanner
-                    variant="dark"
-                    title="Like what you see?"
-                    description="Donec rutrum congue leo eget malesuada. Vivamus suscipit tortor eget felis porttitor volutpat."
-                    buttonText="Let's Work Together"
-                    buttonHref={buildWhatsAppUrl(companyPhone, "Hi! I'd like to work together.")}
-                  />
+                  <div className="w-full rounded-xl bg-black text-white p-4 sm:p-5 md:p-6 grid grid-cols-12 gap-6 items-center">
+                    <div className="col-span-12 md:col-span-9">
+                      <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2">Like what you see?</h2>
+                      <p className="text-sm sm:text-base text-gray-300">
+                        Donec rutrum congue leo eget malesuada. Vivamus suscipit tortor eget felis porttitor volutpat.
+                      </p>
+                    </div>
+                    <div className="col-span-12 md:col-span-3 flex md:justify-end mt-4 md:mt-0">
+                      <a
+                        href={buildWhatsAppUrl(companyPhone, "Hello, I visited the ZI_Core site. I would like to ask you")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block w-full md:w-auto text-center px-6 py-3 font-medium rounded transition-colors text-sm sm:text-base bg-white hover:bg-gray-100 text-black"
+                      >
+                        Let's Work Together
+                      </a>
+                    </div>
+                  </div>
                 </section>
 
                 {/* 9) Top 4 blogs */}
@@ -605,7 +629,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                   />
                 </section>
               </section>
-            </div>
+            </Container12>
           </div>
         </main>
         <section className={`w-full ${spacing.footer.gapTop}`} style={{ marginBottom: 0, paddingBottom: 0 }}>

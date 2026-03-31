@@ -118,7 +118,7 @@ export default function ApplicationsSection({
                   description: item.description,
                   image: item.image,
                   releaseDate: formatDate(item.createdAt) || "—",
-                  downloadsText: item.views > 0 ? String(item.views) : "1.2k+",
+                  downloadsText: "",
                   version: item.version,
                   stars: item.stars,
                   ratingCount: item.ratingCount,

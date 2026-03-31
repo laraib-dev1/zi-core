@@ -60,11 +60,6 @@ export default function ServicesCard({
         </p>
       )}
 
-      {/* View count */}
-      {(views ?? 0) > 0 && (
-        <p className="text-xs text-gray-500 mb-2">{views} view{(views ?? 0) !== 1 ? "s" : ""}</p>
-      )}
-
       {/* Learn More link - after text, with arrow */}
       {showLearnMore && (
         <Link

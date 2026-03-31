@@ -9,10 +9,10 @@ const XIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-/** Same as TeamCard: grey circle, white glyphs at 50% opacity (full on hover). Order: X → Facebook → LinkedIn → Instagram. */
+/** Same as TeamCard: 50% icon background opacity, full icon text color. Order: X → Facebook → LinkedIn → Instagram. */
 const BTN =
-  "flex items-center justify-center rounded-full border border-[#7D7D7D] bg-[#7D7D7D] text-white transition-colors hover:opacity-90";
-const ICON = "opacity-50 group-hover:opacity-100 transition-opacity";
+  "flex items-center justify-center rounded-full border border-[#7D7D7D]/50 bg-[#7D7D7D]/50 text-white transition-colors hover:bg-[#7D7D7D]/65 hover:border-[#7D7D7D]/65";
+const ICON = "";
 
 export type CompanySocialLinks = {
   twitter?: string;
@@ -38,17 +38,22 @@ export interface LandingSocialIconButtonsProps {
   links?: CompanySocialLinks | Record<string, string | undefined> | null;
   /** Navbar uses slightly smaller size; footer/team use default */
   size?: "sm" | "md";
+  /** When false, do not inject default social links. */
+  useDefaults?: boolean;
   className?: string;
 }
 
 export default function LandingSocialIconButtons({
   links,
   size = "md",
+  useDefaults = true,
   className,
 }: LandingSocialIconButtonsProps) {
-  const merged = pickSocialLinksOrDefault(links as Record<string, string | undefined> | null) as CompanySocialLinks;
-  const btnSize = size === "sm" ? "w-8 h-8 sm:w-9 sm:h-9" : "w-7 h-7 sm:w-8 sm:h-8";
-  const iconSize = size === "sm" ? "w-3.5 h-3.5 sm:w-4 sm:h-4" : "w-3.5 h-3.5 sm:w-4 sm:h-4";
+  const merged = useDefaults
+    ? (pickSocialLinksOrDefault(links as Record<string, string | undefined> | null) as CompanySocialLinks)
+    : ((links || {}) as CompanySocialLinks);
+  const btnSize = size === "sm" ? "w-7 h-7 sm:w-8 sm:h-8" : "w-7 h-7 sm:w-8 sm:h-8";
+  const iconSize = size === "sm" ? "w-3 h-3 sm:w-3.5 sm:h-3.5" : "w-3.5 h-3.5 sm:w-4 sm:h-4";
 
   return (
     <div className={cn("flex flex-wrap items-center justify-center gap-2.5 sm:gap-4", className)}>

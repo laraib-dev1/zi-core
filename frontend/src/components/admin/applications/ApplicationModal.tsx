@@ -611,94 +611,51 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
               disabled={isView}
             />
             <div className={!form.appInfo.imagesEnabled ? "opacity-60" : ""}>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div
-                  className="sm:col-span-2 relative group cursor-pointer"
-                  onClick={() => {
-                    if (isView || !form.appInfo.imagesEnabled) return;
-                    const el = document.getElementById("app-shot-0") as HTMLInputElement | null;
-                    el?.click();
-                  }}
-                >
-                  <div className="w-full h-[260px] bg-gray-50 rounded overflow-hidden border flex items-center justify-center">
-                    {(form.media?.screenshots?.[0]) ? (
-                      <img src={form.media.screenshots[0]} className="w-full h-full object-cover" alt="Main screenshot" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                {[0, 1, 2, 3, 4].map((idx) => (
+                  <div
+                    key={idx}
+                    className="relative group cursor-pointer aspect-square bg-gray-50 rounded border overflow-hidden flex items-center justify-center"
+                    onClick={() => {
+                      if (isView || !form.appInfo.imagesEnabled) return;
+                      const el = document.getElementById(`app-shot-${idx}`) as HTMLInputElement | null;
+                      el?.click();
+                    }}
+                  >
+                    {(form.media?.screenshots?.[idx]) ? (
+                      <img src={form.media.screenshots[idx]} className="w-full h-full object-cover" alt={idx === 0 ? "Main screenshot" : `Screenshot ${idx + 1}`} />
                     ) : (
-                      <span className="text-sm text-gray-400">Main image</span>
+                      <span className="text-xs text-gray-400">{idx === 0 ? "Main image" : `Image ${idx + 1}`}</span>
+                    )}
+                    {!isView && form.media?.screenshots?.[idx] && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setForm((prev: any) => {
+                            const shots = [...(prev.media?.screenshots || [])];
+                            shots[idx] = "";
+                            return { ...prev, media: { ...prev.media, screenshots: shots } };
+                          });
+                        }}
+                        className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                      >
+                        x
+                      </button>
+                    )}
+                    {!isView && (
+                      <input
+                        id={`app-shot-${idx}`}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => openCropper("screenshot", e.target.files?.[0] || null, idx)}
+                      />
                     )}
                   </div>
-                  {!isView && form.media?.screenshots?.[0] && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setForm((prev: any) => {
-                          const shots = [...(prev.media?.screenshots || [])];
-                          shots[0] = "";
-                          return { ...prev, media: { ...prev.media, screenshots: shots } };
-                        });
-                      }}
-                      className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
-                    >
-                      x
-                    </button>
-                  )}
-                  {!isView && (
-                    <input
-                      id="app-shot-0"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => openCropper("screenshot", e.target.files?.[0] || null, 0)}
-                    />
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {[1, 2, 3, 4].map((idx) => (
-                    <div
-                      key={idx}
-                      className="relative group cursor-pointer h-[124px] bg-gray-50 rounded border overflow-hidden flex items-center justify-center"
-                      onClick={() => {
-                        if (isView || !form.appInfo.imagesEnabled) return;
-                        const el = document.getElementById(`app-shot-${idx}`) as HTMLInputElement | null;
-                        el?.click();
-                      }}
-                    >
-                      {(form.media?.screenshots?.[idx]) ? (
-                        <img src={form.media.screenshots[idx]} className="w-full h-full object-cover" alt={`Screenshot ${idx + 1}`} />
-                      ) : (
-                        <span className="text-xs text-gray-400">Image {idx + 1}</span>
-                      )}
-                      {!isView && form.media?.screenshots?.[idx] && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setForm((prev: any) => {
-                              const shots = [...(prev.media?.screenshots || [])];
-                              shots[idx] = "";
-                              return { ...prev, media: { ...prev.media, screenshots: shots } };
-                            });
-                          }}
-                          className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
-                        >
-                          x
-                        </button>
-                      )}
-                      {!isView && (
-                        <input
-                          id={`app-shot-${idx}`}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => openCropper("screenshot", e.target.files?.[0] || null, idx)}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
+                ))}
               </div>
-              <p className="mt-2 text-xs text-gray-500">Use exactly 5 images: 1 main + 4 others.</p>
+              <p className="mt-2 text-xs text-gray-500">Use exactly 5 images: 1 main + 4 others. Recommended size: 1080 x 1080 (1:1).</p>
             </div>
           </TabsContent>
 
@@ -782,7 +739,7 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
         }}
         file={cropFile}
         onCropDone={onCropDone}
-        aspect={cropTarget === "icon" ? 1 : cropTarget === "banner" ? 16 / 6 : cropTarget === "inner" ? 16 / 4 : 4 / 3}
+        aspect={cropTarget === "icon" ? 1 : cropTarget === "banner" ? 16 / 6 : cropTarget === "inner" ? 16 / 4 : 1}
       />
     </Dialog>
   );
