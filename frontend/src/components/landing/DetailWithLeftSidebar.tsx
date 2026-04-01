@@ -38,12 +38,10 @@ export interface DetailWithLeftSidebarProps {
   shareUrl?: string;
   /** Share title (defaults to content title when empty) */
   shareTitle?: string;
-  /** Explore Topics list (e.g. [{ name: "Lifestyle", count: 3 }]) – used when relatedServices not provided */
+  /** Default sidebar list (e.g. topic counts) when relatedServices is not provided */
   topics?: ExploreTopic[];
-  /** When provided, show related items in sidebar instead of Explore Topics */
+  /** When provided, show related links in the "Explore More" block instead of topics */
   relatedServices?: RelatedServiceItem[];
-  /** Title for related items block (e.g. "Services in same category", "Courses in same category") */
-  relatedSidebarTitle?: string;
   /** If true, left sidebar sticks with scroll (like BlogDetail right sidebar) */
   stickySidebar?: boolean;
   className?: string;
@@ -70,7 +68,6 @@ export default function DetailWithLeftSidebar({
   shareTitle,
   topics = defaultTopics,
   relatedServices,
-  relatedSidebarTitle = "Services in same category",
   stickySidebar = false,
   className,
 }: DetailWithLeftSidebarProps) {
@@ -147,7 +144,7 @@ export default function DetailWithLeftSidebar({
       {relatedServices && relatedServices.length > 0 ? (
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide" style={{ color: "var(--theme-primary)" }}>
-            {relatedSidebarTitle}
+            Explore More
           </h3>
           <div className="space-y-2">
             {relatedServices.map((s, i) => (
@@ -164,7 +161,7 @@ export default function DetailWithLeftSidebar({
       ) : (
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide" style={{ color: "var(--theme-primary)" }}>
-            Explore Topics
+            Explore More
           </h3>
           <div className="space-y-2">
             {topics.map((t) => (

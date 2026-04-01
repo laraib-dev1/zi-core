@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import Navbar2 from "@/components/layout/Navbar2";
 import Footer from "@/components/layout/Footer";
 import DetailWithLeftSidebar from "@/components/landing/DetailWithLeftSidebar";
@@ -16,9 +16,14 @@ import ProductImageGallery from "@/components/products/ProductImageGallery";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import HelpBanner from "@/components/landing/HelpBanner";
 import PortfolioCard from "@/components/landing/PortfolioCard";
+import DetailPageLatestAndCta from "@/components/landing/DetailPageLatestAndCta";
 import { cn } from "@/lib/utils";
 import { useSecondLandingNavbarProps } from "@/hooks/useSecondLandingNavbarProps";
 import Container12 from "@/components/layout/Container12";
+import { getApplicationPlatformStatesLine } from "@/utils/applicationPlatforms";
+
+const navGrayBtnClass =
+  "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-xs sm:text-sm font-medium text-white shrink-0 border border-[#7D7D7D]/50 bg-[#7D7D7D]/70 transition-colors hover:bg-[var(--theme-primary)] hover:border-[var(--theme-primary)]";
 
 const defaultHtml = `<p>No content available.</p>`;
 
@@ -51,10 +56,10 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
   const id = (idOverride ?? params.id ?? "").toString();
   const [item, setItem] = useState<any>(null);
   const [related, setRelated] = useState<{ title: string; href: string }[]>([]);
-  const [topApplications, setTopApplications] = useState<any[]>([]);
   const [topBlogs, setTopBlogs] = useState<any[]>([]);
   const [activeDownloadType, setActiveDownloadType] = useState<string>("");
   const [downloadsAccordionOpen, setDownloadsAccordionOpen] = useState(false);
+  const [downloadNowLoading, setDownloadNowLoading] = useState(false);
   const [loading, setLoading] = useState(!!id);
   const [notFound, setNotFound] = useState(false);
   const [companyPhone, setCompanyPhone] = useState<string>(() => {
@@ -83,7 +88,6 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
               .then((list: any[]) => {
                 if (cancelled || !Array.isArray(list)) return;
                 const same = list.filter((i: any) => String(i._id || i.id) !== String(data._id || data.id));
-                setTopApplications(same.slice(0, 3));
                 setRelated(
                   same.slice(0, 10).map((i: any) => ({
                     title: i.title || "Untitled",
@@ -164,6 +168,10 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
     setDownloadsAccordionOpen(false);
   }, [item, type]);
 
+  useEffect(() => {
+    if (!downloadsAccordionOpen) setDownloadNowLoading(false);
+  }, [downloadsAccordionOpen]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-transparent pt-20 landing-detail-page">
@@ -242,8 +250,8 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
     const downloadTypeMeta: Record<string, { label: string }> = {
       website: { label: "Web" },
       apk: { label: "App" },
-      windows: { label: "Desktop" },
-      exe: { label: ".exe" },
+      windows: { label: "Windows" },
+      exe: { label: "Desktop" },
       other: { label: "Other" },
     };
     const orderedDownloadTypes: string[] = ["website", "apk", "exe", "windows", "other"];
@@ -258,10 +266,10 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
       return String(imageCandidate || "");
     };
     const defaultPlatformIconByType: Record<string, string> = {
-      apk: "/file_icons.png",
-      exe: "/file_icons-1.png",
-      website: "/file_icons-2.png",
-      windows: "/file_icons-3.png",
+      apk: "/file_icons.svg",
+      exe: "/file_icons-1.svg",
+      website: "/file_icons-2.svg",
+      windows: "/file_icons-3.svg",
     };
 
     return (
@@ -299,6 +307,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                       ratingCount: Number(appInfo.ratingCount || 0),
                       isTopRated: Boolean(appInfo.starsEnabled && Number(appInfo.stars || 0) >= 4),
                     }}
+                    platformStatesLine={getApplicationPlatformStatesLine(downloadItems) || undefined}
                     compact={true}
                     hideActionButton
                     className="bg-transparent"
@@ -322,11 +331,9 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                           <button
                             type="button"
                             onClick={() => setDownloadsAccordionOpen(true)}
-                            className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-xs sm:text-sm font-medium text-white shrink-0"
-                            style={{ backgroundColor: "var(--theme-primary)" }}
+                            className={navGrayBtnClass}
                           >
                             Get Latest Version
-                            <ChevronDown className="h-4 w-4" />
                           </button>
                         </div>
                       </div>
@@ -343,7 +350,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                                 type="button"
                                 onClick={() => setActiveDownloadType(typeKey)}
                                 className={cn(
-                                  "rounded-2xl p-2 text-center transition-colors min-h-[74px] w-[140px] flex flex-col items-center justify-center",
+                                  "rounded-2xl p-3 text-center transition-colors min-h-[108px] w-[min(100%,168px)] sm:w-[168px] flex flex-col items-center justify-center",
                                   active ? "text-white" : "bg-gray-50 text-gray-600"
                                 )}
                                 style={active ? { backgroundColor: "var(--theme-primary)" } : undefined}
@@ -353,13 +360,13 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                                     <img
                                       src={typeImage}
                                       alt={meta.label}
-                                      className="h-10 w-10 object-contain"
+                                      className="h-[52px] w-[52px] sm:h-16 sm:w-16 object-contain"
                                       onError={(e) => {
                                         (e.target as HTMLImageElement).style.display = "none";
                                       }}
                                     />
                                   ) : (
-                                    <div className="h-10 w-10" />
+                                    <div className="h-[52px] w-[52px] sm:h-16 sm:w-16" />
                                   )}
                                 </div>
                                 <div className="mt-1 text-xs font-medium">{meta.label}</div>
@@ -393,13 +400,22 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                               target="_blank"
                               rel="noopener noreferrer"
                               className={cn(
-                                "inline-flex items-center gap-2 rounded-md px-6 py-2 text-sm font-medium text-white shrink-0",
+                                navGrayBtnClass,
+                                "px-6",
                                 selectedDownload ? "opacity-100" : "opacity-50 pointer-events-none"
                               )}
-                              style={{ backgroundColor: "var(--theme-primary)" }}
+                              onClick={() => {
+                                if (!selectedDownload) return;
+                                setDownloadNowLoading(true);
+                                window.setTimeout(() => setDownloadNowLoading(false), 2200);
+                              }}
                             >
+                              {downloadNowLoading ? (
+                                <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                              ) : (
+                                <Download className="h-4 w-4 shrink-0" aria-hidden />
+                              )}
                               Download Now
-                              <ChevronUp className="h-4 w-4" />
                             </a>
                           </div>
                         </div>
@@ -544,29 +560,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                   </section>
                 )}
 
-                {/* 6) Top 3 applications */}
-                {topApplications.length > 0 && (
-                  <section className={spacing.section.gap}>
-                    <h2 className="text-xl md:text-2xl font-semibold theme-heading mb-3">Top Applications</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      {topApplications.map((app: any, i: number) => (
-                        <Link
-                          key={app._id || app.id || i}
-                          to={`/catalog/applications/${app._id || app.id}`}
-                          className={`rounded-xl bg-white ${spacing.container.paddingSmall} py-3 hover:shadow-sm transition-shadow`}
-                        >
-                          <div className="h-32 rounded-xl bg-gray-100 overflow-hidden">
-                            <img src={app.image || "/hero.png"} alt={app.title || "Application"} className="w-full h-full object-cover" />
-                          </div>
-                          <div className="mt-2 font-medium text-sm text-gray-900 line-clamp-1">{app.title || "Untitled"}</div>
-                          <div className="text-xs text-gray-500 line-clamp-1">{app.subTag || "Sub info of application domain"}</div>
-                        </Link>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* 7) Inner thumbnail */}
+                {/* 6) Inner thumbnail */}
                 {appInfo.bannerEnabled !== false && item.media?.inner && (
                   <section className={spacing.section.gap}>
                     <div className="rounded-xl overflow-hidden border border-gray-200">
@@ -575,7 +569,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                   </section>
                 )}
 
-                {/* 8) CTA from second landing */}
+                {/* 7) CTA from second landing */}
                 <section className={spacing.section.gap}>
                   <div className="w-full rounded-xl bg-black text-white p-4 sm:p-5 md:p-6 grid grid-cols-12 gap-6 items-center">
                     <div className="col-span-12 md:col-span-9">
@@ -597,7 +591,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                   </div>
                 </section>
 
-                {/* 9) Top 4 blogs */}
+                {/* 8) Top 4 blogs */}
                 {topBlogs.length > 0 && (
                   <section className={spacing.section.gap}>
                     <h2 className="text-xl md:text-2xl font-semibold theme-heading mb-3">Latest Blogs</h2>
@@ -621,13 +615,20 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                   </section>
                 )}
 
-                {/* 10) Help banner from second landing */}
+                {/* 9) Help banner from second landing */}
                 <section className={spacing.section.gap}>
                   <HelpBanner
                     title="Looking for Help!"
                     description="We are updating our premium products with real-time support and dedicated consultants."
                   />
                 </section>
+
+                <DetailPageLatestAndCta
+                  catalogTypeSlug="applications"
+                  currentItemId={String(item._id || item.id || id)}
+                  hireMeHref={landingNav.hireMeHref}
+                  wrapInContainer12={false}
+                />
               </section>
             </Container12>
           </div>
@@ -660,10 +661,14 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
             views={item.views ?? 0}
             htmlContent={item.description || defaultHtml}
             relatedServices={related.length > 0 ? related : undefined}
-            relatedSidebarTitle={`${typeLabel}s in same category`}
             stickySidebar={true}
           />
         </div>
+        <DetailPageLatestAndCta
+          catalogTypeSlug={(item.catalogType && String(item.catalogType).toLowerCase()) || type.toLowerCase()}
+          currentItemId={String(item._id || item.id || id)}
+          hireMeHref={landingNav.hireMeHref}
+        />
       </main>
       <section
         className={`w-full ${spacing.footer.gapTop}`}

@@ -4,6 +4,7 @@ import Navbar2 from "@/components/layout/Navbar2";
 import { useSecondLandingNavbarProps } from "@/hooks/useSecondLandingNavbarProps";
 import Footer from "@/components/layout/Footer";
 import DetailWithLeftSidebar from "@/components/landing/DetailWithLeftSidebar";
+import DetailPageLatestAndCta from "@/components/landing/DetailPageLatestAndCta";
 import { spacing } from "@/utils/spacing";
 import { getBlogById, getPublishedCatalogItems, incrementBlogView } from "@/api/blog.api";
 import PageLoader from "@/components/ui/PageLoader";
@@ -149,6 +150,11 @@ export default function ServiceDetail() {
             stickySidebar={true}
           />
         </div>
+        <DetailPageLatestAndCta
+          catalogTypeSlug="services"
+          currentItemId={String(service._id || service.id || id)}
+          hireMeHref={landingNav.hireMeHref}
+        />
       </main>
       <section
         className={`w-full ${spacing.footer.gapTop}`}

@@ -480,7 +480,7 @@ export default function BlogDetail() {
                       </p>
                     </div>
                     <div className="bg-white border border-gray-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Explore Topics</h3>
+                      <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Explore More</h3>
                       <div className="space-y-2">
                         {categories.map((cat) => (
                           <span key={cat._id} className="flex items-center justify-between gap-3 text-sm text-gray-700 px-2 py-1">
@@ -526,7 +526,7 @@ export default function BlogDetail() {
                         </p>
                       </div>
                       <div className="bg-white border border-gray-200 rounded-lg p-4">
-                        <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Explore Topics</h3>
+                        <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Explore More</h3>
                         <div className="space-y-2">
                           {categories.map((cat) => (
                             <Link
@@ -545,10 +545,15 @@ export default function BlogDetail() {
                 </div>
               </div>
 
-              {/* Share Your Love in main content – below blog (full width of content area) */}
+              {/* Share below blog: icon row on small screens; inline circles on lg+ (sidebar shows card share on lg+) */}
               <div className={`${spacing.section.gap} mt-0`}>
                 <h3 className={`text-lg font-semibold text-gray-900 ${spacing.inner.gapBottom}`}>Share Your Love!</h3>
-                <ShareOptions url={shareUrl} title={shareTitle} />
+                <div className="lg:hidden rounded-lg border border-gray-200 bg-white p-4">
+                  <ShareOptions url={shareUrl} title={shareTitle} variant="sidebar" />
+                </div>
+                <div className="hidden lg:block">
+                  <ShareOptions url={shareUrl} title={shareTitle} />
+                </div>
               </div>
 
             {/* Author Profile - Commented out as requested, will use later */}

@@ -34,6 +34,12 @@ import FAQsSection from "@/components/landing/FAQsSection";
 import ComingSoonSection from "@/components/landing/ComingSoonSection";
 import CatalogSection from "@/components/landing/CatalogSection";
 import ApplicationsSection from "@/components/landing/ApplicationsSection";
+import { isCatalogStyleLandingSectionId } from "@/utils/landingSectionCatalog";
+import {
+  buildSectionContentMapFromList,
+  contentOverride,
+  SECTION_CONTENT_DEFAULTS,
+} from "@/utils/landingSectionContent";
 import FloatingWhatsApp from "@/components/ui/FloatingWhatsApp";
 import PageLoader from "@/components/ui/PageLoader";
 import { Search, Lightbulb, Settings, Rocket, Package } from "lucide-react";
@@ -103,10 +109,14 @@ function createSectionRenderers(
   img: ImgFn,
   company: HeroCompany,
   faqPage: FaqPageSlice,
-  workTogetherWhatsAppHref: string
+  workTogetherWhatsAppHref: string,
+  contentMap: Record<string, Record<string, string>>
 ): Record<string, () => React.ReactNode> {
+  const ov = (sectionId: string, key: string, fallback: string) =>
+    contentOverride(contentMap, sectionId, key, fallback);
   const slogan = company.slogan?.trim();
   const desc = company.description?.trim();
+  const textImageBulletsDefault = SECTION_CONTENT_DEFAULTS["text-image"]?.bullets ?? "";
   return {
     hero: () => (
       <div id="home" className="pb-12px sm:pb-5">
@@ -134,10 +144,10 @@ function createSectionRenderers(
     about: () => (
       <div id="about" className={spacing.section.gap}>
         <PortfolioDetailSection
-          sectionTitle="About me"
-          sectionSubtitle="FCPS – General Surgeon | Medical Photographer"
-          title="We Take Surgery Beyond the Operating Room"
-          tagline="User Role or Tag Line"
+          sectionTitle={ov("about", "sectionTitle", "About me")}
+          sectionSubtitle={ov("about", "sectionSubtitle", "FCPS – General Surgeon | Medical Photographer")}
+          title={ov("about", "title", "We Take Surgery Beyond the Operating Room")}
+          tagline={ov("about", "tagline", "User Role or Tag Line")}
           images={[img("about-1") || "/hero.png", img("about-2") || "/hero.png", img("about-3") || "/hero.png", img("about-4") || "/hero.png"]}
           companySocialLinks={company.socialLinks}
         />
@@ -147,8 +157,13 @@ function createSectionRenderers(
       <div id="cta-banner-1" className={spacing.section.gap}>
         <CtaBanner 
         variant="light" 
-        title="Discover Surgical Precision & Art" description="Explore the intersection of medicine and visual storytelling through curated surgical documentation and photography." 
-        buttonText="Explore Now" 
+        title={ov("cta-banner-1", "title", "Discover Surgical Precision & Art")}
+        description={ov(
+          "cta-banner-1",
+          "description",
+          "Explore the intersection of medicine and visual storytelling through curated surgical documentation and photography."
+        )}
+        buttonText={ov("cta-banner-1", "buttonText", "Explore Now")}
         onButtonClick={() => {
         const el = document.getElementById("portfolio");
         if (el) {
@@ -160,9 +175,16 @@ function createSectionRenderers(
     "text-image": () => (
       <div id="text-image" className={spacing.section.gap}>
         <TextImageSection
-          title="Precision Meets Art in Surgery"
-          description="As a board-certified surgeon and medical photographer, I capture the discipline, skill, and human side of surgery. Each procedure is documented to educate, inspire, and showcase the artistry involved in modern surgical practice."
-          bullets={["Board-Certified General Surgeon", "Passionate Photographer", "Bridges Surgery and Storytellingt"]}
+          title={ov("text-image", "title", "Precision Meets Art in Surgery")}
+          description={ov(
+            "text-image",
+            "description",
+            "As a board-certified surgeon and medical photographer, I capture the discipline, skill, and human side of surgery. Each procedure is documented to educate, inspire, and showcase the artistry involved in modern surgical practice."
+          )}
+          bullets={ov("text-image", "bullets", textImageBulletsDefault)
+            .split("\n")
+            .map((s) => s.trim())
+            .filter(Boolean)}
           imagePosition="left"
           imageSrc={img("text-image") || "/hero.png"}
         />
@@ -170,12 +192,26 @@ function createSectionRenderers(
     ),
     "how-we-work": () => (
       <div id="how-we-work" className={spacing.section.gap}>
-        <HowWeWorkBlocks title="How We Work" subtitle="Title info description details" items={howWeWorkItems} />
+        <HowWeWorkBlocks
+          title={ov("how-we-work", "title", "How We Work")}
+          subtitle={ov("how-we-work", "subtitle", "Title info description details")}
+          items={howWeWorkItems}
+        />
       </div>
     ),
     "cta-banner-2": () => (
       <div id="cta-banner-2" className={spacing.section.gap}>
-        <CtaBanner variant="dark" title="340+ Products are listed..." description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt." buttonText="View Now" buttonHref="#" />
+        <CtaBanner
+          variant="dark"
+          title={ov("cta-banner-2", "title", "340+ Products are listed...")}
+          description={ov(
+            "cta-banner-2",
+            "description",
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt."
+          )}
+          buttonText={ov("cta-banner-2", "buttonText", "View Now")}
+          buttonHref="#"
+        />
       </div>
     ),
     services: () => (
@@ -211,9 +247,13 @@ function createSectionRenderers(
       <div id="cta-banner-3" className={spacing.section.gap}>
         <CtaBanner
           variant="dark"
-          title="Like what you see?"
-          description="Donec rutrum congue leo eget malesuada. Vivamus suscipit tortor eget felis porttitor volutpat."
-          buttonText="Let's Work Together"
+          title={ov("cta-banner-3", "title", "Like what you see?")}
+          description={ov(
+            "cta-banner-3",
+            "description",
+            "Donec rutrum congue leo eget malesuada. Vivamus suscipit tortor eget felis porttitor volutpat."
+          )}
+          buttonText={ov("cta-banner-3", "buttonText", "Let's Work Together")}
           buttonHref={workTogetherWhatsAppHref}
         />
       </div>
@@ -221,12 +261,16 @@ function createSectionRenderers(
     "other-pages": () => (
       <div id="other-pages" className={spacing.section.gap}>
         <DetailWithLeftSidebar
-          sectionTitle="My Projects"
-          sectionSubtitle="Mini info section details"
+          sectionTitle={ov("other-pages", "sectionTitle", "My Projects")}
+          sectionSubtitle={ov("other-pages", "sectionSubtitle", "Mini info section details")}
           heroImage={img("detail-hero") || "/hero.png"}
-          title="Title Here Lorem ipsum dolor sit amet Lorem ipsum dolor"
-          author="Author name"
-          date="25 Jan 2026"
+          title={ov(
+            "other-pages",
+            "title",
+            "Title Here Lorem ipsum dolor sit amet Lorem ipsum dolor"
+          )}
+          author={ov("other-pages", "author", "Author name")}
+          date={ov("other-pages", "date", "25 Jan 2026")}
           htmlContent={myProjectsHtmlContent}
           stickySidebar={true}
           topics={[
@@ -257,7 +301,14 @@ function createSectionRenderers(
     ),
     "help-banner-1": () => (
       <div id="help-banner-1" className={spacing.section.gap}>
-        <HelpBanner title="Looking for Help!" description="We are updating our Premium products with real-time support and a dedicated consultant to guide your soulmate search." />
+        <HelpBanner
+          title={ov("help-banner-1", "title", "Looking for Help!")}
+          description={ov(
+            "help-banner-1",
+            "description",
+            "We are updating our Premium products with real-time support and a dedicated consultant to guide your soulmate search."
+          )}
+        />
       </div>
     ),
     contact: () => (
@@ -267,7 +318,17 @@ function createSectionRenderers(
     ),
     "cta-banner-4": () => (
       <div id="cta-banner-4" className={spacing.section.gap}>
-        <CtaBanner variant="light" title="340+ Products are listed..." description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt." buttonText="Explore More" buttonHref="#" />
+        <CtaBanner
+          variant="light"
+          title={ov("cta-banner-4", "title", "340+ Products are listed...")}
+          description={ov(
+            "cta-banner-4",
+            "description",
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt."
+          )}
+          buttonText={ov("cta-banner-4", "buttonText", "Explore More")}
+          buttonHref="#"
+        />
       </div>
     ),
     "scale-operations": () => (
@@ -377,7 +438,17 @@ function createSectionRenderers(
     ),
     "help-banner-2": () => (
       <div id="help-banner-2" className={spacing.section.gap}>
-        <HelpBanner variant="card" title="Ready to Start Your Construction Project?" description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi." buttonText="Request a Free Quote" buttonHref="#" />
+        <HelpBanner
+          variant="card"
+          title={ov("help-banner-2", "title", "Ready to Start Your Construction Project?")}
+          description={ov(
+            "help-banner-2",
+            "description",
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi."
+          )}
+          buttonText={ov("help-banner-2", "buttonText", "Request a Free Quote")}
+          buttonHref="#"
+        />
       </div>
     ),
     "event-banner": () => (
@@ -392,7 +463,14 @@ function createSectionRenderers(
     ),
     "coming-soon": () => (
       <div id="coming-soon" className={spacing.section.gap}>
-        <ComingSoonSection title="Maundy" tagline="We are still working on our website. Stay tuned for updates!" />
+        <ComingSoonSection
+          title={ov("coming-soon", "title", "Maundy")}
+          tagline={ov(
+            "coming-soon",
+            "tagline",
+            "We are still working on our website. Stay tuned for updates!"
+          )}
+        />
       </div>
     ),
   };
@@ -403,7 +481,10 @@ function parseSectionData(list: { sectionId: string; label: string; isCustom?: b
   const codeMap: Record<string, string> = {};
   list.forEach((s) => {
     if (s.sectionId && s.label) labelMap[s.sectionId] = s.label;
-    if (s.isCustom && s.sectionId && s.code) codeMap[s.sectionId] = s.code;
+    const raw = typeof s.code === "string" ? s.code : "";
+    if (!s.sectionId || !raw.trim()) return;
+    if (isCatalogStyleLandingSectionId(s.sectionId)) return;
+    codeMap[s.sectionId] = raw;
   });
   return { labelMap, codeMap };
 }
@@ -458,6 +539,14 @@ export default function SecondLanding() {
     const cached = getCachedData<{ labelMap: Record<string, string>; codeMap: Record<string, string> }>(CACHE_KEYS.LANDING_SECTIONS);
     return cached?.codeMap ?? {};
   });
+  const [sectionContentMap, setSectionContentMap] = useState<Record<string, Record<string, string>>>(() => {
+    const cached = getCachedData<{
+      labelMap?: Record<string, string>;
+      codeMap?: Record<string, string>;
+      contentMap?: Record<string, Record<string, string>>;
+    }>(CACHE_KEYS.LANDING_SECTIONS);
+    return cached?.contentMap ?? {};
+  });
   const [banner2Map, setBanner2Map] = useState<Record<string, string>>(() => {
     const cached = getCachedData<Record<string, string>>(CACHE_KEYS.BANNERS2);
     return cached ?? {};
@@ -474,11 +563,13 @@ export default function SecondLanding() {
         ]);
         setEnabledSectionIds(ids);
         const { labelMap, codeMap } = parseSectionData(list);
+        const contentMap = buildSectionContentMapFromList(list);
         setSectionLabels(labelMap);
         setCustomSectionCodeMap(codeMap);
+        setSectionContentMap(contentMap);
         setBanner2Map(parseBanner2Map(banners));
         setCachedData(CACHE_KEYS.ENABLED_LANDING_SECTIONS, ids);
-        setCachedData(CACHE_KEYS.LANDING_SECTIONS, { labelMap, codeMap });
+        setCachedData(CACHE_KEYS.LANDING_SECTIONS, { labelMap, codeMap, contentMap });
         setCachedData(CACHE_KEYS.BANNERS2, parseBanner2Map(banners));
       } catch {
         setEnabledSectionIds([]);
@@ -564,9 +655,19 @@ export default function SecondLanding() {
           socialLinks: companyData.socialLinks,
         },
         faqPage,
-        buildWhatsAppUrl(companyData.phone, "Hello, I visited the ZI_Core site. I would like to ask you")
+        buildWhatsAppUrl(companyData.phone, "Hello, I visited the ZI_Core site. I would like to ask you"),
+        sectionContentMap
       ),
-    [banner2Map, companyData.company, companyData.slogan, companyData.description, companyData.socialLinks, companyData.phone, faqPage]
+    [
+      banner2Map,
+      companyData.company,
+      companyData.slogan,
+      companyData.description,
+      companyData.socialLinks,
+      companyData.phone,
+      faqPage,
+      sectionContentMap,
+    ]
   );
 
   const otherPagesItems: { id: string; label: string }[] =
@@ -610,19 +711,20 @@ export default function SecondLanding() {
           <PageLoader />
         ) : (
         sectionOrder.map((sectionId) => {
-          const render = sectionRenderers[sectionId];
-          if (render) {
-            return <React.Fragment key={sectionId}>{render()}</React.Fragment>;
-          }
-          if (sectionId.startsWith("custom-") && customSectionCodeMap[sectionId]) {
+          const htmlOverride = customSectionCodeMap[sectionId];
+          if (htmlOverride) {
             return (
               <div
                 key={sectionId}
                 id={sectionId}
                 className={spacing.section.gap}
-                dangerouslySetInnerHTML={{ __html: customSectionCodeMap[sectionId] }}
+                dangerouslySetInnerHTML={{ __html: htmlOverride }}
               />
             );
+          }
+          const render = sectionRenderers[sectionId];
+          if (render) {
+            return <React.Fragment key={sectionId}>{render()}</React.Fragment>;
           }
           if (sectionId.startsWith("catalog-")) {
             const slug = sectionId.replace(/^catalog-/, "");

@@ -8,6 +8,8 @@ export interface LandingSectionItem {
   order: number;
   isCustom?: boolean;
   code?: string;
+  /** JSON object string: editable copy fields per section (see landingSectionContent). */
+  contentJson?: string;
 }
 
 export const getLandingSections = async (): Promise<LandingSectionItem[]> => {
@@ -27,7 +29,7 @@ export const createLandingSection = async (label: string): Promise<LandingSectio
 
 export const updateLandingSection = async (
   id: string,
-  data: { enabled?: boolean; order?: number; code?: string }
+  data: { enabled?: boolean; order?: number; code?: string; label?: string; contentJson?: string }
 ): Promise<LandingSectionItem> => {
   const res = await API.put(`/landingsections/${id}`, data);
   return res.data.data;

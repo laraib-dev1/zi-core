@@ -10,7 +10,6 @@ import {
   Menu,
   Package,
   FolderTree,
-  LayoutList,
   LayoutTemplate,
   Loader2,
 } from "lucide-react";
@@ -80,7 +79,7 @@ export default function DeveloperLayout() {
     { label: "Web Pages", icon: FileText, path: "/developer/web-pages" },
     { label: "Profile Pages", icon: FileText, path: "/developer/profile-pages" },
     { label: "Footer", icon: PanelBottom, path: "/developer/footer" },
-    { label: "2nd Landing Sections", icon: LayoutList, path: "/developer/landing-sections" },
+    // { label: "2nd Landing Sections", icon: LayoutList, path: "/developer/landing-sections" },
     { label: "SpFolio", icon: LayoutTemplate, path: "/developer/spfolio" },
     { label: "SP Components", icon: Package, path: "/developer/sp-components" },
   ];

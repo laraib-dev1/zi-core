@@ -8,6 +8,8 @@ const LandingSectionSchema = new mongoose.Schema(
     order: { type: Number, default: 0 },
     isCustom: { type: Boolean, default: false },
     code: { type: String, default: "" }, // HTML content for custom sections
+    /** JSON string: per-section text overrides (keys match SpFolio field defs). */
+    contentJson: { type: String, default: "{}" },
   },
   { timestamps: true }
 );

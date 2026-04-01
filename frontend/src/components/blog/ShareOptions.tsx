@@ -143,63 +143,66 @@ export default function ShareOptions({
     </div>
   );
 
-  // Sidebar share options (vertical rectangle buttons – all options like after blog)
+  const sidebarBtnBase =
+    "flex items-center justify-center rounded-lg text-white transition-colors shrink-0 md:w-full md:justify-start md:gap-2 md:px-3 md:py-2.5 md:text-sm md:text-left w-11 h-11 md:h-auto md:min-h-0";
+
+  // Sidebar: full-width labeled buttons on md+, icon-only row on small screens
   const SidebarShareOptions = () => (
-    <div className={`flex flex-col gap-2 ${className}`}>
+    <div className={`flex flex-row flex-wrap justify-center gap-2 md:flex-col md:gap-2 ${className}`}>
       <button
         type="button"
         onClick={() => handleShareClick("facebook", socialLinks.facebook)}
-        className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-[#1877F2] text-white hover:bg-[#166FE5] transition-colors text-sm w-full text-left"
+        className={`${sidebarBtnBase} bg-[#1877F2] hover:bg-[#166FE5]`}
         aria-label="Share on Facebook"
       >
         <Facebook size={16} className="shrink-0" />
-        Facebook
+        <span className="hidden md:inline">Facebook</span>
       </button>
       <button
         type="button"
         onClick={() => handleShareClick("twitter", socialLinks.twitter)}
-        className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-[#1DA1F2] text-white hover:bg-[#1A91DA] transition-colors text-sm w-full text-left"
+        className={`${sidebarBtnBase} bg-[#1DA1F2] hover:bg-[#1A91DA]`}
         aria-label="Share on Twitter"
       >
         <Twitter size={16} className="shrink-0" />
-        Twitter
+        <span className="hidden md:inline">Twitter</span>
       </button>
       <button
         type="button"
         onClick={() => handleShareClick("linkedin", socialLinks.linkedin)}
-        className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-[#0077B5] text-white hover:bg-[#006399] transition-colors text-sm w-full text-left"
+        className={`${sidebarBtnBase} bg-[#0077B5] hover:bg-[#006399]`}
         aria-label="Share on LinkedIn"
       >
         <Linkedin size={16} className="shrink-0" />
-        LinkedIn
+        <span className="hidden md:inline">LinkedIn</span>
       </button>
       <button
         type="button"
         onClick={() => handleShareClick("pinterest", socialLinks.pinterest)}
-        className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-[#BD081C] text-white hover:bg-[#A00718] transition-colors text-sm w-full text-left"
+        className={`${sidebarBtnBase} bg-[#BD081C] hover:bg-[#A00718]`}
         aria-label="Share on Pinterest"
       >
         <FaPinterest size={16} className="shrink-0" />
-        Pinterest
+        <span className="hidden md:inline">Pinterest</span>
       </button>
       <button
         type="button"
         onClick={() => handleShareClick("whatsapp", socialLinks.whatsapp)}
-        className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-[#25D366] text-white hover:bg-[#20BD5A] transition-colors text-sm w-full text-left"
+        className={`${sidebarBtnBase} bg-[#25D366] hover:bg-[#20BD5A]`}
         aria-label="Share on WhatsApp"
       >
         <FaWhatsapp size={16} className="shrink-0" />
-        WhatsApp
+        <span className="hidden md:inline">WhatsApp</span>
       </button>
       {typeof navigator.share === "function" && (
         <button
           type="button"
           onClick={handleNativeShare}
-          className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors text-sm w-full text-left"
+          className={`${sidebarBtnBase} bg-[#3f4752] hover:bg-[#525b68]`}
           aria-label="Share (system dialog)"
         >
           <Share2 size={16} className="shrink-0" />
-          Share
+          <span className="hidden md:inline">Share</span>
         </button>
       )}
     </div>

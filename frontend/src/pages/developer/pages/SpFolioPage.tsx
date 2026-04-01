@@ -13,6 +13,12 @@ import {
   type LandingSectionItem,
 } from "@/api/landingsection.api";
 import { getCachedData, removeCachedData, setCachedData, CACHE_KEYS } from "@/utils/cache";
+import { isCatalogStyleLandingSectionId } from "@/utils/landingSectionCatalog";
+import {
+  getEditFieldDefsForSection,
+  mergeContentForEditor,
+  packContentForSave,
+} from "@/utils/landingSectionContent";
 import PageLoader from "@/components/ui/PageLoader";
 import CircularLoader from "@/components/ui/CircularLoader";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -45,6 +51,12 @@ export default function SpFolioPage() {
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [customSectionName, setCustomSectionName] = useState("");
   const [isCreatingCustom, setIsCreatingCustom] = useState(false);
+
+  const [editSection, setEditSection] = useState<LandingSectionItem | null>(null);
+  const [editLabel, setEditLabel] = useState("");
+  const [editCode, setEditCode] = useState("");
+  const [editContentFields, setEditContentFields] = useState<Record<string, string>>({});
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   useEffect(() => {
     loadSections();
@@ -150,6 +162,58 @@ export default function SpFolioPage() {
     setShowCustomModal(true);
   };
 
+  const handleOpenEditSection = (section: LandingSectionItem) => {
+    if (isCatalogStyleLandingSectionId(section.sectionId)) return;
+    const fresh = allSections.find((s) => s._id === section._id) ?? section;
+    setEditSection(fresh);
+    setEditLabel(fresh.label ?? "");
+    setEditCode(typeof fresh.code === "string" ? fresh.code : "");
+    setEditContentFields(mergeContentForEditor(fresh.sectionId, fresh.contentJson));
+  };
+
+  const handleCloseEditSection = () => {
+    setEditSection(null);
+    setEditLabel("");
+    setEditCode("");
+    setEditContentFields({});
+  };
+
+  const handleSaveEditSection = async () => {
+    if (!editSection || isSavingEdit) return;
+    const name = editLabel.trim();
+    if (!name) {
+      error("Section name is required.");
+      return;
+    }
+    setIsSavingEdit(true);
+    try {
+      const defs = getEditFieldDefsForSection(editSection.sectionId);
+      const payload: {
+        label: string;
+        code: string;
+        contentJson?: string;
+      } = { label: name, code: editCode };
+      if (defs.length > 0) {
+        payload.contentJson = packContentForSave(editSection.sectionId, editContentFields);
+      }
+      const updated = await updateLandingSection(editSection._id, payload);
+      removeCachedData(CACHE_KEYS.ENABLED_LANDING_SECTIONS);
+      removeCachedData(CACHE_KEYS.LANDING_SECTIONS);
+      removeCachedData(CACHE_KEYS.LANDING_SECTIONS_FULL);
+      setEditingSections((prev) =>
+        prev.map((s) => (s._id === updated._id ? { ...updated, enabled: s.enabled } : s))
+      );
+      await loadSections();
+      success("Section updated.");
+      handleCloseEditSection();
+    } catch (err) {
+      console.error("Failed to update section:", err);
+      error("Failed to update section.");
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
   const handleCreateCustomSection = async () => {
     const name = customSectionName.trim();
     if (!name || isCreatingCustom) return;
@@ -160,7 +224,7 @@ export default function SpFolioPage() {
       setEditingSections((prev) =>
         [...prev, { ...newSection, enabled: true }].sort((a, b) => a.order - b.order)
       );
-      success(`Custom section "${newSection.label}" created. Edit code in Admin → Sections.`);
+      success(`Custom section "${newSection.label}" created. Add HTML via Sp Builder → Edit on the section.`);
       setShowCustomModal(false);
       setShowAddModal(false);
       setCustomSectionName("");
@@ -428,8 +492,16 @@ export default function SpFolioPage() {
                           align="end"
                           side="bottom"
                           sideOffset={4}
-                          className="bg-white border rounded-md shadow-md text-gray-900 min-w-[140px]"
+                          className="bg-white border rounded-md shadow-md text-gray-900 min-w-[160px]"
                         >
+                          {!isCatalogStyleLandingSectionId(section.sectionId) && (
+                            <DropdownMenuItem
+                              className="cursor-pointer text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50"
+                              onClick={() => handleOpenEditSection(section)}
+                            >
+                              Edit
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem
                             className="text-red-600 focus:bg-red-50"
                             onClick={() => handleRemoveFromList(section._id)}
@@ -531,6 +603,105 @@ export default function SpFolioPage() {
       )}
 
       {/* Custom Section Modal (nested) */}
+      {/* Edit section (static / custom — not catalog-style grids) */}
+      {editSection && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Edit section</h3>
+              <button
+                type="button"
+                onClick={handleCloseEditSection}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mb-3">
+              <span className="font-medium text-gray-700">Section label</span> — used in the navbar{" "}
+              <span className="font-medium">Other</span> menu (for sections not in the main links) and in builder lists.
+            </p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Section label</label>
+            <input
+              type="text"
+              value={editLabel}
+              onChange={(e) => setEditLabel(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent mb-4"
+            />
+            {getEditFieldDefsForSection(editSection.sectionId).map((field) => (
+              <div key={field.key} className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
+                {field.multiline ? (
+                  <textarea
+                    value={editContentFields[field.key] ?? ""}
+                    onChange={(e) =>
+                      setEditContentFields((prev) => ({ ...prev, [field.key]: e.target.value }))
+                    }
+                    rows={field.key === "bullets" ? 5 : 4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent resize-y min-h-[80px]"
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={editContentFields[field.key] ?? ""}
+                    onChange={(e) =>
+                      setEditContentFields((prev) => ({ ...prev, [field.key]: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent"
+                  />
+                )}
+              </div>
+            ))}
+            {getEditFieldDefsForSection(editSection.sectionId).length > 0 ? (
+              <>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Optional: full HTML override
+                </label>
+                <p className="text-xs text-gray-500 mb-1">
+                  If filled, this replaces the entire section (the fields above are ignored until this is cleared).
+                </p>
+                <textarea
+                  value={editCode}
+                  onChange={(e) => setEditCode(e.target.value)}
+                  rows={6}
+                  placeholder="Leave empty to use the fields above."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent resize-y min-h-[80px]"
+                />
+              </>
+            ) : (
+              <>
+                <label className="block text-sm font-medium text-gray-700 mb-1">HTML content</label>
+                <textarea
+                  value={editCode}
+                  onChange={(e) => setEditCode(e.target.value)}
+                  rows={12}
+                  placeholder="Your custom section HTML"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent resize-y min-h-[160px]"
+                />
+              </>
+            )}
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                type="button"
+                onClick={handleCloseEditSection}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveEditSection}
+                disabled={!editLabel.trim() || isSavingEdit}
+                className="px-4 py-2 text-sm text-white rounded-lg theme-button disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSavingEdit && <CircularLoader size={14} color="white" />}
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showCustomModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60]">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 mx-4">
@@ -549,7 +720,7 @@ export default function SpFolioPage() {
               </button>
             </div>
             <p className="text-sm text-gray-500 mb-3">
-              Enter a name for your custom section. You can add HTML code in 2nd Landing Sections.
+              Enter a name for your custom section. Add HTML in SpFolio (Sp Builder → Edit on the section).
             </p>
             <input
               type="text"

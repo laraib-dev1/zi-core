@@ -6,6 +6,7 @@ import { spacing } from "@/utils/spacing";
 import { cn } from "@/lib/utils";
 import { getPublishedCatalogItems } from "@/api/blog.api";
 import { getApplications } from "@/api/application.api";
+import { getApplicationPlatformStatesLine } from "@/utils/applicationPlatforms";
 
 interface ApplicationsSectionProps {
   catalogTypeSlug: string;
@@ -26,6 +27,7 @@ interface AppItem {
   stars: number;
   ratingCount: number;
   topRated: boolean;
+  platformStatesLine: string;
 }
 
 function stripHtml(html: string, maxLength = 160): string {
@@ -68,6 +70,7 @@ export default function ApplicationsSection({
           stars: Number(row.appInfo?.stars || 0),
           ratingCount: Number(row.appInfo?.ratingCount || 0),
           topRated: Boolean(row.appInfo?.starsEnabled && Number(row.appInfo?.stars || 0) >= 4),
+          platformStatesLine: getApplicationPlatformStatesLine(row.downloadsList),
         }));
         setItems(mapped.filter((x) => x.id));
       })
@@ -124,6 +127,7 @@ export default function ApplicationsSection({
                   ratingCount: item.ratingCount,
                   isTopRated: item.topRated,
                 }}
+                platformStatesLine={item.platformStatesLine || undefined}
                 viewHref={`/catalog/${catalogTypeSlug}/${item.id}`}
                 viewLabel="View"
               />

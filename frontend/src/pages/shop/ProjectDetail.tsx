@@ -4,6 +4,7 @@ import Navbar2 from "@/components/layout/Navbar2";
 import { useSecondLandingNavbarProps } from "@/hooks/useSecondLandingNavbarProps";
 import Footer from "@/components/layout/Footer";
 import DetailWithLeftSidebar from "@/components/landing/DetailWithLeftSidebar";
+import DetailPageLatestAndCta from "@/components/landing/DetailPageLatestAndCta";
 import { spacing } from "@/utils/spacing";
 import { getBlogById, getPublishedCatalogItems, incrementBlogView } from "@/api/blog.api";
 import PageLoader from "@/components/ui/PageLoader";
@@ -146,10 +147,14 @@ export default function ProjectDetail() {
             views={project.views ?? 0}
             htmlContent={project.description || defaultProjectHtml}
             relatedServices={relatedProjects.length > 0 ? relatedProjects : undefined}
-            relatedSidebarTitle="Projects in same category"
             stickySidebar={true}
           />
         </div>
+        <DetailPageLatestAndCta
+          catalogTypeSlug="projects"
+          currentItemId={String(project._id || project.id || id)}
+          hireMeHref={landingNav.hireMeHref}
+        />
       </main>
       <section
         className={`w-full ${spacing.footer.gapTop}`}

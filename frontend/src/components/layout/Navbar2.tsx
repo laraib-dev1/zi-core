@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import LandingSocialIconButtons from "@/components/landing/LandingSocialIconButtons";
 import { getCompany } from "@/api/company.api";
 import { getCachedData, CACHE_KEYS } from "@/utils/cache";
-import { DEFAULT_LANDING_SOCIAL, pickSocialLinksOrDefault } from "@/utils/landingSocial";
 
 const navLinks = [
   { to: "#home", label: "Home", hash: "home" },
@@ -93,19 +92,27 @@ export default function Navbar2({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
 
-  const [landingSocial, setLandingSocial] = useState<Record<string, string | undefined>>(DEFAULT_LANDING_SOCIAL);
+  /** Same as footer: only show icons for URLs saved on the Company page. */
+  const [rawSocialLinks, setRawSocialLinks] = useState<Record<string, string | undefined>>({});
 
   useEffect(() => {
-    if (companySocialLinks !== undefined) {
-      setLandingSocial(pickSocialLinksOrDefault(companySocialLinks));
+    if (companySocialLinks !== undefined && companySocialLinks !== null) {
+      setRawSocialLinks(companySocialLinks as Record<string, string | undefined>);
       return;
     }
     const cached = getCachedData<any>(CACHE_KEYS.COMPANY);
-    setLandingSocial(pickSocialLinksOrDefault(cached?.socialLinks));
+    setRawSocialLinks((cached?.socialLinks || {}) as Record<string, string | undefined>);
     getCompany()
-      .then((c) => setLandingSocial(pickSocialLinksOrDefault(c?.socialLinks)))
+      .then((c) => setRawSocialLinks((c?.socialLinks || {}) as Record<string, string | undefined>))
       .catch(() => {});
   }, [companySocialLinks]);
+
+  const navbarSocialLinks = {
+    twitter: rawSocialLinks.twitter || rawSocialLinks.x || "",
+    facebook: rawSocialLinks.facebook || "",
+    linkedin: rawSocialLinks.linkedin || "",
+    instagram: rawSocialLinks.instagram || "",
+  };
 
   // Same slide logic as Navbar.tsx / AppSidebar: open -> next frame slide in
   useEffect(() => {
@@ -225,7 +232,7 @@ export default function Navbar2({
       {/* Part 3: Social icons + hire me — on detail pages always visible (including mobile); on home, desktop only until burger opens */}
       <div
         className={cn(
-          "flex items-center gap-2 shrink-0",
+          "flex items-center gap-1 shrink-0",
           "hidden md:flex"
         )}
       >
@@ -238,7 +245,7 @@ export default function Navbar2({
         >
           Hire Me
         </a>
-        <LandingSocialIconButtons links={landingSocial} size="sm" />
+        <LandingSocialIconButtons links={navbarSocialLinks} useDefaults={false} size="sm" />
       </div>
     </>
   );
@@ -370,7 +377,7 @@ export default function Navbar2({
                   Hire Me
                 </a>
                 <div className="pt-4 mt-4 justify-start">
-                  <LandingSocialIconButtons links={landingSocial} size="sm" />
+                  <LandingSocialIconButtons links={navbarSocialLinks} useDefaults={false} size="sm" />
                 </div>
               </div>
             </>
