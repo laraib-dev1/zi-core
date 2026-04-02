@@ -65,16 +65,8 @@ function isRichTextEmpty(html: string): boolean {
   return text.length === 0;
 }
 
-export default function ApplicationModal({ open, mode, data, onClose, onSubmit }: Props) {
-  const { success, error } = useToast();
-  const isView = mode === "view";
-  const [saving, setSaving] = useState(false);
-  const [tab, setTab] = useState<AppTab>("app");
-  const [cropModalOpen, setCropModalOpen] = useState(false);
-  const [cropTarget, setCropTarget] = useState<"icon" | "banner" | "inner" | "screenshot" | null>(null);
-  const [cropScreenshotIndex, setCropScreenshotIndex] = useState<number | null>(null);
-  const [cropFile, setCropFile] = useState<File | null>(null);
-  const [form, setForm] = useState<any>({
+function createEmptyApplicationForm() {
+  return {
     title: "",
     subTag: "",
     shortDescription: "",
@@ -116,7 +108,19 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
     screenshotFiles: [] as File[],
     imageFile: null as File | null,
     image: "",
-  });
+  };
+}
+
+export default function ApplicationModal({ open, mode, data, onClose, onSubmit }: Props) {
+  const { success, error } = useToast();
+  const isView = mode === "view";
+  const [saving, setSaving] = useState(false);
+  const [tab, setTab] = useState<AppTab>("app");
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [cropTarget, setCropTarget] = useState<"icon" | "banner" | "inner" | "screenshot" | null>(null);
+  const [cropScreenshotIndex, setCropScreenshotIndex] = useState<number | null>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [form, setForm] = useState<any>(() => createEmptyApplicationForm());
   const currentTabIndex = useMemo(() => appTabs.indexOf(tab), [tab]);
   const setupOrder = ["website", "apk", "exe", "windows"] as const;
   const getSetup = (typeKey: string) => {
@@ -164,13 +168,14 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
   useEffect(() => {
     if (!open) return;
     setTab("app");
+    const empty = createEmptyApplicationForm();
     if (data) {
-      const mergedAppInfo = { ...form.appInfo, ...(data.appInfo || {}) };
+      const mergedAppInfo = { ...empty.appInfo, ...(data.appInfo || {}) };
       if (typeof mergedAppInfo.supportTabEnabled !== "boolean") {
         mergedAppInfo.supportTabEnabled = Boolean(data.helpEnabled);
       }
       setForm({
-        ...form,
+        ...empty,
         ...data,
         appInfo: mergedAppInfo,
         media: { banner: "", inner: "", screenshots: [], ...(data.media || {}) },
@@ -184,9 +189,8 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
         image: data.image || "",
       });
     } else {
-      setForm((prev: any) => ({ ...prev, title: "", subTag: "", shortDescription: "", description: "<p></p>", downloadsList: [] }));
+      setForm(createEmptyApplicationForm());
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, data]);
 
   const handleSave = async () => {
@@ -213,6 +217,8 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
         await updateApplication(id, payload);
         success("Application updated successfully");
       }
+      setForm(createEmptyApplicationForm());
+      setTab("app");
       onClose();
       onSubmit();
     } catch (e: any) {
@@ -254,8 +260,11 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
         if (form.appInfo?.thumbnailEnabled && !(form.media?.banner || form.bannerFile)) return "Media tab: Thumbnail image is required when Thumbnail is enabled.";
         if (form.appInfo?.bannerEnabled && !(form.media?.inner || form.innerFile)) return "Media tab: Banner image is required when Banner is enabled.";
         if (form.appInfo?.imagesEnabled) {
-          const shots = Array.isArray(form.media?.screenshots) ? form.media.screenshots.filter(Boolean) : [];
-          if (shots.length !== 5) return "Media tab: Add exactly 5 images (1 main + 4 others) when Images is enabled.";
+          const firstUrl = Array.isArray(form.media?.screenshots) ? String(form.media.screenshots[0] || "").trim() : "";
+          const firstFile = Array.isArray(form.screenshotFiles) ? form.screenshotFiles[0] : null;
+          if (!firstUrl && !firstFile) {
+            return "Media tab: Main image (first slot) is required when Images is enabled. Additional slots are optional.";
+          }
         }
         return null;
       case "description":
@@ -625,7 +634,9 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
                     {(form.media?.screenshots?.[idx]) ? (
                       <img src={form.media.screenshots[idx]} className="w-full h-full object-cover" alt={idx === 0 ? "Main screenshot" : `Screenshot ${idx + 1}`} />
                     ) : (
-                      <span className="text-xs text-gray-400">{idx === 0 ? "Main image" : `Image ${idx + 1}`}</span>
+                      <span className="text-xs text-gray-400">
+                        {idx === 0 ? "Main image (required)" : `Image ${idx + 1} (optional)`}
+                      </span>
                     )}
                     {!isView && form.media?.screenshots?.[idx] && (
                       <button
@@ -655,7 +666,9 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
                   </div>
                 ))}
               </div>
-              <p className="mt-2 text-xs text-gray-500">Use exactly 5 images: 1 main + 4 others. Recommended size: 1080 x 1080 (1:1).</p>
+              <p className="mt-2 text-xs text-gray-500">
+                First image is required when Images is enabled; up to four more are optional. Recommended size: 1080 × 1080 (1:1).
+              </p>
             </div>
           </TabsContent>
 
