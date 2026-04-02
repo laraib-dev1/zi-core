@@ -55,7 +55,58 @@ export interface Navbar2Props {
    * When omitted, Navbar loads `/api/company` so detail pages match without prop drilling.
    */
   companySocialLinks?: Record<string, string | undefined> | null;
+  /**
+   * Second landing: DOM ids of sections in scroll order (top → bottom), e.g. ["home","about",…].
+   * When set on `/`, active nav follows scroll (scroll-spy).
+   */
+  landingScrollSpyOrder?: string[];
+  /** DOM ids that belong under "Other pages" — when any is in view, that nav item is active. */
+  otherPagesScrollIds?: string[];
   className?: string;
+}
+
+const SCROLL_SPY_TOP_OFFSET = 88;
+const EMPTY_OTHER_SCROLL_IDS: string[] = [];
+
+/** Last section whose top has crossed the offset line (typical scroll-spy). */
+function getActiveScrollSpyDomId(orderedDomIds: string[], offsetPx: number): string {
+  const docH = Math.max(
+    document.documentElement.scrollHeight,
+    document.body.scrollHeight,
+    document.documentElement.clientHeight
+  );
+  const nearBottom = window.scrollY + window.innerHeight >= docH - 56;
+  if (nearBottom) {
+    for (let i = orderedDomIds.length - 1; i >= 0; i--) {
+      const id = orderedDomIds[i];
+      if (document.getElementById(id)) return id;
+    }
+  }
+  let active = orderedDomIds[0] ?? "home";
+  for (const id of orderedDomIds) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    const top = el.getBoundingClientRect().top;
+    if (top <= offsetPx) active = id;
+  }
+  return active;
+}
+
+/** Map visible section id to main nav hash (Home, About, Portfolio, …). */
+function mapDomIdToNavHash(activeDomId: string, orderedDomIds: string[], otherPagesIds: Set<string>): string {
+  const idx = orderedDomIds.indexOf(activeDomId);
+  if (idx < 0) return "home";
+  let nav: string = "home";
+  for (let i = 0; i <= idx; i++) {
+    const sid = orderedDomIds[i];
+    if (sid === "home" || sid === "hero") nav = "home";
+    if (sid === "about") nav = "about";
+    if (sid === "portfolio") nav = "portfolio";
+    if (sid === "testimonials") nav = "testimonials";
+    if (sid === "contact") nav = "contact";
+    if (otherPagesIds.has(sid)) nav = "other-pages";
+  }
+  return nav;
 }
 
 export default function Navbar2({
@@ -64,6 +115,8 @@ export default function Navbar2({
   companyName = "Grace by Anu",
   hireMeHref = "#",
   companySocialLinks,
+  landingScrollSpyOrder,
+  otherPagesScrollIds,
   className,
 }: Navbar2Props) {
   const { pathname, hash } = useLocation();
@@ -74,6 +127,44 @@ export default function Navbar2({
   const isOnLandingPage = pathname === "/";
   /** Second landing home: full nav + mobile drawer. Detail routes: brand + Hire Me + socials only (no section links / burger). */
   const isLandingHome = pathname === "/";
+  const [scrollSpyNavHash, setScrollSpyNavHash] = useState<string | null>(null);
+
+  const resolvedOtherScrollIds = otherPagesScrollIds ?? EMPTY_OTHER_SCROLL_IDS;
+  const otherPagesIdSet = React.useMemo(
+    () => new Set(resolvedOtherScrollIds.filter(Boolean)),
+    [resolvedOtherScrollIds]
+  );
+
+  useEffect(() => {
+    if (!isLandingHome || !landingScrollSpyOrder?.length) {
+      setScrollSpyNavHash(null);
+      return;
+    }
+
+    const order = landingScrollSpyOrder;
+    const run = () => {
+      const activeDom = getActiveScrollSpyDomId(order, SCROLL_SPY_TOP_OFFSET);
+      setScrollSpyNavHash(mapDomIdToNavHash(activeDom, order, otherPagesIdSet));
+    };
+
+    run();
+    let ticking = false;
+    const onScrollOrResize = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        run();
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [isLandingHome, landingScrollSpyOrder, otherPagesIdSet]);
   const getHref = (to: string) => (isLanding ? to : `/${to}`);
 
   const handleNavClick = (e: React.MouseEvent, itemHash: string) => {
@@ -156,7 +247,13 @@ export default function Navbar2({
 
   const v = bottomDivHasColor ? variantHasColor : variantNoColor;
 
-  const isActive = (itemHash: string) => isOnLandingPage && currentHash === itemHash;
+  const isActive = (itemHash: string) => {
+    if (!isOnLandingPage) return false;
+    if (scrollSpyNavHash != null && landingScrollSpyOrder?.length) {
+      return scrollSpyNavHash === itemHash;
+    }
+    return currentHash === itemHash;
+  };
 
   const linkClass = (itemHash: string) =>
     cn(

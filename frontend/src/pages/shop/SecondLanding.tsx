@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar2 from "@/components/layout/Navbar2";
 import { getEnabledLandingSections, getLandingSections } from "@/api/landingsection.api";
@@ -683,6 +683,24 @@ export default function SecondLanding() {
             return { id: scrollId, label: sectionLabels[sectionId] || sectionId };
           });
 
+  const landingScrollSpyOrder = useMemo(() => {
+    if (!sectionsReady) return [];
+    return sectionOrder.map((sid) => {
+      if (sid === "hero") return customSectionCodeMap[sid] ? "hero" : "home";
+      return sid;
+    });
+  }, [sectionsReady, sectionOrder, customSectionCodeMap]);
+
+  const otherPagesScrollIds = useMemo(() => {
+    if (enabledSectionIds == null || enabledSectionIds.length === 0) return [];
+    return enabledSectionIds
+      .filter((sectionId) => {
+        const scrollId = sectionId === "hero" ? "home" : sectionId;
+        return !MAIN_NAV_SCROLL_IDS.has(scrollId);
+      })
+      .map((sectionId) => (sectionId === "hero" ? "home" : sectionId));
+  }, [enabledSectionIds]);
+
   useEffect(() => {
     const hashId = hash?.replace("#", "");
     if (!hashId || !sectionsReady) return;
@@ -703,6 +721,8 @@ export default function SecondLanding() {
         companyName={companyData.company || DEFAULT_COMPANY_NAME}
         hireMeHref={buildWhatsAppUrl(companyData.phone, "Hello, I visited the ZI_Core site. I would like to ask you")}
         companySocialLinks={companyData.socialLinks}
+        landingScrollSpyOrder={landingScrollSpyOrder}
+        otherPagesScrollIds={otherPagesScrollIds}
       />
 
       {/* Section gap from spacing.ts = outer padding (wrapper), not on section div */}

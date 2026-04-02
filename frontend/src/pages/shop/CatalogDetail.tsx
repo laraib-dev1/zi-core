@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { useSecondLandingNavbarProps } from "@/hooks/useSecondLandingNavbarProps";
 import Container12 from "@/components/layout/Container12";
 import { getApplicationPlatformStatesLine } from "@/utils/applicationPlatforms";
+import { resolvePublicAssetUrl } from "@/utils/mediaUrl";
 
 const navGrayBtnClass =
   "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-xs sm:text-sm font-medium text-white shrink-0 border border-[#7D7D7D]/50 bg-[#7D7D7D]/70 transition-colors hover:bg-[var(--theme-primary)] hover:border-[var(--theme-primary)]";
@@ -232,10 +233,19 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
       : downloadItems;
     const selectedDownload = filteredDownloads[0] || null;
     const selectedDownloadHref = selectedDownload ? (selectedDownload.fileUrl || selectedDownload.url || "#") : "#";
+    const resolveImg = (u: string | undefined) => resolvePublicAssetUrl(u).trim();
     const screenshotImages: string[] = Array.isArray(item.media?.screenshots)
-      ? item.media.screenshots.filter(Boolean).slice(0, 5)
+      ? item.media.screenshots
+          .filter(Boolean)
+          .map((x: string) => resolveImg(x))
+          .filter(Boolean)
+          .slice(0, 5)
       : [];
-    const galleryImages = screenshotImages.length ? screenshotImages : item.image ? [item.image] : [];
+    const galleryImages = screenshotImages.length
+      ? screenshotImages
+      : item.image
+        ? [resolveImg(item.image)].filter(Boolean)
+        : [];
     const cleanText = (html: string) => String(html || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
     const setupDescriptionBlocks = downloadItems
       .filter((d: any) => String(d?.description || "").trim())
@@ -263,7 +273,8 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
     const getTypeImage = (typeKey: string): string => {
       const byType = downloadItems.find((d: any) => String(d?.type || "").toLowerCase() === typeKey);
       const imageCandidate = byType?.iconUrl || byType?.icon || byType?.imageUrl || byType?.image || "";
-      return String(imageCandidate || "");
+      const raw = String(imageCandidate || "").trim();
+      return raw ? resolveImg(raw) : "";
     };
     const defaultPlatformIconByType: Record<string, string> = {
       apk: "/file_icons.svg",
@@ -288,7 +299,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                 <div className={`${spacing.section.gap} mb-2`}>
                   <h1 className="text-center text-2xl md:text-3xl font-bold theme-heading">Application Details</h1>
                   <p className="mt-1 text-center text-xs text-gray-500">
-                    Applications / Category / Niche / {item.title || "Application Name"}
+                    Application / {item.title || "Application Name"}
                   </p>
                 </div>
 
@@ -299,7 +310,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                       id: String(item._id || item.id || ""),
                       title: item.title || "Application Name",
                       subTag: item.subTag || appInfo.domain || "Sub info of application domain",
-                      image: item.image || "",
+                      image: resolveImg(item.image) || "",
                       releaseDate: appInfo.releaseDate || formatDate(item.createdAt) || "—",
                       downloadsText: appInfo.downloadsDisplay || "1.2k+",
                       version: appInfo.version ? `v${appInfo.version}` : "",
@@ -555,7 +566,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                 {appInfo.thumbnailEnabled !== false && item.media?.banner && (
                   <section className={spacing.section.gap}>
                     <div className="w-full rounded-xl overflow-hidden border border-gray-200" style={{ aspectRatio: "9 / 6" }}>
-                      <img src={item.media.banner} alt="Application banner" className="w-full h-full object-cover" />
+                      <img src={resolveImg(item.media.banner)} alt="Application banner" className="w-full h-full object-cover" />
                     </div>
                   </section>
                 )}
@@ -564,7 +575,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                 {appInfo.bannerEnabled !== false && item.media?.inner && (
                   <section className={spacing.section.gap}>
                     <div className="rounded-xl overflow-hidden border border-gray-200">
-                      <img src={item.media.inner} alt="Application thumbnail" className="w-full object-cover" />
+                      <img src={resolveImg(item.media.inner)} alt="Application thumbnail" className="w-full object-cover" />
                     </div>
                   </section>
                 )}
@@ -654,7 +665,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
           <DetailWithLeftSidebar
             sectionTitle={`${typeLabel} Detail`}
             sectionSubtitle={item.subTag || "Mini info section details"}
-            heroImage={item.image || "/hero.png"}
+            heroImage={resolvePublicAssetUrl(item.image).trim() || "/hero.png"}
             title={item.title || "Untitled"}
             author={authorName || undefined}
             date={formatDate(item.createdAt)}

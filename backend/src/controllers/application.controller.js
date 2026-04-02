@@ -13,6 +13,55 @@ function normalizeList(raw) {
   }
 }
 
+/** Drop browser-only preview URLs (blob:/data:) so they are never persisted. Keep real http(s) and same-origin paths. */
+function sanitizeScreenshotSlot(url) {
+  if (typeof url !== "string") return "";
+  const t = url.trim();
+  if (!t || t.startsWith("blob:") || t.startsWith("data:")) return "";
+  if (t.startsWith("http://") || t.startsWith("https://")) return t;
+  if (t.startsWith("//")) return t;
+  if (t.startsWith("/") && t.length > 1) return t;
+  return "";
+}
+
+/** Prefer new upload, else sanitized client value, else existing stored URL (so blob previews never wipe Cloudinary). */
+function mergeScreenshotSlot(incomingVal, existingVal) {
+  const fromIncoming = sanitizeScreenshotSlot(incomingVal);
+  if (fromIncoming) return fromIncoming;
+  return sanitizeScreenshotSlot(typeof existingVal === "string" ? existingVal : "");
+}
+
+/** Same rules as screenshot slots — use for any persisted image/file URL field. */
+function mergeUrlField(incomingVal, existingVal) {
+  const fromIncoming = sanitizeScreenshotSlot(typeof incomingVal === "string" ? incomingVal : "");
+  if (fromIncoming) return fromIncoming;
+  return sanitizeScreenshotSlot(typeof existingVal === "string" ? existingVal : "");
+}
+
+/** Strip blob:/data: from API responses so clients never try to load dead preview URLs (fixes Vercel console errors). */
+function sanitizeApplicationForClient(doc) {
+  if (!doc) return doc;
+  const plain = typeof doc.toObject === "function" ? doc.toObject() : { ...doc };
+  plain.image = sanitizeScreenshotSlot(plain.image || "");
+  plain.media = plain.media || {};
+  plain.media.banner = sanitizeScreenshotSlot(plain.media.banner || "");
+  plain.media.inner = sanitizeScreenshotSlot(plain.media.inner || "");
+  plain.media.screenshots = Array.isArray(plain.media.screenshots)
+    ? plain.media.screenshots.map((u) => sanitizeScreenshotSlot(typeof u === "string" ? u : "")).filter(Boolean)
+    : [];
+  if (Array.isArray(plain.downloadsList)) {
+    plain.downloadsList = plain.downloadsList.map((d) => ({
+      ...d,
+      fileUrl: sanitizeScreenshotSlot(typeof d?.fileUrl === "string" ? d.fileUrl : ""),
+      iconUrl: sanitizeScreenshotSlot(typeof d?.iconUrl === "string" ? d.iconUrl : ""),
+      icon: sanitizeScreenshotSlot(typeof d?.icon === "string" ? d.icon : ""),
+      imageUrl: sanitizeScreenshotSlot(typeof d?.imageUrl === "string" ? d.imageUrl : ""),
+      image: sanitizeScreenshotSlot(typeof d?.image === "string" ? d.image : ""),
+    }));
+  }
+  return plain;
+}
+
 export const getApplications = async (req, res) => {
   try {
     await connectDB();
@@ -20,7 +69,7 @@ export const getApplications = async (req, res) => {
     const query = {};
     if (status && status !== "all") query.status = status;
     const data = await Application.find(query).sort({ createdAt: -1 });
-    res.json({ success: true, data });
+    res.json({ success: true, data: data.map((d) => sanitizeApplicationForClient(d)) });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -31,7 +80,7 @@ export const getApplicationById = async (req, res) => {
     await connectDB();
     const item = await Application.findById(req.params.id);
     if (!item) return res.status(404).json({ success: false, message: "Application not found" });
-    res.json({ success: true, data: item });
+    res.json({ success: true, data: sanitizeApplicationForClient(item) });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -110,7 +159,7 @@ export const createApplication = async (req, res) => {
       helpEnabled: req.body.helpEnabled === "true" || req.body.helpEnabled === true,
       helpHtml: req.body.helpHtml || "",
     });
-    res.status(201).json({ success: true, data: app });
+    res.status(201).json({ success: true, data: sanitizeApplicationForClient(app) });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -122,12 +171,17 @@ export const updateApplication = async (req, res) => {
     const existing = await Application.findById(req.params.id);
     if (!existing) return res.status(404).json({ success: false, message: "Application not found" });
 
+    const prevDownloads = Array.isArray(existing.downloadsList) ? existing.downloadsList : [];
     const downloadsList = normalizeList(req.body.downloadsList).map((x, index) => ({
       ...x,
       order: x.order ?? index,
-      fileUrl: x.fileUrl || "",
+      fileUrl: mergeUrlField(x.fileUrl, prevDownloads[index]?.fileUrl),
       fileName: x.fileName || "",
       fileSize: x.fileSize || 0,
+      iconUrl: mergeUrlField(x.iconUrl, prevDownloads[index]?.iconUrl),
+      icon: mergeUrlField(x.icon, prevDownloads[index]?.icon),
+      imageUrl: mergeUrlField(x.imageUrl, prevDownloads[index]?.imageUrl),
+      image: mergeUrlField(x.image, prevDownloads[index]?.image),
     }));
 
     for (let i = 0; i < 20; i += 1) {
@@ -140,31 +194,44 @@ export const updateApplication = async (req, res) => {
       downloadsList[i].fileSize = file.size || downloadsList[i].fileSize || 0;
     }
 
-    let image = existing.image;
+    let image = sanitizeScreenshotSlot(existing.image || "");
     const iconFile = req.files?.icon?.[0] || req.files?.image?.[0];
     if (iconFile) {
       const upload = await uploadToCloudinary(iconFile.buffer, "applications");
       image = upload.secure_url;
     }
-    let banner = existing.media?.banner || "";
+    let banner = sanitizeScreenshotSlot(existing.media?.banner || "");
     if (req.files?.banner?.[0]) {
       const upload = await uploadToCloudinary(req.files.banner[0].buffer, "applications");
       banner = upload.secure_url;
     }
-    let inner = existing.media?.inner || "";
+    let inner = sanitizeScreenshotSlot(existing.media?.inner || "");
     if (req.files?.inner?.[0]) {
       const upload = await uploadToCloudinary(req.files.inner[0].buffer, "applications");
       inner = upload.secure_url;
     }
-    const incomingScreenshots = req.body.media ? (JSON.parse(req.body.media).screenshots || []) : (existing.media?.screenshots || []);
-    const screenshots = [...incomingScreenshots];
+    const existingScreens = Array.isArray(existing.media?.screenshots) ? existing.media.screenshots : [];
+    let incomingScreens = [];
+    try {
+      const parsedMedia = req.body.media ? JSON.parse(req.body.media) : {};
+      incomingScreens = Array.isArray(parsedMedia.screenshots) ? parsedMedia.screenshots : [];
+    } catch {
+      incomingScreens = [];
+    }
+    const slotCount = Math.max(existingScreens.length, incomingScreens.length, 5);
+    let screenshots = [];
+    for (let i = 0; i < slotCount; i += 1) {
+      screenshots.push(mergeScreenshotSlot(incomingScreens[i], existingScreens[i]));
+    }
     for (let i = 0; i < 10; i += 1) {
       const key = `screenshot_${i}`;
       const file = req.files?.[key]?.[0];
       if (!file) continue;
       const upload = await uploadToCloudinary(file.buffer, "applications");
-      screenshots.push(upload.secure_url);
+      while (screenshots.length <= i) screenshots.push("");
+      screenshots[i] = upload.secure_url;
     }
+    screenshots = screenshots.filter(Boolean);
 
     const tags = req.body.tags
       ? (Array.isArray(req.body.tags) ? req.body.tags : String(req.body.tags).split(",").map((t) => t.trim()).filter(Boolean))
@@ -193,7 +260,7 @@ export const updateApplication = async (req, res) => {
       { new: true }
     );
 
-    res.json({ success: true, data: updated });
+    res.json({ success: true, data: sanitizeApplicationForClient(updated) });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

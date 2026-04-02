@@ -13,14 +13,16 @@ export default function ProductImageGallery({
   showThumbnails = true,
   transparentBackground = false,
 }: Props) {
-  // Filter out empty, null, undefined, or placeholder images
-  const validImages = images.filter(img => 
-    img && 
-    img.trim() !== "" && 
-    img !== "/product.png" && 
-    !img.includes("placeholder") &&
-    !img.includes("wqwwwq")
-  );
+  const isProbablyRealImageUrl = (img: string) => {
+    const t = img.trim();
+    if (!t || t === "/product.png") return false;
+    if (t.includes("wqwwwq")) return false;
+    if (t.startsWith("blob:") || t.startsWith("data:")) return false;
+    if (/^https?:\/\//i.test(t) || t.startsWith("//") || t.startsWith("/")) return true;
+    return !t.toLowerCase().includes("placeholder");
+  };
+
+  const validImages = images.filter((img) => typeof img === "string" && isProbablyRealImageUrl(img));
   
   const displayImages = validImages.length > 0 ? validImages : ["/product.png"];
   const [selected, setSelected] = useState(displayImages[0] || "/product.png");

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { getPublishedCatalogItems } from "@/api/blog.api";
 import { getApplications } from "@/api/application.api";
 import { getApplicationPlatformStatesLine } from "@/utils/applicationPlatforms";
+import { resolvePublicAssetUrl } from "@/utils/mediaUrl";
 
 interface ApplicationsSectionProps {
   catalogTypeSlug: string;
@@ -63,7 +64,7 @@ export default function ApplicationsSection({
           title: row.title || "Untitled Application",
           subTag: row.subTag || "Sub info of application domain",
           description: stripHtml(row.description || "", 120),
-          image: row.image || "",
+          image: resolvePublicAssetUrl(row.image).trim() || "",
           views: Number(row.views || 0),
           createdAt: row.createdAt || "",
           version: row.appInfo?.version ? `v${row.appInfo.version}` : "",
