@@ -10,6 +10,8 @@ const LandingSectionSchema = new mongoose.Schema(
     code: { type: String, default: "" }, // HTML content for custom sections
     /** JSON string: per-section text overrides (keys match SpFolio field defs). */
     contentJson: { type: String, default: "{}" },
+    /** When true (default), section can appear in Navbar2 "Other pages" for non–main-nav sections. */
+    showInNavbarDropdown: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

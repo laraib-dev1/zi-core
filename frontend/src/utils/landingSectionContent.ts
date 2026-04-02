@@ -61,6 +61,43 @@ export const SECTION_EDIT_FIELD_DEFS: Record<string, SectionEditFieldDef[]> = {
     { key: "author", label: "Author" },
     { key: "date", label: "Date line" },
   ],
+  clients: [
+    { key: "title", label: "Section title" },
+    { key: "description", label: "Section description", multiline: true },
+    {
+      key: "logoSlides",
+      label:
+        "Logo slides — one line per logo (URL or URL|Alt). Blank line starts a new slide row.",
+      multiline: true,
+    },
+  ],
+  excellence: [
+    { key: "heading", label: "Full heading (e.g. Building Excellence Since 1995)" },
+    { key: "headingUnderline", label: "Part of heading with underline (e.g. Building Excellence)" },
+    { key: "paragraph1", label: "First paragraph", multiline: true },
+    { key: "paragraph2", label: "Second paragraph", multiline: true },
+    {
+      key: "statsLines",
+      label: "Stat cards — one per line as Value|Label (e.g. 25+|Years Experience)",
+      multiline: true,
+    },
+  ],
+  "scale-operations": [
+    { key: "tag", label: "Small tag above heading" },
+    { key: "heading", label: "Main heading" },
+    { key: "description", label: "Description", multiline: true },
+    { key: "features", label: "Feature bullets (one line each)", multiline: true },
+    { key: "primaryButtonText", label: "Primary button text" },
+    { key: "primaryButtonHref", label: "Primary button link (URL or #anchor)" },
+    { key: "secondaryButtonText", label: "Secondary button text" },
+    { key: "secondaryButtonHref", label: "Secondary button link" },
+    { key: "trustText", label: "Trust line under buttons" },
+    { key: "ratingText", label: "Rating / reviews line (e.g. 4.9/5 (2,300+ reviews))" },
+  ],
+  team: [
+    { key: "title", label: "Section title" },
+    { key: "subtitle", label: "Section subtitle" },
+  ],
 };
 
 /** Default copy matching SecondLanding hardcoded strings (used when DB empty). */
@@ -124,7 +161,105 @@ export const SECTION_CONTENT_DEFAULTS: Record<string, Record<string, string>> = 
     author: "Author name",
     date: "25 Jan 2026",
   },
+  clients: {
+    title: "Clients",
+    description:
+      "Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit",
+    logoSlides: "",
+  },
+  excellence: {
+    heading: "Building Excellence Since 1995",
+    headingUnderline: "Building Excellence",
+    paragraph1:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    paragraph2:
+      "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    statsLines: `25+|Years Experience
+500+|Projects Completed
+100%|Client Satisfaction
+48|Team Members`,
+  },
+  "scale-operations": {
+    tag: "Transform Your Business",
+    heading: "Ready to Scale Your Corporate Operations?",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.",
+    features: `Advanced Analytics Dashboard
+24/7 Enterprise Support
+Custom Integration Solutions`,
+    primaryButtonText: "Start Free Trial",
+    primaryButtonHref: "#",
+    secondaryButtonText: "Schedule Demo",
+    secondaryButtonHref: "#",
+    trustText: "Trusted by 500+ companies worldwide",
+    ratingText: "4.9/5 (2,300+ reviews)",
+  },
+  team: {
+    title: "Team",
+    subtitle: "Our Hardworking Team",
+  },
 };
+
+/** Client logo row for `ClientsSection` — parsed from Sp Builder multiline field. */
+export type ClientLogoSlideItem = { imageUrl: string; alt?: string };
+
+export function parseClientLogoSlidesMultiline(raw: string): ClientLogoSlideItem[][] | undefined {
+  const text = String(raw ?? "").trim();
+  if (!text) return undefined;
+  const slides: ClientLogoSlideItem[][] = [];
+  let current: ClientLogoSlideItem[] = [];
+  const flush = () => {
+    if (current.length) {
+      slides.push(current);
+      current = [];
+    }
+  };
+  for (const line of String(raw).split("\n")) {
+    const t = line.trim();
+    if (!t) {
+      flush();
+      continue;
+    }
+    const pipe = t.indexOf("|");
+    if (pipe >= 0) {
+      current.push({
+        imageUrl: t.slice(0, pipe).trim(),
+        alt: t.slice(pipe + 1).trim() || undefined,
+      });
+    } else {
+      current.push({ imageUrl: t, alt: undefined });
+    }
+  }
+  flush();
+  return slides.length ? slides : undefined;
+}
+
+export type StatLineItem = { value: string; label: string };
+
+export function parseStatLinesMultiline(raw: string): StatLineItem[] | undefined {
+  const lines = String(raw ?? "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+  if (!lines.length) return undefined;
+  const out: StatLineItem[] = [];
+  for (const line of lines) {
+    const pipe = line.indexOf("|");
+    if (pipe < 0) continue;
+    const value = line.slice(0, pipe).trim();
+    const label = line.slice(pipe + 1).trim();
+    if (value && label) out.push({ value, label });
+  }
+  return out.length ? out : undefined;
+}
+
+export function parseMultilineStringArray(raw: string): string[] | undefined {
+  const lines = String(raw ?? "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+  return lines.length ? lines : undefined;
+}
 
 export function getEditFieldDefsForSection(sectionId: string): SectionEditFieldDef[] {
   if (sectionId.startsWith("custom-")) return [];

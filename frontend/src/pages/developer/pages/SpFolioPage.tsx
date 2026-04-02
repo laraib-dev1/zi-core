@@ -116,6 +116,26 @@ export default function SpFolioPage() {
     );
   };
 
+  const handleToggleNavbarDropdown = async (section: LandingSectionItem, checked: boolean) => {
+    try {
+      const updated = await updateLandingSection(section._id, { showInNavbarDropdown: checked });
+      removeCachedData(CACHE_KEYS.ENABLED_LANDING_SECTIONS);
+      removeCachedData(CACHE_KEYS.LANDING_SECTIONS);
+      removeCachedData(CACHE_KEYS.LANDING_SECTIONS_FULL);
+      setEditingSections((prev) =>
+        prev.map((s) => (s._id === updated._id ? { ...s, ...updated, enabled: s.enabled } : s))
+      );
+      setAllSections((prev) =>
+        prev.map((s) => (s._id === updated._id ? { ...s, ...updated } : s)).sort((a, b) => a.order - b.order)
+      );
+      await loadSections();
+      success(checked ? "Section will show in the navbar Other menu." : "Section hidden from the navbar Other menu.");
+    } catch (err) {
+      console.error("Failed to update navbar visibility:", err);
+      error("Failed to update navbar visibility.");
+    }
+  };
+
   const handleRemoveFromList = (id: string) => {
     setEditingSections((prev) => prev.filter((sec) => sec._id !== id));
   };
@@ -503,6 +523,43 @@ export default function SpFolioPage() {
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem
+                            className="cursor-default focus:bg-gray-50"
+                            onSelect={(e) => e.preventDefault()}
+                          >
+                            <div className="flex items-center justify-between gap-4 w-full py-0.5">
+                              <span className="flex flex-col gap-0.5 text-left min-w-0">
+                                <span className="text-sm text-gray-900">Show in navbar</span>
+                                <span className="text-xs font-normal text-gray-500">
+                                  Other pages menu (when not a main link)
+                                </span>
+                              </span>
+                              <button
+                                type="button"
+                                role="switch"
+                                aria-checked={section.showInNavbarDropdown !== false}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const next = !(section.showInNavbarDropdown !== false);
+                                  handleToggleNavbarDropdown(section, next);
+                                }}
+                                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                                  section.showInNavbarDropdown !== false ? "" : "bg-gray-300"
+                                }`}
+                                style={
+                                  section.showInNavbarDropdown !== false
+                                    ? { backgroundColor: "var(--theme-primary)" }
+                                    : undefined
+                                }
+                              >
+                                <span
+                                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                    section.showInNavbarDropdown !== false ? "translate-x-6" : "translate-x-1"
+                                  }`}
+                                />
+                              </button>
+                            </div>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
                             className="text-red-600 focus:bg-red-50"
                             onClick={() => handleRemoveFromList(section._id)}
                           >
@@ -637,7 +694,13 @@ export default function SpFolioPage() {
                     onChange={(e) =>
                       setEditContentFields((prev) => ({ ...prev, [field.key]: e.target.value }))
                     }
-                    rows={field.key === "bullets" ? 5 : 4}
+                    rows={
+                      field.key === "bullets" || field.key === "features"
+                        ? 5
+                        : field.key === "logoSlides" || field.key === "statsLines"
+                          ? 8
+                          : 4
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent resize-y min-h-[80px]"
                   />
                 ) : (

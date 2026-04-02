@@ -15,6 +15,8 @@ export interface PortfolioCardProps {
   index?: number;
   /** Override detail link (e.g. /blog/123). When not set, uses /project/{id}. */
   to?: string;
+  /** 1:1 image area (e.g. Latest Applications on detail pages). */
+  squareImage?: boolean;
 }
 
 export default function PortfolioCard({
@@ -28,6 +30,7 @@ export default function PortfolioCard({
   inView = true,
   index = 0,
   to,
+  squareImage = false,
 }: PortfolioCardProps) {
   const href = to ?? `/project/${id}`;
   return (
@@ -40,7 +43,12 @@ export default function PortfolioCard({
     >
       <Link to={href} className="group cursor-pointer block">
         <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-          <div className="relative w-full aspect-16/9 bg-gray-100 overflow-hidden">
+          <div
+            className={cn(
+              "relative w-full bg-gray-100 overflow-hidden",
+              squareImage ? "aspect-square" : "aspect-16/9"
+            )}
+          >
             <img
               src={image || "/hero.png"}
               alt={title}

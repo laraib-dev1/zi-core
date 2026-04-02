@@ -64,7 +64,7 @@ export default function ServicesCard({
       {showLearnMore && (
         <Link
           to={href!}
-          className="inline-flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-gray-900 mt-auto pt-1"
+          className="inline-flex items-center gap-1 text-sm font-medium text-gray-700 mt-auto pt-1 transition-colors group-hover:text-[var(--theme-primary)]"
         >
           {learnMoreLabel}
           <ArrowRight className="w-4 h-4" />
@@ -74,7 +74,7 @@ export default function ServicesCard({
   );
 
   const cardClass = cn(
-    "block rounded-lg bg-gray-50 overflow-hidden border border-gray-100 hover:shadow-md transition-shadow",
+    "group block rounded-lg bg-gray-50 overflow-hidden border border-gray-100 hover:shadow-md transition-shadow",
     className
   );
 

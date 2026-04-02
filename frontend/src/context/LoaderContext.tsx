@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 
 const STORAGE_KEY_PRESET = "app_loader_preset";
 const STORAGE_KEY_CUSTOM = "app_loader_custom_message";
@@ -232,6 +232,46 @@ export function LoaderProvider({ children }: { children: React.ReactNode }) {
     setCustomZipCssState(null);
     setCustomZipLabelState(null);
     setLoaderStyleIdState((prev) => (prev === CUSTOM_ZIP_STYLE_ID ? defaultStyleId : prev));
+  }, []);
+
+  useEffect(() => {
+    if (loaderStyleId === CUSTOM_ZIP_STYLE_ID && !customZipCss?.trim()) {
+      setLoaderStyleIdState(defaultStyleId);
+    }
+  }, [customZipCss, loaderStyleId]);
+
+  /** Persist display mode immediately so spinner-only / message-only survives navigation and reload without clicking Save. */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(STORAGE_KEY_DISPLAY_MODE, loaderDisplayMode);
+    } catch {
+      /* ignore quota / private mode */
+    }
+  }, [loaderDisplayMode]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onStorage = (e: StorageEvent) => {
+      if (!e.key || !e.key.startsWith("app_loader_")) return;
+      try {
+        const style = localStorage.getItem(STORAGE_KEY_STYLE);
+        const zip = localStorage.getItem(STORAGE_KEY_CUSTOM_ZIP_CSS);
+        if (zip !== undefined) setCustomZipCssState(zip);
+        const zipLabel = localStorage.getItem(STORAGE_KEY_CUSTOM_ZIP_LABEL);
+        if (zipLabel !== undefined) setCustomZipLabelState(zipLabel);
+        if (style != null && style !== "") {
+          const validZip = style === CUSTOM_ZIP_STYLE_ID && !!zip?.trim();
+          const validBuiltin = LOADER_STYLES.some((s) => s.id === style);
+          if (validZip || validBuiltin) setLoaderStyleIdState(style);
+          else if (style === CUSTOM_ZIP_STYLE_ID && !zip?.trim()) setLoaderStyleIdState(defaultStyleId);
+        }
+      } catch {
+        /* ignore */
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   return (

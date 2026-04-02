@@ -12,6 +12,13 @@ import { getCatalogItemPublicPath } from "@/utils/catalogPublicPaths";
 function stripHtml(html: string, maxLength = 160): string {
   const text = String(html || "")
     .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&#160;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/g, "'")
     .replace(/\s+/g, " ")
     .trim();
   if (!text) return "";
@@ -88,12 +95,22 @@ export default function DetailPageLatestAndCta({
   const inner = (
     <>
       <div id="cta-banner-3" className={spacing.section.gap}>
-        <CtaBanner variant="dark" title={ctaTitle} description={ctaDesc} buttonText={ctaBtn} buttonHref={hireMeHref} />
+        <CtaBanner
+          layout="embedded"
+          variant="dark"
+          title={ctaTitle}
+          description={ctaDesc}
+          buttonText={ctaBtn}
+          buttonHref={hireMeHref}
+        />
       </div>
       {latest.length > 0 && (
         <section className={spacing.section.gap}>
-          <h2 className="text-xl md:text-2xl font-semibold theme-heading mb-3">{latestCatalogSectionHeading(catalogTypeSlug)}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="flex flex-col gap-4 md:gap-5">
+            <h2 className="text-xl md:text-2xl font-semibold theme-heading m-0 shrink-0">
+              {latestCatalogSectionHeading(catalogTypeSlug)}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 min-w-0">
             {latest.map((row: any, i: number) => (
               <PortfolioCard
                 key={row._id || row.id || i}
@@ -113,6 +130,7 @@ export default function DetailPageLatestAndCta({
                 to={getCatalogItemPublicPath(catalogTypeSlug, String(row._id || row.id))}
               />
             ))}
+            </div>
           </div>
         </section>
       )}

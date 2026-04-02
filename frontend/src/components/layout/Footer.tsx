@@ -7,6 +7,7 @@ import { getProducts } from "@/api/product.api";
 import { getCachedData, setCachedData, CACHE_KEYS } from "@/utils/cache";
 import LandingSocialIconButtons from "@/components/landing/LandingSocialIconButtons";
 import { spacing } from "@/utils/spacing";
+import { buildWhatsAppUrl } from "@/utils/companyBrand";
 
 type FooterVariant = "default" | "landing2";
 
@@ -29,6 +30,7 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
     company: "VERES",
     copyright: "",
     description: "",
+    phone: "",
     socialPosts: [] as Array<{ image: string; url: string; order: number }>,
     socialLinks: {} as Record<string, string>,
   });
@@ -65,6 +67,7 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
             company: cachedCompany.company || "VERES",
             copyright: cachedCompany.copyright || "",
             description: cachedCompany.description || "",
+            phone: cachedCompany.phone || "",
             socialPosts: (cachedCompany.socialPosts || [])
               .filter((post: any) => post && post.image && post.image.trim() !== "")
               .slice(0, 8),
@@ -208,6 +211,7 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
           company: company.company || "VERES",
           copyright: company.copyright || "",
           description: company.description || "",
+          phone: company.phone || "",
           socialPosts: finalValidPosts,
           socialLinks: company.socialLinks || {},
         });
@@ -242,6 +246,7 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
             company: cachedCompany.company || "VERES",
             copyright: cachedCompany.copyright || "",
             description: cachedCompany.description || "",
+            phone: cachedCompany.phone || "",
             socialPosts: (cachedCompany.socialPosts || [])
               .filter((post: any) => post && post.image && post.image.trim() !== "")
               .slice(0, 8),
@@ -592,13 +597,13 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
               `© ${new Date().getFullYear()} ${companyData.company || "VERES"}. All rights reserved.`}
           </span>
           <a
-            href="/"
+            href={buildWhatsAppUrl(
+              companyData.phone,
+              "Hello, I visited the ZI_Core site. I would like to ask you"
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-gray-100 hover:opacity-90 cursor-pointer underline-offset-2 hover:underline"
-            style={{ color: "inherit" }}
-            onClick={(e) => {
-              e.preventDefault();
-              window.location.assign("/");
-            }}
           >
             Join {companyData.company || "Company"}
           </a>

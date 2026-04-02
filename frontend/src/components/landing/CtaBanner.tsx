@@ -9,6 +9,11 @@ export interface CtaBannerProps {
   buttonHref?: string;
   /** "light" = light grey bg (first CTA), "dark" = black bg (e.g. 340+ Products) */
   variant?: "light" | "dark";
+  /**
+   * standalone: own max-width + horizontal padding (matches Container12) — use on landing sections.
+   * embedded: full width of parent only — use inside Container12 / 12-col grid so the bar aligns with other blocks.
+   */
+  layout?: "standalone" | "embedded";
   className?: string;
   onButtonClick?: () => void;
 }
@@ -20,26 +25,18 @@ export default function CtaBanner({
   buttonHref = "#",
   onButtonClick,
   variant = "dark",
+  layout = "standalone",
   className,
 }: CtaBannerProps) {
   const isDark = variant === "dark";
   const contentPadding = "px-3 sm:px-4 md:px-6 lg:px-8";
-  return (
-    <section
+  const bar = (
+    <div
       className={cn(
-        "w-full py-0 flex justify-center",
-        className
+        "w-full grid grid-cols-12 gap-6 items-center rounded-xl p-4 sm:p-5 md:p-6",
+        isDark ? "bg-black text-white" : "bg-gray-200 text-gray-900"
       )}
     >
-      {/* Outer: same as Container12 — padding here so inner (colored) is strictly 12-col content width */}
-      <div className={cn("w-full max-w-[1232px] mx-auto py-0", contentPadding)}>
-        {/* BG bar: full width of outer's content area; inner gap top and bottom */}
-        <div
-          className={cn(
-            "w-full grid grid-cols-12 gap-6 items-center rounded-xl p-4 sm:p-5 md:p-6",
-            isDark ? "bg-black text-white" : "bg-gray-200 text-gray-900"
-          )}
-        >
           <div className="col-span-12 md:col-span-9">
             <h2 className={cn("text-base sm:text-lg md:text-xl font-semibold mb-2", isDark ? "text-white" : "text-gray-900")}>
               {title}
@@ -88,6 +85,26 @@ export default function CtaBanner({
             })()}
           </div>
         </div>
+  );
+
+  if (layout === "embedded") {
+    return (
+      <section className={cn("w-full py-0", className)}>
+        {bar}
+      </section>
+    );
+  }
+
+  return (
+    <section
+      className={cn(
+        "w-full py-0 flex justify-center",
+        className
+      )}
+    >
+      {/* Outer: same as Container12 — padding here when not already inside Container12 */}
+      <div className={cn("w-full max-w-[1232px] mx-auto py-0", contentPadding)}>
+        {bar}
       </div>
     </section>
   );

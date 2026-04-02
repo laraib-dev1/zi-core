@@ -38,7 +38,7 @@ export interface DetailWithLeftSidebarProps {
   shareUrl?: string;
   /** Share title (defaults to content title when empty) */
   shareTitle?: string;
-  /** Default sidebar list (e.g. topic counts) when relatedServices is not provided */
+  /** Optional topic list; if set with items, shown when there are no related links */
   topics?: ExploreTopic[];
   /** When provided, show related links in the "Explore More" block instead of topics */
   relatedServices?: RelatedServiceItem[];
@@ -46,12 +46,6 @@ export interface DetailWithLeftSidebarProps {
   stickySidebar?: boolean;
   className?: string;
 }
-
-const defaultTopics: ExploreTopic[] = [
-  { name: "Lifestyle", count: 3 },
-  { name: "Inspiration", count: 2 },
-  { name: "Fashion", count: 4 },
-];
 
 const NAV_TOP = 76;
 
@@ -66,7 +60,7 @@ export default function DetailWithLeftSidebar({
   htmlContent,
   shareUrl = typeof window !== "undefined" ? window.location.href : "",
   shareTitle,
-  topics = defaultTopics,
+  topics,
   relatedServices,
   stickySidebar = false,
   className,
@@ -75,6 +69,10 @@ export default function DetailWithLeftSidebar({
   const leftColumnRef = useRef<HTMLDivElement>(null);
   const mainContentColumnRef = useRef<HTMLDivElement>(null);
   const effectiveShareTitle = shareTitle ?? title;
+
+  const hasRelatedLinks = Boolean(relatedServices && relatedServices.length > 0);
+  const hasTopicList = Boolean(topics && topics.length > 0);
+  const showExploreMore = hasRelatedLinks || hasTopicList;
 
   const [sidebarFixed, setSidebarFixed] = useState<{ top: number; left: number; width: number; visible: boolean }>({
     top: 0,
@@ -141,41 +139,42 @@ export default function DetailWithLeftSidebar({
           variant="sidebar"
         />
       </div>
-      {relatedServices && relatedServices.length > 0 ? (
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide" style={{ color: "var(--theme-primary)" }}>
-            Explore More
-          </h3>
-          <div className="space-y-2">
-            {relatedServices.map((s, i) => (
-              <Link
-                key={s.href + i}
-                to={s.href}
-                className="block text-sm text-gray-700 hover:text-(--theme-primary) px-2 py-1.5 rounded hover:bg-gray-50 transition-colors"
-              >
-                {s.title}
-              </Link>
-            ))}
+      {showExploreMore &&
+        (hasRelatedLinks ? (
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide" style={{ color: "var(--theme-primary)" }}>
+              Explore More
+            </h3>
+            <div className="space-y-2">
+              {relatedServices!.map((s, i) => (
+                <Link
+                  key={s.href + i}
+                  to={s.href}
+                  className="block text-sm text-gray-700 hover:text-(--theme-primary) px-2 py-1.5 rounded hover:bg-gray-50 transition-colors"
+                >
+                  {s.title}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide" style={{ color: "var(--theme-primary)" }}>
-            Explore More
-          </h3>
-          <div className="space-y-2">
-            {topics.map((t) => (
-              <div
-                key={t.name}
-                className="flex items-center justify-between gap-3 text-sm text-gray-700 px-2 py-1"
-              >
-                <span className="leading-5">{t.name}</span>
-                <span className="text-xs text-gray-500">({t.count})</span>
-              </div>
-            ))}
+        ) : (
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide" style={{ color: "var(--theme-primary)" }}>
+              Explore More
+            </h3>
+            <div className="space-y-2">
+              {topics!.map((t) => (
+                <div
+                  key={t.name}
+                  className="flex items-center justify-between gap-3 text-sm text-gray-700 px-2 py-1"
+                >
+                  <span className="leading-5">{t.name}</span>
+                  <span className="text-xs text-gray-500">({t.count})</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        ))}
     </>
   );
 

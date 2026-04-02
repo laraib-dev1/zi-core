@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Download, Loader2 } from "lucide-react";
+import { Download, ExternalLink, Loader2 } from "lucide-react";
 import Navbar2 from "@/components/layout/Navbar2";
 import Footer from "@/components/layout/Footer";
 import DetailWithLeftSidebar from "@/components/landing/DetailWithLeftSidebar";
@@ -15,18 +15,63 @@ import ApplicationTileCard from "@/components/applications/ApplicationTileCard";
 import ProductImageGallery from "@/components/products/ProductImageGallery";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import HelpBanner from "@/components/landing/HelpBanner";
+import CtaBanner from "@/components/landing/CtaBanner";
 import PortfolioCard from "@/components/landing/PortfolioCard";
 import DetailPageLatestAndCta from "@/components/landing/DetailPageLatestAndCta";
 import { cn } from "@/lib/utils";
 import { useSecondLandingNavbarProps } from "@/hooks/useSecondLandingNavbarProps";
 import Container12 from "@/components/layout/Container12";
-import { getApplicationPlatformStatesLine } from "@/utils/applicationPlatforms";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { getApplicationPlatformNavEntries, getApplicationPlatformStatesLine } from "@/utils/applicationPlatforms";
 import { resolvePublicAssetUrl } from "@/utils/mediaUrl";
 
 const navGrayBtnClass =
   "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-xs sm:text-sm font-medium text-white shrink-0 border border-[#7D7D7D]/50 bg-[#7D7D7D]/70 transition-colors hover:bg-[var(--theme-primary)] hover:border-[var(--theme-primary)]";
 
 const defaultHtml = `<p>No content available.</p>`;
+
+function platformGuideBadgeLabel(typeKey: string, row: any): string {
+  const custom = String(row?.label || "").trim();
+  if (custom) return custom;
+  const t = String(typeKey || "").toLowerCase();
+  if (t === "website") return "Web";
+  if (t === "apk") return "APK";
+  if (t === "ios") return "iOS";
+  if (t === "exe") return ".exe";
+  if (t === "windows") return "Windows";
+  return "Other";
+}
+
+/** Setups tab stores guide copy in a plain textarea (`description`); render safely with line breaks. */
+function setupDescriptionToSafeHtml(text: unknown): string {
+  const raw = String(text ?? "").trim();
+  if (!raw) return "";
+  const esc = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return esc(raw)
+    .split(/\n{2,}/)
+    .map((block) => `<p>${block.split(/\n/).join("<br/>")}</p>`)
+    .join("");
+}
+
+/** Installation guide modal: one block per enabled setup row of the selected platform (Setups tab → Guide / Description), in admin order. */
+function perSetupGuideModalHtmlForRows(rows: any[]): string {
+  const sorted = [...rows].sort(
+    (a, b) => (Number(a?.order) || 0) - (Number(b?.order) || 0)
+  );
+  const chunks = sorted
+    .map((r) => String(r?.description ?? "").trim())
+    .filter(Boolean)
+    .map((t) => setupDescriptionToSafeHtml(t));
+  if (chunks.length === 0) return "";
+  return chunks.join('<hr class="my-4 border-gray-200" />');
+}
 
 function formatDate(value: string | Date | undefined): string {
   if (!value) return "";
@@ -61,6 +106,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
   const [activeDownloadType, setActiveDownloadType] = useState<string>("");
   const [downloadsAccordionOpen, setDownloadsAccordionOpen] = useState(false);
   const [downloadNowLoading, setDownloadNowLoading] = useState(false);
+  const [installGuideOpen, setInstallGuideOpen] = useState(false);
   const [loading, setLoading] = useState(!!id);
   const [notFound, setNotFound] = useState(false);
   const [companyPhone, setCompanyPhone] = useState<string>(() => {
@@ -162,7 +208,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
     const isApplications = String(type || "").toLowerCase() === "applications";
     if (!isApplications || !item) return;
     const list = (Array.isArray(item.downloadsList) ? item.downloadsList : []).filter((x: any) => x?.enabled !== false);
-    const ordered = ["website", "apk", "exe", "windows", "other"];
+    const ordered = ["website", "apk", "ios", "exe", "windows", "other"];
     const byType = new Set(list.map((x: any) => String(x?.type || "other").toLowerCase()));
     const firstWithData = ordered.find((t) => byType.has(t));
     setActiveDownloadType(firstWithData || ordered[0]);
@@ -228,9 +274,16 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
     const appInfo = item.appInfo || {};
     const allDownloadItems = Array.isArray(item.downloadsList) ? item.downloadsList : [];
     const downloadItems = allDownloadItems.filter((d: any) => d?.enabled !== false);
-    const filteredDownloads = activeDownloadType
-      ? downloadItems.filter((d: any) => String(d.type || "").toLowerCase() === activeDownloadType)
-      : downloadItems;
+    const orderedDownloadTypes: string[] = ["website", "apk", "ios", "exe", "windows", "other"];
+    const availableDownloadTypes = orderedDownloadTypes.filter((typeKey) =>
+      downloadItems.some((d: any) => String(d?.type || "").toLowerCase() === typeKey)
+    );
+    const selectedType = String(
+      activeDownloadType || availableDownloadTypes[0] || orderedDownloadTypes[0]
+    );
+    const filteredDownloads = downloadItems
+      .filter((d: any) => String(d.type || "").toLowerCase() === selectedType)
+      .sort((a: any, b: any) => (Number(a?.order) || 0) - (Number(b?.order) || 0));
     const selectedDownload = filteredDownloads[0] || null;
     const selectedDownloadHref = selectedDownload ? (selectedDownload.fileUrl || selectedDownload.url || "#") : "#";
     const resolveImg = (u: string | undefined) => resolvePublicAssetUrl(u).trim();
@@ -246,7 +299,14 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
       : item.image
         ? [resolveImg(item.image)].filter(Boolean)
         : [];
-    const cleanText = (html: string) => String(html || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    const cleanText = (html: string) =>
+      String(html || "")
+        .replace(/<[^>]*>/g, " ")
+        .replace(/&nbsp;/gi, " ")
+        .replace(/&#160;/gi, " ")
+        .replace(/&amp;/gi, "&")
+        .replace(/\s+/g, " ")
+        .trim();
     const setupDescriptionBlocks = downloadItems
       .filter((d: any) => String(d?.description || "").trim())
       .map((d: any) => `<h4>${String(d?.label || d?.type || "").toUpperCase()}</h4><p>${String(d.description || "")}</p>`)
@@ -260,15 +320,11 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
     const downloadTypeMeta: Record<string, { label: string }> = {
       website: { label: "Web" },
       apk: { label: "App" },
+      ios: { label: "App" },
       windows: { label: "Windows" },
       exe: { label: "Desktop" },
       other: { label: "Other" },
     };
-    const orderedDownloadTypes: string[] = ["website", "apk", "exe", "windows", "other"];
-    const availableDownloadTypes = orderedDownloadTypes.filter((typeKey) =>
-      downloadItems.some((d: any) => String(d?.type || "").toLowerCase() === typeKey)
-    );
-    const selectedType = String(activeDownloadType || availableDownloadTypes[0] || orderedDownloadTypes[0]);
     const selectedTypeMeta = downloadTypeMeta[selectedType] || downloadTypeMeta.other;
     const getTypeImage = (typeKey: string): string => {
       const byType = downloadItems.find((d: any) => String(d?.type || "").toLowerCase() === typeKey);
@@ -278,10 +334,23 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
     };
     const defaultPlatformIconByType: Record<string, string> = {
       apk: "/file_icons.svg",
+      ios: "/file_icons.svg",
       exe: "/file_icons-1.svg",
       website: "/file_icons-2.svg",
       windows: "/file_icons-3.svg",
     };
+
+    const primaryActionIsWeb = selectedType === "website";
+    const primaryActionLabel = primaryActionIsWeb ? "Click here" : "Download now";
+    const setupGuideCombinedHtml = perSetupGuideModalHtmlForRows(filteredDownloads);
+    const guideModalHtml = setupGuideCombinedHtml
+      ? setupGuideCombinedHtml
+      : "<p class=\"text-gray-500\">No installation guide is available for this platform yet.</p>";
+    const guidePlatformBadge = platformGuideBadgeLabel(selectedType, selectedDownload);
+    const subTagLine =
+      (typeof item.subTag === "string" && item.subTag.trim()) ||
+      (typeof appInfo.domain === "string" && appInfo.domain.trim()) ||
+      "Sub info of application domain";
 
     return (
       <div className="min-h-screen flex flex-col bg-transparent pt-20 landing-detail-page" style={{ overflow: "visible" }}>
@@ -309,7 +378,10 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                     item={{
                       id: String(item._id || item.id || ""),
                       title: item.title || "Application Name",
-                      subTag: item.subTag || appInfo.domain || "Sub info of application domain",
+                      subTag:
+                        (typeof item.subTag === "string" && item.subTag.trim()) ||
+                        (typeof appInfo.domain === "string" && appInfo.domain.trim()) ||
+                        "",
                       image: resolveImg(item.image) || "",
                       releaseDate: appInfo.releaseDate || formatDate(item.createdAt) || "—",
                       downloadsText: appInfo.downloadsDisplay || "1.2k+",
@@ -319,7 +391,13 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                       isTopRated: Boolean(appInfo.starsEnabled && Number(appInfo.stars || 0) >= 4),
                     }}
                     platformStatesLine={getApplicationPlatformStatesLine(downloadItems) || undefined}
+                    platformLinks={getApplicationPlatformNavEntries(
+                      downloadItems,
+                      String(type || "applications").toLowerCase(),
+                      String(item._id || item.id || "")
+                    )}
                     compact={true}
+                    compactVerticallyCenter
                     hideActionButton
                     className="bg-transparent"
                   />
@@ -361,26 +439,26 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                                 type="button"
                                 onClick={() => setActiveDownloadType(typeKey)}
                                 className={cn(
-                                  "rounded-2xl p-3 text-center transition-colors min-h-[108px] w-[min(100%,168px)] sm:w-[168px] flex flex-col items-center justify-center",
+                                  "aspect-square w-[120px] sm:w-36 shrink-0 rounded-2xl p-2 sm:p-3 text-center transition-colors flex flex-col items-center justify-center gap-1",
                                   active ? "text-white" : "bg-gray-50 text-gray-600"
                                 )}
                                 style={active ? { backgroundColor: "var(--theme-primary)" } : undefined}
                               >
-                                <div className="flex justify-center items-center">
+                                <div className="flex flex-1 min-h-0 w-full items-center justify-center">
                                   {typeImage ? (
                                     <img
                                       src={typeImage}
                                       alt={meta.label}
-                                      className="h-[52px] w-[52px] sm:h-16 sm:w-16 object-contain"
+                                      className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
                                       onError={(e) => {
                                         (e.target as HTMLImageElement).style.display = "none";
                                       }}
                                     />
                                   ) : (
-                                    <div className="h-[52px] w-[52px] sm:h-16 sm:w-16" />
+                                    <div className="h-12 w-12 sm:h-14 sm:w-14" />
                                   )}
                                 </div>
-                                <div className="mt-1 text-xs font-medium">{meta.label}</div>
+                                <div className="text-xs font-medium leading-tight">{meta.label}</div>
                               </button>
                             );
                           })}
@@ -396,13 +474,14 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                             </p>
                             <p className="text-sm text-gray-500">
                               By using this, you agree to the Zi_Core terms and policies.{" "}
-                              <a
-                                href="#"
-                                className="underline underline-offset-2 hover:opacity-80"
+                              <button
+                                type="button"
+                                onClick={() => setInstallGuideOpen(true)}
+                                className="underline underline-offset-2 hover:opacity-80 bg-transparent border-0 p-0 cursor-pointer text-inherit"
                                 style={{ color: "var(--theme-primary)" }}
                               >
-                                view installation guide.
-                              </a>
+                                View installation guide.
+                              </button>
                             </p>
                           </div>
                           <div className="col-span-12 md:col-span-4 flex md:justify-end">
@@ -423,10 +502,12 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                             >
                               {downloadNowLoading ? (
                                 <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                              ) : primaryActionIsWeb ? (
+                                <ExternalLink className="h-4 w-4 shrink-0" aria-hidden />
                               ) : (
                                 <Download className="h-4 w-4 shrink-0" aria-hidden />
                               )}
-                              Download Now
+                              {primaryActionLabel}
                             </a>
                           </div>
                         </div>
@@ -447,7 +528,6 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                     )}
                     <div className="col-span-12 lg:col-span-8">
                       <h3 className="text-3xl font-semibold theme-text-primary">About</h3>
-                      <h4 className="mt-1 text-2xl font-bold text-gray-800">{item.title || "Application"}</h4>
                       {(appInfo.downloadsEnabled && appInfo.downloadsDisplay) || appInfo.datesEnabled ? (
                         <p className="mt-1 text-sm text-gray-500">
                           {appInfo.downloadsEnabled && appInfo.downloadsDisplay ? (
@@ -580,33 +660,29 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                   </section>
                 )}
 
-                {/* 7) CTA from second landing */}
-                <section className={spacing.section.gap}>
-                  <div className="w-full rounded-xl bg-black text-white p-4 sm:p-5 md:p-6 grid grid-cols-12 gap-6 items-center">
-                    <div className="col-span-12 md:col-span-9">
-                      <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2">Like what you see?</h2>
-                      <p className="text-sm sm:text-base text-gray-300">
-                        Donec rutrum congue leo eget malesuada. Vivamus suscipit tortor eget felis porttitor volutpat.
-                      </p>
-                    </div>
-                    <div className="col-span-12 md:col-span-3 flex md:justify-end mt-4 md:mt-0">
-                      <a
-                        href={buildWhatsAppUrl(companyPhone, "Hello, I visited the ZI_Core site. I would like to ask you")}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block w-full md:w-auto text-center px-6 py-3 font-medium rounded transition-colors text-sm sm:text-base bg-white hover:bg-gray-100 text-black"
-                      >
-                        Let's Work Together
-                      </a>
-                    </div>
-                  </div>
-                </section>
+                {/* 7) Inline CTA on application detail — disabled; change `false` to `true` to restore */}
+                {false && (
+                  <section className={`${spacing.section.gap} w-full`}>
+                    <CtaBanner
+                      layout="embedded"
+                      variant="dark"
+                      title="Like what you see?"
+                      description="Donec rutrum congue leo eget malesuada. Vivamus suscipit tortor eget felis porttitor volutpat."
+                      buttonText="Let's Work Together"
+                      buttonHref={buildWhatsAppUrl(
+                        companyPhone,
+                        "Hello, I visited the ZI_Core site. I would like to ask you"
+                      )}
+                    />
+                  </section>
+                )}
 
                 {/* 8) Top 4 blogs */}
                 {topBlogs.length > 0 && (
                   <section className={spacing.section.gap}>
-                    <h2 className="text-xl md:text-2xl font-semibold theme-heading mb-3">Latest Blogs</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="flex flex-col gap-4 md:gap-5">
+                      <h2 className="text-xl md:text-2xl font-semibold theme-heading m-0 shrink-0">Latest Blogs</h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
                       {topBlogs.map((blog: any, i: number) => (
                         <PortfolioCard
                           key={blog._id || blog.id || i}
@@ -622,17 +698,20 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                           to={`/catalog/blog/${blog._id || blog.id}`}
                         />
                       ))}
+                      </div>
                     </div>
                   </section>
                 )}
 
-                {/* 9) Help banner from second landing */}
-                <section className={spacing.section.gap}>
-                  <HelpBanner
-                    title="Looking for Help!"
-                    description="We are updating our premium products with real-time support and dedicated consultants."
-                  />
-                </section>
+                {/* 9) Help banner on application detail — disabled; change `false` to `true` to restore */}
+                {false && (
+                  <section className={spacing.section.gap}>
+                    <HelpBanner
+                      title="Looking for Help!"
+                      description="We are updating our premium products with real-time support and dedicated consultants."
+                    />
+                  </section>
+                )}
 
                 <DetailPageLatestAndCta
                   catalogTypeSlug="applications"
@@ -642,6 +721,35 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                 />
               </section>
             </Container12>
+            <Dialog open={installGuideOpen} onOpenChange={setInstallGuideOpen}>
+              <DialogContent className="max-w-[min(100vw-1.5rem,28rem)] gap-0 p-0 rounded-2xl border border-gray-200 bg-white shadow-xl">
+                <DialogHeader className="border-b border-gray-200 px-6 py-4 space-y-0">
+                  <DialogTitle className="text-left text-lg font-semibold text-gray-900">Guide</DialogTitle>
+                </DialogHeader>
+                <div className="px-6 py-5 max-h-[min(70vh,520px)] overflow-y-auto">
+                  <h2 className="text-xl font-bold text-gray-900">{item.title || "Application"}</h2>
+                  <p className="mt-2 text-sm text-gray-600">
+                    {subTagLine} <span className="text-gray-400">|</span>{" "}
+                    <span className="font-semibold" style={{ color: "var(--theme-primary)" }}>
+                      {guidePlatformBadge}
+                    </span>
+                  </p>
+                  <div
+                    className="prose prose-sm max-w-none mt-4 text-gray-600"
+                    dangerouslySetInnerHTML={{ __html: guideModalHtml }}
+                  />
+                </div>
+                <DialogFooter className="border-t border-gray-100 px-6 py-4 sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setInstallGuideOpen(false)}
+                    className="rounded-full border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50 transition-colors"
+                  >
+                    Close
+                  </button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </main>
         <section className={`w-full ${spacing.footer.gapTop}`} style={{ marginBottom: 0, paddingBottom: 0 }}>

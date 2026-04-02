@@ -6,7 +6,7 @@ import { spacing } from "@/utils/spacing";
 import { cn } from "@/lib/utils";
 import { getPublishedCatalogItems } from "@/api/blog.api";
 import { getApplications } from "@/api/application.api";
-import { getApplicationPlatformStatesLine } from "@/utils/applicationPlatforms";
+import { getApplicationPlatformNavEntries, getApplicationPlatformStatesLine } from "@/utils/applicationPlatforms";
 import { resolvePublicAssetUrl } from "@/utils/mediaUrl";
 
 interface ApplicationsSectionProps {
@@ -29,6 +29,7 @@ interface AppItem {
   ratingCount: number;
   topRated: boolean;
   platformStatesLine: string;
+  downloadsList: unknown;
 }
 
 function stripHtml(html: string, maxLength = 160): string {
@@ -59,20 +60,27 @@ export default function ApplicationsSection({
     (catalogTypeSlug === "applications" ? getApplications("published") : getPublishedCatalogItems(catalogTypeSlug))
       .then((rows: any[]) => {
         if (cancelled) return;
-        const mapped = (Array.isArray(rows) ? rows : []).map((row: any) => ({
-          id: String(row._id || row.id || ""),
-          title: row.title || "Untitled Application",
-          subTag: row.subTag || "Sub info of application domain",
-          description: stripHtml(row.description || "", 120),
-          image: resolvePublicAssetUrl(row.image).trim() || "",
-          views: Number(row.views || 0),
-          createdAt: row.createdAt || "",
-          version: row.appInfo?.version ? `v${row.appInfo.version}` : "",
-          stars: Number(row.appInfo?.stars || 0),
-          ratingCount: Number(row.appInfo?.ratingCount || 0),
-          topRated: Boolean(row.appInfo?.starsEnabled && Number(row.appInfo?.stars || 0) >= 4),
-          platformStatesLine: getApplicationPlatformStatesLine(row.downloadsList),
-        }));
+        const mapped = (Array.isArray(rows) ? rows : []).map((row: any) => {
+          const rawSub =
+            (typeof row.subTag === "string" && row.subTag.trim()) ||
+            (typeof row.appInfo?.domain === "string" && row.appInfo.domain.trim()) ||
+            "";
+          return {
+            id: String(row._id || row.id || ""),
+            title: row.title || "Untitled Application",
+            subTag: rawSub,
+            description: stripHtml(row.description || "", 120),
+            image: resolvePublicAssetUrl(row.image).trim() || "",
+            views: Number(row.views || 0),
+            createdAt: row.createdAt || "",
+            version: row.appInfo?.version ? `v${row.appInfo.version}` : "",
+            stars: Number(row.appInfo?.stars || 0),
+            ratingCount: Number(row.appInfo?.ratingCount || 0),
+            topRated: Boolean(row.appInfo?.starsEnabled && Number(row.appInfo?.stars || 0) >= 4),
+            platformStatesLine: getApplicationPlatformStatesLine(row.downloadsList),
+            downloadsList: row.downloadsList,
+          };
+        });
         setItems(mapped.filter((x) => x.id));
       })
       .catch(() => {
@@ -129,6 +137,7 @@ export default function ApplicationsSection({
                   isTopRated: item.topRated,
                 }}
                 platformStatesLine={item.platformStatesLine || undefined}
+                platformLinks={getApplicationPlatformNavEntries(item.downloadsList, catalogTypeSlug, item.id)}
                 viewHref={`/catalog/${catalogTypeSlug}/${item.id}`}
                 viewLabel="View"
               />

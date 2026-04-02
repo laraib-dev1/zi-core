@@ -39,6 +39,9 @@ import {
   buildSectionContentMapFromList,
   contentOverride,
   SECTION_CONTENT_DEFAULTS,
+  parseClientLogoSlidesMultiline,
+  parseMultilineStringArray,
+  parseStatLinesMultiline,
 } from "@/utils/landingSectionContent";
 import FloatingWhatsApp from "@/components/ui/FloatingWhatsApp";
 import PageLoader from "@/components/ui/PageLoader";
@@ -117,6 +120,8 @@ function createSectionRenderers(
   const slogan = company.slogan?.trim();
   const desc = company.description?.trim();
   const textImageBulletsDefault = SECTION_CONTENT_DEFAULTS["text-image"]?.bullets ?? "";
+  const scaleOpsFeaturesDefault = SECTION_CONTENT_DEFAULTS["scale-operations"]?.features ?? "";
+  const excellenceStatsDefault = SECTION_CONTENT_DEFAULTS.excellence?.statsLines ?? "";
   return {
     hero: () => (
       <div id="home" className="pb-12px sm:pb-5">
@@ -130,10 +135,12 @@ function createSectionRenderers(
           introduction=""
           title={company.companyName}
           titleClassName="theme-text-primary"
+          titleSizeClassName="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-serif"
           subtitle={slogan || undefined}
           description={desc || undefined}
           buttons={[
-            { label: "View Portfolio", href: "#portfolio", variant: "primary" },
+            // { label: "View Portfolio", href: "#portfolio", variant: "primary" },
+            { label: "View Application", href: "/#applications", variant: "primary" },
             { label: "Contact Me", href: "#contact", variant: "secondary" },
           ]}
           showSocialIcons={false}
@@ -334,16 +341,30 @@ function createSectionRenderers(
     "scale-operations": () => (
       <div id="scale-operations" className={spacing.section.gap}>
         <ScaleOperationsBanner
-          tag="Transform Your Business"
-          heading="Ready to Scale Your Corporate Operations?"
-          description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation."
-          features={["Advanced Analytics Dashboard", "24/7 Enterprise Support", "Custom Integration Solutions"]}
-          primaryButtonText="Start Free Trial"
-          primaryButtonHref="#"
-          secondaryButtonText="Schedule Demo"
-          secondaryButtonHref="#"
-          trustText="Trusted by 500+ companies worldwide"
-          ratingText="4.9/5 (2,300+ reviews)"
+          tag={ov("scale-operations", "tag", "Transform Your Business")}
+          heading={ov(
+            "scale-operations",
+            "heading",
+            "Ready to Scale Your Corporate Operations?"
+          )}
+          description={ov(
+            "scale-operations",
+            "description",
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation."
+          )}
+          features={parseMultilineStringArray(
+            ov("scale-operations", "features", scaleOpsFeaturesDefault)
+          )}
+          primaryButtonText={ov("scale-operations", "primaryButtonText", "Start Free Trial")}
+          primaryButtonHref={ov("scale-operations", "primaryButtonHref", "#")}
+          secondaryButtonText={ov("scale-operations", "secondaryButtonText", "Schedule Demo")}
+          secondaryButtonHref={ov("scale-operations", "secondaryButtonHref", "#")}
+          trustText={ov(
+            "scale-operations",
+            "trustText",
+            "Trusted by 500+ companies worldwide"
+          )}
+          ratingText={ov("scale-operations", "ratingText", "4.9/5 (2,300+ reviews)")}
         />
       </div>
     ),
@@ -377,8 +398,8 @@ function createSectionRenderers(
     team: () => (
       <div id="team" className={spacing.section.gap}>
         <TeamSection
-          title="Team"
-          subtitle="Our Hardworking Team"
+          title={ov("team", "title", "Team")}
+          subtitle={ov("team", "subtitle", "Our Hardworking Team")}
           members={[
             { imageSrc: img("team-1") || "https://placehold.co/400x500?text=Sarah+Chen", name: "Sarah Chen", title: "Chief Executive Officer", description: "Praesentium nihil ut laudantium cumque. Ut et consequatur ab ut totam architecto. Expedita sunt eum.", socialLinks: { twitter: "#", facebook: "#", linkedin: "#", instagram: "#" } },
             { imageSrc: img("team-2") || "https://placehold.co/400x500?text=David+Lee", name: "David Lee", title: "Product Manager", description: "Praesentium nihil ut laudantium cumque. Ut et consequatur ab ut totam architecto. Expedita sunt eum.", socialLinks: { twitter: "#", facebook: "#", linkedin: "#", instagram: "#" } },
@@ -420,19 +441,43 @@ function createSectionRenderers(
         />
       </div>
     ),
-    clients: () => (
-      <div id="clients" className={spacing.section.gap}>
-        <ClientsSection title="Clients" description="Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit" logoHeight={60} />
-      </div>
-    ),
+    clients: () => {
+      const slidesFromBuilder = parseClientLogoSlidesMultiline(
+        ov("clients", "logoSlides", SECTION_CONTENT_DEFAULTS.clients?.logoSlides ?? "")
+      );
+      return (
+        <div id="clients" className={spacing.section.gap}>
+          <ClientsSection
+            title={ov("clients", "title", "Clients")}
+            description={ov(
+              "clients",
+              "description",
+              "Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit"
+            )}
+            logoHeight={60}
+            {...(slidesFromBuilder ? { slides: slidesFromBuilder } : {})}
+          />
+        </div>
+      );
+    },
     excellence: () => (
       <div id="excellence" className={spacing.section.gap}>
         <ExcellenceSection
-          heading="Building Excellence Since 1995"
-          headingUnderline="Building Excellence"
-          paragraph1="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-          paragraph2="Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-          stats={[{ value: "25+", label: "Years Experience" }, { value: "500+", label: "Projects Completed" }, { value: "100%", label: "Client Satisfaction" }, { value: "48", label: "Team Members" }]}
+          heading={ov("excellence", "heading", "Building Excellence Since 1995")}
+          headingUnderline={ov("excellence", "headingUnderline", "Building Excellence")}
+          paragraph1={ov(
+            "excellence",
+            "paragraph1",
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+          )}
+          paragraph2={ov(
+            "excellence",
+            "paragraph2",
+            "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+          )}
+          stats={parseStatLinesMultiline(
+            ov("excellence", "statsLines", excellenceStatsDefault)
+          )}
         />
       </div>
     ),
@@ -547,6 +592,12 @@ export default function SecondLanding() {
     }>(CACHE_KEYS.LANDING_SECTIONS);
     return cached?.contentMap ?? {};
   });
+  const [sectionShowInNavbarDropdown, setSectionShowInNavbarDropdown] = useState<Record<string, boolean>>(() => {
+    const cached = getCachedData<{
+      navDropdownMap?: Record<string, boolean>;
+    }>(CACHE_KEYS.LANDING_SECTIONS);
+    return cached?.navDropdownMap ?? {};
+  });
   const [banner2Map, setBanner2Map] = useState<Record<string, string>>(() => {
     const cached = getCachedData<Record<string, string>>(CACHE_KEYS.BANNERS2);
     return cached ?? {};
@@ -567,9 +618,14 @@ export default function SecondLanding() {
         setSectionLabels(labelMap);
         setCustomSectionCodeMap(codeMap);
         setSectionContentMap(contentMap);
+        const navDropdownMap: Record<string, boolean> = {};
+        (list || []).forEach((row: { sectionId?: string; showInNavbarDropdown?: boolean }) => {
+          if (row.sectionId) navDropdownMap[row.sectionId] = row.showInNavbarDropdown !== false;
+        });
+        setSectionShowInNavbarDropdown(navDropdownMap);
         setBanner2Map(parseBanner2Map(banners));
         setCachedData(CACHE_KEYS.ENABLED_LANDING_SECTIONS, ids);
-        setCachedData(CACHE_KEYS.LANDING_SECTIONS, { labelMap, codeMap, contentMap });
+        setCachedData(CACHE_KEYS.LANDING_SECTIONS, { labelMap, codeMap, contentMap, navDropdownMap });
         setCachedData(CACHE_KEYS.BANNERS2, parseBanner2Map(banners));
       } catch {
         setEnabledSectionIds([]);
@@ -676,7 +732,9 @@ export default function SecondLanding() {
       : enabledSectionIds
           .filter((sectionId) => {
             const scrollId = sectionId === "hero" ? "home" : sectionId;
-            return !MAIN_NAV_SCROLL_IDS.has(scrollId);
+            if (MAIN_NAV_SCROLL_IDS.has(scrollId)) return false;
+            if (sectionShowInNavbarDropdown[sectionId] === false) return false;
+            return true;
           })
           .map((sectionId) => {
             const scrollId = sectionId === "hero" ? "home" : sectionId;
@@ -696,10 +754,12 @@ export default function SecondLanding() {
     return enabledSectionIds
       .filter((sectionId) => {
         const scrollId = sectionId === "hero" ? "home" : sectionId;
-        return !MAIN_NAV_SCROLL_IDS.has(scrollId);
+        if (MAIN_NAV_SCROLL_IDS.has(scrollId)) return false;
+        if (sectionShowInNavbarDropdown[sectionId] === false) return false;
+        return true;
       })
       .map((sectionId) => (sectionId === "hero" ? "home" : sectionId));
-  }, [enabledSectionIds]);
+  }, [enabledSectionIds, sectionShowInNavbarDropdown]);
 
   useEffect(() => {
     const hashId = hash?.replace("#", "");

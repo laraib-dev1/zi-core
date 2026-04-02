@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import Container12 from "@/components/layout/Container12";
 import FilterTabs from "@/components/ui/FilterTabs";
 import SectionHeader from "@/components/ui/SectionHeader";
@@ -22,6 +23,8 @@ function stripHtml(html: string, maxLength?: number): string {
   if (maxLength && text.length > maxLength) return text.slice(0, maxLength).trim() + "...";
   return text;
 }
+
+const INITIAL_GRID_COUNT = 6;
 
 const DEFAULT_PLACEHOLDERS = Array.from({ length: 6 }, (_, i) => ({
   id: `placeholder-${i}`,
@@ -123,6 +126,10 @@ export default function CatalogSection({
     return catId === activeFilter;
   });
 
+  const slugLower = String(catalogTypeSlug || "").toLowerCase();
+  const isBlogSection = slugLower === "blog" || slugLower === "blogs";
+  const displayedItems = isBlogSection ? visibleItems.slice(0, INITIAL_GRID_COUNT) : visibleItems;
+
   const showFilterTabs = filters.length > 1;
   const usePortfolioCards = !PREVIOUS_SECTIONS_USE_SERVICES_CARD.includes(catalogTypeSlug);
 
@@ -156,23 +163,36 @@ export default function CatalogSection({
             ))}
           </div>
         ) : usePortfolioCards ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
-            {visibleItems.map((item, i) => (
-              <PortfolioCard
-                key={item.id ?? i}
-                id={String(item.id ?? i)}
-                title={item.title}
-                description={item.description || "No description"}
-                image={item.imageSrc || "/hero.png"}
-                date={formatDate(item.createdAt) || "—"}
-                niche={item.category || catalogTypeSlug}
-                views={item.views}
-                index={i}
-                inView={true}
-                to={item.href}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
+              {displayedItems.map((item, i) => (
+                <PortfolioCard
+                  key={item.id ?? i}
+                  id={String(item.id ?? i)}
+                  title={item.title}
+                  description={item.description || "No description"}
+                  image={item.imageSrc || "/hero.png"}
+                  date={formatDate(item.createdAt) || "—"}
+                  niche={item.category || catalogTypeSlug}
+                  views={item.views}
+                  index={i}
+                  inView={true}
+                  to={item.href}
+                />
+              ))}
+            </div>
+            {isBlogSection && !loading && (
+              <div className="flex justify-center mt-8">
+                <Link
+                  to="/blogpage"
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium text-white transition-colors hover:opacity-90"
+                  style={{ backgroundColor: "var(--theme-primary)" }}
+                >
+                  View more
+                </Link>
+              </div>
+            )}
+          </>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {visibleItems.map((item, i) => (

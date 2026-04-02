@@ -45,10 +45,12 @@ export default function ExcellenceSection({
   const headingRest = heading.startsWith(headingUnderline)
     ? heading.slice(headingUnderline.length)
     : "";
+  const sinceMatch = headingRest.trim().match(/^Since\s+(.+)$/i);
+  const sinceYear = sinceMatch ? sinceMatch[1] : "";
 
   return (
     <section className={cn("w-full py-10 sm:py-12 md:py-14", className)}>
-      <Container12 className="flex flex-col gap-8 md:gap-10">
+      <Container12 className="flex flex-col gap-4 md:gap-6">
         {/* Heading with underline under first part */}
         <div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-left">
@@ -58,7 +60,17 @@ export default function ExcellenceSection({
             >
               {headingUnderline}
             </span>
-            <span className="text-gray-900">{headingRest}</span>
+            {sinceYear ? (
+              <>
+                <span className="hidden md:inline text-gray-900">{headingRest}</span>
+                <span className="md:hidden block text-gray-900 mt-1 max-w-[min(100%,20ch)]">
+                  Since{" "}
+                  <span className="whitespace-nowrap">{sinceYear}</span>
+                </span>
+              </>
+            ) : (
+              <span className="text-gray-900">{headingRest}</span>
+            )}
           </h2>
         </div>
 

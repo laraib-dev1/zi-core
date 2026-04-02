@@ -60,6 +60,8 @@ export interface HeroBannerFullProps {
   className?: string;
   /** Optional extra classes for title only (e.g. theme color overrides) */
   titleClassName?: string;
+  /** Override default responsive title sizes (e.g. larger heading on small screens) */
+  titleSizeClassName?: string;
 }
 
 export default function HeroBannerFull({
@@ -79,6 +81,7 @@ export default function HeroBannerFull({
   socialLinks = {},
   className,
   titleClassName,
+  titleSizeClassName,
 }: HeroBannerFullProps) {
   const isDark = theme === "black";
   const sectionRef = useRef<HTMLElement>(null);
@@ -177,7 +180,8 @@ export default function HeroBannerFull({
               {title && (
                 <h1
                   className={cn(
-                    "text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-serif",
+                    titleSizeClassName ||
+                      "text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-serif",
                     textColor,
                     titleClassName
                   )}

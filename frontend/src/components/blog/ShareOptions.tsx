@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Facebook, Twitter, Linkedin, Share2, Mail, Link2 } from "lucide-react";
+import { Facebook, Linkedin, Share2, Mail, Link2 } from "lucide-react";
 import { FaPinterest, FaWhatsapp } from "react-icons/fa";
 import {
   Dialog,
@@ -46,7 +46,6 @@ export default function ShareOptions({
 
   const socialLinks = {
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-    twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
     linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
     pinterest: `https://pinterest.com/pin/create/button/?url=${encodedUrl}&description=${encodedTitle}`,
     whatsapp: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
@@ -103,15 +102,6 @@ export default function ShareOptions({
         <Facebook size={20} />
       </button>
       <button
-        onClick={(e) => handleShareClick("twitter", socialLinks.twitter, e)}
-        className="w-10 h-10 rounded-full bg-[#1DA1F2] text-white flex items-center justify-center hover:bg-[#1A91DA] transition-colors cursor-pointer"
-        title="Share on Twitter"
-        aria-label="Share on Twitter"
-        type="button"
-      >
-        <Twitter size={20} />
-      </button>
-      <button
         onClick={(e) => handleShareClick("linkedin", socialLinks.linkedin, e)}
         className="w-10 h-10 rounded-full bg-[#0077B5] text-white flex items-center justify-center hover:bg-[#006399] transition-colors cursor-pointer"
         title="Share on LinkedIn"
@@ -148,7 +138,7 @@ export default function ShareOptions({
 
   // Sidebar: full-width labeled buttons on md+, icon-only row on small screens
   const SidebarShareOptions = () => (
-    <div className={`flex flex-row flex-wrap justify-center gap-2 md:flex-col md:gap-2 ${className}`}>
+    <div className={`flex flex-row flex-wrap justify-start gap-2 md:flex-col md:gap-2 ${className}`}>
       <button
         type="button"
         onClick={() => handleShareClick("facebook", socialLinks.facebook)}
@@ -157,15 +147,6 @@ export default function ShareOptions({
       >
         <Facebook size={16} className="shrink-0" />
         <span className="hidden md:inline">Facebook</span>
-      </button>
-      <button
-        type="button"
-        onClick={() => handleShareClick("twitter", socialLinks.twitter)}
-        className={`${sidebarBtnBase} bg-[#1DA1F2] hover:bg-[#1A91DA]`}
-        aria-label="Share on Twitter"
-      >
-        <Twitter size={16} className="shrink-0" />
-        <span className="hidden md:inline">Twitter</span>
       </button>
       <button
         type="button"
@@ -258,15 +239,6 @@ export default function ShareOptions({
               >
                 <Facebook size={24} />
                 <span className="text-xs">Facebook</span>
-              </button>
-              <button
-                type="button"
-                onClick={(e) => handleShareClick("twitter", socialLinks.twitter, e)}
-                className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-black hover:bg-gray-900 text-white transition-colors"
-                title="Twitter"
-              >
-                <Twitter size={24} />
-                <span className="text-xs">Twitter</span>
               </button>
               <button
                 type="button"

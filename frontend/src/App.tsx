@@ -59,6 +59,7 @@ const LandingSectionsPage = React.lazy(() => import("./pages/developer/pages/Lan
 const SpFolioPage = React.lazy(() => import("./pages/developer/pages/SpFolioPage"));
 const LoaderSettingsPage = React.lazy(() => import("./pages/developer/pages/LoaderSettingsPage"));
 const PortfolioPage = React.lazy(() => import("@/components/landing/PortfolioPage"));
+const BlogPage = React.lazy(() => import("@/components/landing/BlogPage"));
 const CatalogDetail = React.lazy(() => import("@/pages/shop/CatalogDetail"));
 const BlogCatalogDetail = React.lazy(() => import("@/pages/shop/BlogCatalogDetail"));
 
@@ -92,6 +93,7 @@ export default function App() {
         {/* New second landing with Navbar2 (other routes commented out for future use) */}
         <Route path="/" element={<SecondLanding />} />
          <Route path="/portfoliopage" element={<PortfolioPage />} />
+        <Route path="/blogpage" element={<BlogPage />} />
         <Route path="/project/:id" element={<ProjectDetail />} />
         <Route path="/service/:id" element={<ServiceDetail />} />
         <Route path="/course/:id" element={<CourseDetail />} />

@@ -49,12 +49,19 @@ export function useSecondLandingNavbarProps(): SecondLandingNavbarProps {
           if (s.sectionId && s.label) labelMap[s.sectionId] = s.label;
         });
 
+        const navDropdownBySection: Record<string, boolean> = {};
+        (list || []).forEach((s: { sectionId?: string; showInNavbarDropdown?: boolean }) => {
+          if (s.sectionId) navDropdownBySection[s.sectionId] = s.showInNavbarDropdown !== false;
+        });
+
         const items =
           ids && ids.length > 0
             ? ids
                 .filter((sectionId: string) => {
                   const scrollId = sectionId === "hero" ? "home" : sectionId;
-                  return !MAIN_NAV_SCROLL_IDS.has(scrollId);
+                  if (MAIN_NAV_SCROLL_IDS.has(scrollId)) return false;
+                  if (navDropdownBySection[sectionId] === false) return false;
+                  return true;
                 })
                 .map((sectionId: string) => {
                   const scrollId = sectionId === "hero" ? "home" : sectionId;

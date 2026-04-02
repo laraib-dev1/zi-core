@@ -124,6 +124,11 @@ export default function LoaderSettingsPage() {
     });
   }, []);
 
+  /** Display mode is written to localStorage immediately in LoaderContext; keep snapshot in sync so "Update" is not stuck showing for that toggle alone. */
+  useEffect(() => {
+    setLastSaved((prev) => (prev ? { ...prev, loaderDisplayMode } : prev));
+  }, [loaderDisplayMode]);
+
   const hasChanges =
     lastSaved != null &&
     (presetId !== lastSaved.presetId ||
