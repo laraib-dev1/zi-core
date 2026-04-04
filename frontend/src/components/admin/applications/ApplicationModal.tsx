@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { RichTextEditor } from "@mantine/rte";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { X } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { cnTabsTriggerPill } from "@/components/ui/tabTriggerVariants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,9 +21,6 @@ interface Props {
 
 const appTabs = ["app", "meta", "setups", "media", "description", "features", "guide", "help"] as const;
 type AppTab = (typeof appTabs)[number];
-const tabClass =
-  "rounded-lg px-4 py-2 text-sm font-medium transition-colors data-[state=active]:bg-[var(--theme-primary)] data-[state=active]:text-white data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:bg-[color-mix(in_srgb,var(--theme-primary)_15%,transparent)]";
-
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return <label className="block text-xs font-semibold uppercase tracking-wide text-gray-600 mb-1">{children}</label>;
 }
@@ -350,24 +349,38 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl w-full h-[90vh] overflow-y-auto bg-[#f7f7f8] p-0">
-        <DialogHeader className="px-6 py-5 border-b border-gray-200" style={{ backgroundColor: "var(--theme-primary)" }}>
-          <DialogTitle className="text-2xl text-white">
-            {mode === "add" ? "Add New Application" : mode === "edit" ? "Edit Application" : "View Application"}
-          </DialogTitle>
-          <DialogDescription className="text-white/90">Fill all tabs to build the application detail page.</DialogDescription>
+      <DialogContent hideClose className="max-w-6xl w-full h-[90vh] overflow-y-auto bg-[#f7f7f8] p-0">
+        <DialogHeader
+          className="flex flex-row items-center gap-4 space-y-0 px-6 py-5 border-b border-white/20 text-left sm:text-left"
+          style={{ backgroundColor: "var(--theme-primary)" }}
+        >
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <DialogTitle className="text-2xl text-white">
+              {mode === "add" ? "Add New Application" : mode === "edit" ? "Edit Application" : "View Application"}
+            </DialogTitle>
+            <DialogDescription className="text-white/90">Fill all tabs to build the application detail page.</DialogDescription>
+          </div>
+          <DialogClose asChild>
+            <button
+              type="button"
+              aria-label="Close"
+              className="shrink-0 inline-flex h-10 w-10 items-center justify-center rounded-md text-white hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 transition-colors"
+            >
+              <X className="h-5 w-5 stroke-[2.5]" />
+            </button>
+          </DialogClose>
         </DialogHeader>
 
         <Tabs value={tab} onValueChange={handleTabChange} className="w-full px-6 py-4">
           <TabsList className="inline-flex w-full justify-start overflow-x-auto gap-1 p-1.5 rounded-xl h-auto border-0 shadow-none bg-[color-mix(in_srgb,var(--theme-primary)_10%,#e8f0f3)]">
-            <TabsTrigger value="app" className={tabClass}>App</TabsTrigger>
-            <TabsTrigger value="meta" className={tabClass}>Meta</TabsTrigger>
-            <TabsTrigger value="setups" className={tabClass}>Setups</TabsTrigger>
-            <TabsTrigger value="media" className={tabClass}>Media</TabsTrigger>
-            <TabsTrigger value="description" className={tabClass}>Description</TabsTrigger>
-            <TabsTrigger value="features" className={tabClass}>Features</TabsTrigger>
-            <TabsTrigger value="guide" className={tabClass}>Guide</TabsTrigger>
-            <TabsTrigger value="help" className={tabClass}>Support</TabsTrigger>
+            <TabsTrigger value="app" className={cnTabsTriggerPill()}>App</TabsTrigger>
+            <TabsTrigger value="meta" className={cnTabsTriggerPill()}>Meta</TabsTrigger>
+            <TabsTrigger value="setups" className={cnTabsTriggerPill()}>Setups</TabsTrigger>
+            <TabsTrigger value="media" className={cnTabsTriggerPill()}>Media</TabsTrigger>
+            <TabsTrigger value="description" className={cnTabsTriggerPill()}>Description</TabsTrigger>
+            <TabsTrigger value="features" className={cnTabsTriggerPill()}>Features</TabsTrigger>
+            <TabsTrigger value="guide" className={cnTabsTriggerPill()}>Guide</TabsTrigger>
+            <TabsTrigger value="help" className={cnTabsTriggerPill()}>Support</TabsTrigger>
           </TabsList>
 
           <TabsContent value="app" className="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5 space-y-4">

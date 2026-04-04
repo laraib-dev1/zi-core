@@ -60,8 +60,11 @@ const SpFolioPage = React.lazy(() => import("./pages/developer/pages/SpFolioPage
 const LoaderSettingsPage = React.lazy(() => import("./pages/developer/pages/LoaderSettingsPage"));
 const PortfolioPage = React.lazy(() => import("@/components/landing/PortfolioPage"));
 const BlogPage = React.lazy(() => import("@/components/landing/BlogPage"));
+const Blogs = React.lazy(() => import("@/pages/shop/Blogs"));
 const CatalogDetail = React.lazy(() => import("@/pages/shop/CatalogDetail"));
 const BlogCatalogDetail = React.lazy(() => import("@/pages/shop/BlogCatalogDetail"));
+const ApplicationsListPage = React.lazy(() => import("@/pages/shop/ApplicationsListPage"));
+const GetStartedPage = React.lazy(() => import("@/pages/shop/GetStartedPage"));
 
 export default function App() {
   useEffect(() => {
@@ -94,11 +97,14 @@ export default function App() {
         <Route path="/" element={<SecondLanding />} />
          <Route path="/portfoliopage" element={<PortfolioPage />} />
         <Route path="/blogpage" element={<BlogPage />} />
+        <Route path="/blogs" element={<Blogs />} />
         <Route path="/project/:id" element={<ProjectDetail />} />
         <Route path="/service/:id" element={<ServiceDetail />} />
         <Route path="/course/:id" element={<CourseDetail />} />
         <Route path="/blog/:id" element={<BlogCatalogDetail />} />
         <Route path="/catalog/:type/:id" element={<CatalogDetail />} />
+        <Route path="/applications" element={<ApplicationsListPage />} />
+        <Route path="/get-started" element={<GetStartedPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<SecondLanding />} />
 

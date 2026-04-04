@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import ProductGrid from "../../components/products/ProductGrid";
-import { ProductGridSkeleton } from "../../components/products/ProductGridSkeleton";
 import Banner from "@/components/hero/Banner";
 import DynamicButton from "@/components/ui/buttons/DynamicButton";
 import AtYourService from "@/components/ui/AtYourService";
@@ -260,7 +259,7 @@ const Shop = () => {
           </div>
 
           {loading && !initialLoad ? (
-            <ProductGridSkeleton count={PRODUCTS_PER_PAGE} />
+            <PageLoader />
           ) : (
             <>
               <ProductGrid items={displayedProducts} />

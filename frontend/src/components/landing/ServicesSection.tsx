@@ -5,6 +5,7 @@ import ServicesCard from "@/components/ui/ServicesCard";
 import { spacing } from "@/utils/spacing";
 import { cn } from "@/lib/utils";
 import { getPublishedCatalogItems } from "@/api/blog.api";
+import PageLoader from "@/components/ui/PageLoader";
 
 export interface ServiceItem {
   id?: string;
@@ -20,6 +21,8 @@ export interface ServicesSectionProps {
   subtitle?: string;
   /** If provided, used instead of fetching (e.g. for static pages) */
   items?: ServiceItem[];
+  /** WhatsApp booking link (e.g. from `buildWhatsAppUrl`); same behavior as floating WhatsApp */
+  bookMeetingHref?: string;
   className?: string;
 }
 
@@ -42,6 +45,7 @@ export default function ServicesSection({
   title = "Services",
   subtitle = "Mini info section details",
   items: itemsProp,
+  bookMeetingHref,
   className,
 }: ServicesSectionProps) {
   const [items, setItems] = useState<ServiceItem[]>(itemsProp ?? defaultPlaceholders);
@@ -138,11 +142,7 @@ export default function ServicesSection({
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {defaultPlaceholders.slice(0, 3).map((item, i) => (
-              <div key={i} className="rounded-lg bg-gray-100 border border-gray-100 h-48 animate-pulse" />
-            ))}
-          </div>
+          <PageLoader variant="embedded" />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {items.map((item, i) => (
@@ -160,6 +160,7 @@ export default function ServicesSection({
                   description={item.description}
                   href={item.href}
                   views={item.views}
+                  bookMeetingHref={bookMeetingHref}
                 />
               </div>
             ))}

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import Container12 from "@/components/layout/Container12";
 import SectionHeader from "@/components/ui/SectionHeader";
 import ApplicationTileCard from "@/components/applications/ApplicationTileCard";
@@ -8,11 +9,17 @@ import { getPublishedCatalogItems } from "@/api/blog.api";
 import { getApplications } from "@/api/application.api";
 import { getApplicationPlatformNavEntries, getApplicationPlatformStatesLine } from "@/utils/applicationPlatforms";
 import { resolvePublicAssetUrl } from "@/utils/mediaUrl";
+import PageLoader from "@/components/ui/PageLoader";
 
 interface ApplicationsSectionProps {
   catalogTypeSlug: string;
   title?: string;
   subtitle?: string;
+  /** When set, only this many tiles are shown on the landing page (full list lives on `seeMoreHref`). */
+  maxItems?: number;
+  /** e.g. `/applications` — shown when `maxItems` is set */
+  seeMoreHref?: string;
+  seeMoreLabel?: string;
   className?: string;
 }
 
@@ -30,6 +37,7 @@ interface AppItem {
   topRated: boolean;
   platformStatesLine: string;
   downloadsList: unknown;
+  downloadsText: string;
 }
 
 function stripHtml(html: string, maxLength = 160): string {
@@ -49,6 +57,9 @@ export default function ApplicationsSection({
   catalogTypeSlug,
   title = "Our Applications",
   subtitle = "Mini info section details",
+  maxItems,
+  seeMoreHref,
+  seeMoreLabel = "See More",
   className,
 }: ApplicationsSectionProps) {
   const [items, setItems] = useState<AppItem[]>([]);
@@ -79,6 +90,7 @@ export default function ApplicationsSection({
             topRated: Boolean(row.appInfo?.starsEnabled && Number(row.appInfo?.stars || 0) >= 4),
             platformStatesLine: getApplicationPlatformStatesLine(row.downloadsList),
             downloadsList: row.downloadsList,
+            downloadsText: String(row.appInfo?.downloadsDisplay || "").trim() || "1.2k+",
           };
         });
         setItems(mapped.filter((x) => x.id));
@@ -94,6 +106,13 @@ export default function ApplicationsSection({
       cancelled = true;
     };
   }, [catalogTypeSlug]);
+
+  const displayedItems = useMemo(() => {
+    if (maxItems != null && maxItems > 0) return items.slice(0, maxItems);
+    return items;
+  }, [items, maxItems]);
+
+  const showSeeMore = Boolean(seeMoreHref && maxItems != null && maxItems > 0 && items.length > 0);
 
   return (
     <section id={`catalog-${catalogTypeSlug}`} className={cn("py-0 bg-white w-full", className)}>
@@ -112,15 +131,25 @@ export default function ApplicationsSection({
           />
         </div>
 
+        {showSeeMore && (
+          <div className="flex justify-end mb-3 sm:mb-4">
+            <Link
+              to={seeMoreHref!}
+              className="inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 whitespace-nowrap"
+              style={{ backgroundColor: "var(--theme-primary)" }}
+            >
+              {seeMoreLabel}
+            </Link>
+          </div>
+        )}
+
         <div className="space-y-3">
           {loading ? (
-            Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-20 rounded-xl bg-gray-100 animate-pulse" />
-            ))
+            <PageLoader variant="embedded" />
           ) : items.length === 0 ? (
             <div className="text-sm text-gray-500 py-6">No applications found.</div>
           ) : (
-            items.map((item) => (
+            displayedItems.map((item) => (
               <ApplicationTileCard
                 key={item.id}
                 item={{
@@ -130,7 +159,7 @@ export default function ApplicationsSection({
                   description: item.description,
                   image: item.image,
                   releaseDate: formatDate(item.createdAt) || "—",
-                  downloadsText: "",
+                  downloadsText: item.downloadsText,
                   version: item.version,
                   stars: item.stars,
                   ratingCount: item.ratingCount,

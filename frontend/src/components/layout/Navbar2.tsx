@@ -5,15 +5,10 @@ import { cn } from "@/lib/utils";
 import LandingSocialIconButtons from "@/components/landing/LandingSocialIconButtons";
 import { getCompany } from "@/api/company.api";
 import { getCachedData, CACHE_KEYS } from "@/utils/cache";
-
-const navLinks = [
-  { to: "#home", label: "Home", hash: "home" },
-  { to: "#about", label: "About me", hash: "about" },
-  { to: "#portfolio", label: "Portfolio", hash: "portfolio" },
-  { to: "#testimonials", label: "Testimonials", hash: "testimonials" }, // section to be added later
-  { to: "#other-pages", label: "Other Pages", hash: "other-pages", hasDropdown: true },
-  { to: "#contact", label: "Contact us", hash: "contact" },
-];
+import {
+  DEFAULT_NAVBAR2_MAIN_LINKS,
+  type Navbar2NavLinkItem,
+} from "@/utils/landingNavbarLinks";
 
 // When bottom div has NO color: rounded pill, light pinkish-beige. Fixed height so page content can align with no gap.
 const NAVBAR_HEIGHT = "h-16"; // 64px - use same value in SecondLanding for main offset
@@ -60,8 +55,15 @@ export interface Navbar2Props {
    * When set on `/`, active nav follows scroll (scroll-spy).
    */
   landingScrollSpyOrder?: string[];
+  /** Base path for section links when not on the home route (default `/`). Clicks go here + hash. */
+  sectionNavHomePath?: string;
   /** DOM ids that belong under "Other pages" — when any is in view, that nav item is active. */
   otherPagesScrollIds?: string[];
+  /**
+   * Main section links (Home, About, …). When omitted, full default list is used (e.g. while SpFolio data loads).
+   * Pass a filtered list from `buildFilteredMainNavLinks` so items match enabled sections + “Show in navbar”.
+   */
+  mainNavLinks?: Navbar2NavLinkItem[];
   className?: string;
 }
 
@@ -117,16 +119,20 @@ export default function Navbar2({
   companySocialLinks,
   landingScrollSpyOrder,
   otherPagesScrollIds,
+  sectionNavHomePath = "/",
+  mainNavLinks: mainNavLinksProp,
   className,
 }: Navbar2Props) {
+  /** Omit prop for legacy full list; pass [] while SpFolio loads or when no links apply. */
+  const navLinks =
+    mainNavLinksProp === undefined ? DEFAULT_NAVBAR2_MAIN_LINKS : mainNavLinksProp;
   const { pathname, hash } = useLocation();
   const navigate = useNavigate();
   const currentHash = hash?.replace("#", "") || "home";
-  const isLanding = !pathname.startsWith("/project");
-  /** Only show a nav item as active when we're on the landing page; on detail pages (service, course, project, blog, etc.) no item is active */
-  const isOnLandingPage = pathname === "/";
-  /** Second landing home: full nav + mobile drawer. Detail routes: brand + Hire Me + socials only (no section links / burger). */
-  const isLandingHome = pathname === "/";
+  const homePath = sectionNavHomePath.replace(/\/$/, "") || "/";
+  const isOnMainLanding = pathname === homePath;
+  /** Only highlight a nav item when we're on the main landing (scroll-spy or hash); subpages show no active section */
+  const isOnLandingPage = isOnMainLanding;
   const [scrollSpyNavHash, setScrollSpyNavHash] = useState<string | null>(null);
 
   const resolvedOtherScrollIds = otherPagesScrollIds ?? EMPTY_OTHER_SCROLL_IDS;
@@ -136,7 +142,7 @@ export default function Navbar2({
   );
 
   useEffect(() => {
-    if (!isLandingHome || !landingScrollSpyOrder?.length) {
+    if (!isOnMainLanding || !landingScrollSpyOrder?.length) {
       setScrollSpyNavHash(null);
       return;
     }
@@ -164,18 +170,29 @@ export default function Navbar2({
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
     };
-  }, [isLandingHome, landingScrollSpyOrder, otherPagesIdSet]);
-  const getHref = (to: string) => (isLanding ? to : `/${to}`);
+  }, [isOnMainLanding, landingScrollSpyOrder, otherPagesIdSet]);
+
+  /** Hash fragment only, no leading # — for navigate({ hash }) */
+  const toHashFragment = (itemHash: string) => (itemHash.startsWith("#") ? itemHash.slice(1) : itemHash);
+
+  /** On main landing: `#section`. Else: `/#section` so the browser targets home + hash, not current path + hash. */
+  const getHref = (to: string) => {
+    const frag = toHashFragment(to);
+    const h = `#${frag}`;
+    if (pathname === homePath) return h;
+    if (homePath === "/") return `/${h}`;
+    return `${homePath}${h}`;
+  };
 
   const handleNavClick = (e: React.MouseEvent, itemHash: string) => {
     setMenuOpen(false);
     e.preventDefault();
-    const hashValue = itemHash.startsWith("#") ? itemHash : `#${itemHash}`;
-    if (!isLanding) {
-      navigate({ pathname: "/", hash: hashValue });
+    const fragment = toHashFragment(itemHash);
+    if (pathname !== homePath) {
+      navigate({ pathname: homePath, hash: fragment });
       return;
     }
-    navigate({ pathname, hash: hashValue }, { replace: true });
+    navigate({ pathname: homePath, hash: fragment }, { replace: true });
   };
   const [menuOpen, setMenuOpen] = useState(false);
   const [slideIn, setSlideIn] = useState(false);
@@ -220,7 +237,6 @@ export default function Navbar2({
   }, [menuOpen]);
 
   useEffect(() => {
-    if (!isLandingHome) return;
     if (!(menuOpen || isClosing)) return;
     const prevBodyOverflow = document.body.style.overflow;
     const prevHtmlOverflow = document.documentElement.style.overflow;
@@ -230,11 +246,12 @@ export default function Navbar2({
       document.body.style.overflow = prevBodyOverflow;
       document.documentElement.style.overflow = prevHtmlOverflow;
     };
-  }, [menuOpen, isClosing, isLandingHome]);
+  }, [menuOpen, isClosing]);
 
   useEffect(() => {
-    if (!isLandingHome) setMenuOpen(false);
-  }, [isLandingHome]);
+    setMenuOpen(false);
+    setIsClosing(false);
+  }, [pathname]);
 
   const handleCloseMenu = () => {
     if (isClosing) return;
@@ -276,8 +293,7 @@ export default function Navbar2({
         {companyName}
       </a>
 
-      {/* Part 2: Nav links — only on second landing home; hidden on detail / portfolio routes */}
-      {isLandingHome && (
+      {/* Part 2: Section links — on any page; off-home navigates to main landing + hash */}
       <nav className="hidden md:flex items-center justify-center gap-6 flex-1">
         {navLinks.map((item) =>
           item.hasDropdown ? (
@@ -298,7 +314,7 @@ export default function Navbar2({
                     otherPagesItems.map((opt) => (
                       <a
                         key={opt.id}
-                        href={`#${opt.id}`}
+                        href={getHref(`#${opt.id}`)}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 truncate"
                         onClick={(e) => {
                           handleNavClick(e, opt.id);
@@ -324,7 +340,6 @@ export default function Navbar2({
           )
         )}
       </nav>
-      )}
 
       {/* Part 3: Social icons + hire me — on detail pages always visible (including mobile); on home, desktop only until burger opens */}
       <div
@@ -405,8 +420,7 @@ export default function Navbar2({
                 >
                   {companyName}
                 </a>
-                {isLandingHome && (
-                  <nav className="flex flex-col gap-1.5 mt-6">
+                <nav className="flex flex-col gap-1.5 mt-6">
                     {navLinks.map((item) =>
                       item.hasDropdown ? (
                         <div key={item.to} className="flex flex-col">
@@ -431,7 +445,7 @@ export default function Navbar2({
                               {otherPagesItems.map((opt) => (
                                 <a
                                   key={opt.id}
-                                  href={`#${opt.id}`}
+                                  href={getHref(`#${opt.id}`)}
                                   className="py-1.5 text-xs text-gray-700 border-l border-gray-200 pl-3"
                                   onClick={(e) => {
                                     handleNavClick(e, opt.id);
@@ -460,15 +474,11 @@ export default function Navbar2({
                       )
                     )}
                   </nav>
-                )}
                 <a
                   href={hireMeHref}
                   target={hireMeHref !== "#" ? "_blank" : undefined}
                   rel={hireMeHref !== "#" ? "noopener noreferrer" : undefined}
-                  className={cn(
-                    "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold text-white",
-                    isLandingHome ? "mt-3" : "mt-6"
-                  )}
+                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold text-white mt-3"
                   style={{ backgroundColor: "var(--theme-primary)" }}
                 >
                   Hire Me

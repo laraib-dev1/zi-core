@@ -16,6 +16,10 @@ export interface ServicesCardProps {
   href?: string;
   /** Label for the learn more link (default "Learn More") */
   learnMoreLabel?: string;
+  /** WhatsApp `wa.me` URL for “Set Meeting”; hidden if missing or invalid */
+  bookMeetingHref?: string;
+  /** Label for booking button (default "Set Meeting") */
+  bookMeetingLabel?: string;
   className?: string;
 }
 
@@ -26,11 +30,16 @@ export default function ServicesCard({
   description,
   href,
   learnMoreLabel = "Learn More",
+  bookMeetingHref,
+  bookMeetingLabel = "Set Meeting",
   className,
 }: ServicesCardProps) {
   const [imgError, setImgError] = useState(false);
   const showImage = imageSrc && !imgError;
   const showLearnMore = href != null && href !== "";
+  const showBookMeeting =
+    typeof bookMeetingHref === "string" &&
+    bookMeetingHref.startsWith("https://wa.me/");
 
   const content = (
     <div className="flex flex-col p-4 sm:p-5">
@@ -48,10 +57,23 @@ export default function ServicesCard({
         )}
       </div>
 
-      {/* Title */}
-      <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-2 line-clamp-2">
-        {title}
-      </h3>
+      {/* Title + booking (WhatsApp), same row */}
+      <div className="flex justify-between items-start gap-2 mb-2">
+        <h3 className="font-semibold text-gray-900 text-base sm:text-lg line-clamp-2 min-w-0 flex-1">
+          {title}
+        </h3>
+        {showBookMeeting && (
+          <a
+            href={bookMeetingHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 inline-flex items-center justify-center rounded-md border-2 px-2.5 py-1 text-xs font-medium transition-colors border-[var(--theme-primary)] text-[var(--theme-primary)] bg-transparent hover:bg-[var(--theme-primary)] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-primary)] focus-visible:ring-offset-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {bookMeetingLabel}
+          </a>
+        )}
+      </div>
 
       {/* Description */}
       {description && (

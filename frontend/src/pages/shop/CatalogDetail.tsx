@@ -14,6 +14,7 @@ import PageLoader from "@/components/ui/PageLoader";
 import ApplicationTileCard from "@/components/applications/ApplicationTileCard";
 import ProductImageGallery from "@/components/products/ProductImageGallery";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { cnTabsTriggerUnderline } from "@/components/ui/tabTriggerVariants";
 import HelpBanner from "@/components/landing/HelpBanner";
 import CtaBanner from "@/components/landing/CtaBanner";
 import PortfolioCard from "@/components/landing/PortfolioCard";
@@ -228,6 +229,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
           companyName={landingNav.companyName}
           hireMeHref={landingNav.hireMeHref}
           companySocialLinks={landingNav.companySocialLinks}
+          mainNavLinks={landingNav.mainNavLinks}
         />
         <main className="flex-1 flex items-center justify-center">
           <PageLoader />
@@ -247,6 +249,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
           companyName={landingNav.companyName}
           hireMeHref={landingNav.hireMeHref}
           companySocialLinks={landingNav.companySocialLinks}
+          mainNavLinks={landingNav.mainNavLinks}
         />
         <main className="flex-1 pt-0">
           <div className={spacing.section.gap}>
@@ -360,6 +363,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
           companyName={landingNav.companyName}
           hireMeHref={landingNav.hireMeHref}
           companySocialLinks={landingNav.companySocialLinks}
+          mainNavLinks={landingNav.mainNavLinks}
         />
         <main className="flex-1 pt-0">
           <div>
@@ -549,41 +553,30 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                     </div>
                     <div className="col-span-12">
                       <Tabs defaultValue={firstContentTab || "description"}>
-                        <div className="w-full border-b-2 border-gray-100">
-                          <TabsList className="flex gap-0 p-0 h-auto w-fit min-w-0 border-0 bg-transparent">
+                        <div className="w-full">
+                          <TabsList className="flex gap-0.5 p-0 h-10 w-fit min-w-0 border-0 bg-transparent items-stretch mb-2">
                             {hasDescription && (
-                              <TabsTrigger
-                                value="description"
-                                className="px-5 py-2.5 rounded-t-lg rounded-b-none text-xs sm:text-sm font-medium bg-gray-200 text-gray-600 data-[state=active]:bg-(--theme-primary) data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:scale-100 mb-1 transition-colors border-0 hover:bg-[color-mix(in_srgb,var(--theme-primary,#8B5E3C)_15%,#e5e7eb)] data-[state=active]:hover:bg-(--theme-primary)"
-                              >
+                              <TabsTrigger value="description" className={cnTabsTriggerUnderline()}>
                                 Description
                               </TabsTrigger>
                             )}
                             {hasFeatures && (
-                              <TabsTrigger
-                                value="features"
-                                className="px-5 py-2.5 rounded-t-lg rounded-b-none text-xs sm:text-sm font-medium bg-gray-200 text-gray-600 data-[state=active]:bg-(--theme-primary) data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:scale-100 mb-1 transition-colors border-0 hover:bg-[color-mix(in_srgb,var(--theme-primary,#8B5E3C)_15%,#e5e7eb)] data-[state=active]:hover:bg-(--theme-primary)"
-                              >
+                              <TabsTrigger value="features" className={cnTabsTriggerUnderline()}>
                                 Features
                               </TabsTrigger>
                             )}
                             {hasGuide && (
-                              <TabsTrigger
-                                value="guide"
-                                className="px-5 py-2.5 rounded-t-lg rounded-b-none text-xs sm:text-sm font-medium bg-gray-200 text-gray-600 data-[state=active]:bg-(--theme-primary) data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:scale-100 mb-1 transition-colors border-0 hover:bg-[color-mix(in_srgb,var(--theme-primary,#8B5E3C)_15%,#e5e7eb)] data-[state=active]:hover:bg-(--theme-primary)"
-                              >
+                              <TabsTrigger value="guide" className={cnTabsTriggerUnderline()}>
                                 Guide
                               </TabsTrigger>
                             )}
                             {hasHelp && (
-                              <TabsTrigger
-                                value="help"
-                                className="px-5 py-2.5 rounded-t-lg rounded-b-none text-xs sm:text-sm font-medium bg-gray-200 text-gray-600 data-[state=active]:bg-(--theme-primary) data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:scale-100 mb-1 transition-colors border-0 hover:bg-[color-mix(in_srgb,var(--theme-primary,#8B5E3C)_15%,#e5e7eb)] data-[state=active]:hover:bg-(--theme-primary)"
-                              >
+                              <TabsTrigger value="help" className={cnTabsTriggerUnderline()}>
                                 Support
                               </TabsTrigger>
                             )}
                           </TabsList>
+                          <div className="h-0 w-full border-b-2 border-gray-100" aria-hidden />
                         </div>
                         {hasDescription && (
                           <TabsContent value="description" className="mt-4">
@@ -767,6 +760,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
         companyName={landingNav.companyName}
         hireMeHref={landingNav.hireMeHref}
         companySocialLinks={landingNav.companySocialLinks}
+        mainNavLinks={landingNav.mainNavLinks}
       />
       <main className="flex-1 pt-0" style={{ overflow: "visible" }}>
         <div className={spacing.section.gap}>

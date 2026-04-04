@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import Navbar from "@/components/layout/Navbar";
+import Navbar2 from "@/components/layout/Navbar2";
 import Footer from "@/components/layout/Footer";
+import { useSecondLandingNavbarProps } from "@/hooks/useSecondLandingNavbarProps";
 import AtYourService from "@/components/ui/AtYourService";
 import FeatureCards from "@/components/ui/FeatureCards";
 import ProductCard from "@/components/products/ProductCard";
@@ -41,6 +42,7 @@ interface Niche {
 }
 
 export default function Blogs() {
+  const landingNav = useSecondLandingNavbarProps();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -237,9 +239,16 @@ export default function Blogs() {
   const hasMore = filteredBlogs.length > displayCount;
 
   return (
-    <div className="bg-white min-h-screen flex flex-col">
-      <Navbar />
-      <main className={`${spacing.navbar.offset} ${spacing.navbar.gapBottom} flex-1`}>
+    <div className="min-h-screen flex flex-col bg-transparent pt-20 landing-detail-page">
+      <Navbar2
+        bottomDivHasColor={false}
+        otherPagesItems={landingNav.otherPagesItems}
+        companyName={landingNav.companyName}
+        hireMeHref={landingNav.hireMeHref}
+        companySocialLinks={landingNav.companySocialLinks}
+        mainNavLinks={landingNav.mainNavLinks}
+      />
+      <main className="flex-1 pt-0">
         {/* Header Section – same inner area as blog grid */}
         <section className={`max-w-8xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 ${spacing.section.gap}`}>
           <div className={spacing.container.paddingXLarge}>
@@ -343,9 +352,7 @@ export default function Blogs() {
         <section className={`max-w-8xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 ${spacing.section.gap}`}>
           <div className={spacing.container.paddingXLarge}>
             {loading ? (
-              <div className="text-center py-12">
-                <p className="text-gray-600">Loading blogs...</p>
-              </div>
+              <PageLoader />
             ) : displayedBlogs.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-600">No blogs found.</p>
@@ -476,7 +483,7 @@ export default function Blogs() {
         </section>
       </main>
       <section className={`w-full ${spacing.footer.gapTop}`} style={{ marginBottom: 0, paddingBottom: 0 }}>
-        <Footer />
+        <Footer variant="landing2" />
       </section>
     </div>
   );

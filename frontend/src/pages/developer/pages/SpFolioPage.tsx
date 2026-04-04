@@ -530,7 +530,7 @@ export default function SpFolioPage() {
                               <span className="flex flex-col gap-0.5 text-left min-w-0">
                                 <span className="text-sm text-gray-900">Show in navbar</span>
                                 <span className="text-xs font-normal text-gray-500">
-                                  Other pages menu (when not a main link)
+                                  Other pages dropdown & mobile submenu (Home, About, Portfolio, Contact, etc. follow enabled sections)
                                 </span>
                               </span>
                               <button

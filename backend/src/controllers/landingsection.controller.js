@@ -21,6 +21,7 @@ const DEFAULT_SECTIONS = [
   { sectionId: "courses", label: "Courses", order: 7 },
   { sectionId: "portfolio", label: "Portfolio Grid", order: 8 },
   { sectionId: "applications", label: "Applications", order: 9 },
+  { sectionId: "zi-core-package", label: "Zi Core Development Package", order: 9.5 },
   { sectionId: "feature-cards", label: "Feature Cards", order: 10 },
   { sectionId: "cta-banner-3", label: "CTA Banner 3", order: 11 },
   { sectionId: "other-pages", label: "Other Pages (Detail Sidebar)", order: 12 },

@@ -9,6 +9,7 @@ import { spacing } from "@/utils/spacing";
 import { cn } from "@/lib/utils";
 import { getPublishedCatalogItems } from "@/api/blog.api";
 import { getBlogCategories } from "@/api/blog.api";
+import PageLoader from "@/components/ui/PageLoader";
 
 export interface CatalogSectionProps {
   catalogTypeSlug: string;
@@ -157,11 +158,7 @@ export default function CatalogSection({
         )}
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {DEFAULT_PLACEHOLDERS.slice(0, 3).map((_, i) => (
-              <div key={i} className={usePortfolioCards ? "h-64 bg-gray-100 animate-pulse rounded-xl" : "rounded-lg bg-gray-100 border border-gray-100 h-48 animate-pulse"} />
-            ))}
-          </div>
+          <PageLoader variant="embedded" />
         ) : usePortfolioCards ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
@@ -184,11 +181,11 @@ export default function CatalogSection({
             {isBlogSection && !loading && (
               <div className="flex justify-center mt-8">
                 <Link
-                  to="/blogpage"
+                  to="/blogs"
                   className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium text-white transition-colors hover:opacity-90"
                   style={{ backgroundColor: "var(--theme-primary)" }}
                 >
-                  View more
+                  View More
                 </Link>
               </div>
             )}

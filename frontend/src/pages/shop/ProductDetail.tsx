@@ -19,6 +19,7 @@ import AddToCartButton from "@/components/ui/buttons/AddToCartButton";
 import SocialShare from "@/components/products/SocialShare";
 import ProductCard from "@/components/products/ProductCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { cnTabsTriggerPill } from "@/components/ui/tabTriggerVariants";
 import FeatureCards from "@/components/ui/FeatureCards";
 import { getProduct, getProducts } from "@/api/product.api";
 import { getCompany } from "@/api/company.api";
@@ -679,10 +680,7 @@ export default function ProductDetail() {
               className="bg-gray-100 p-1 rounded-lg h-auto relative"
               style={{ backgroundColor: "#F5F5F5" }}
             >
-              <TabsTrigger 
-                value="description"
-                className="px-4 py-2 rounded-md transition-all duration-300 ease-in-out"
-              >
+              <TabsTrigger value="description" className={cnTabsTriggerPill("rounded-md")}>
                 Description
               </TabsTrigger>
               {(() => {
@@ -694,10 +692,7 @@ export default function ProductDetail() {
                 if (!hasVideo) return null;
                 
                 return (
-                  <TabsTrigger 
-                    value="videos"
-                    className="px-4 py-2 rounded-md transition-all duration-300 ease-in-out"
-                  >
+                  <TabsTrigger value="videos" className={cnTabsTriggerPill("rounded-md")}>
                     Demo Video
                   </TabsTrigger>
                 );

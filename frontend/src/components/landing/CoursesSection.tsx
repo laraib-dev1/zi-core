@@ -6,6 +6,7 @@ import CoursesCard from "@/components/ui/CoursesCard";
 import { spacing } from "@/utils/spacing";
 import { cn } from "@/lib/utils";
 import { getPublishedCatalogItems } from "@/api/blog.api";
+import PageLoader from "@/components/ui/PageLoader";
 
 export interface CourseItem {
   id?: string;
@@ -139,11 +140,7 @@ export default function CoursesSection({
         )}
 
         {loading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {defaultPlaceholders.slice(0, 3).map((_, i) => (
-              <div key={i} className="rounded-lg bg-gray-100 border border-gray-100 h-64 animate-pulse" />
-            ))}
-          </div>
+          <PageLoader variant="embedded" />
         ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
           {visibleItems.map((item, i) => (

@@ -34,6 +34,7 @@ import FAQsSection from "@/components/landing/FAQsSection";
 import ComingSoonSection from "@/components/landing/ComingSoonSection";
 import CatalogSection from "@/components/landing/CatalogSection";
 import ApplicationsSection from "@/components/landing/ApplicationsSection";
+import ZiCorePackageSection from "@/components/landing/ZiCorePackageSection";
 import { isCatalogStyleLandingSectionId } from "@/utils/landingSectionCatalog";
 import {
   buildSectionContentMapFromList,
@@ -51,6 +52,8 @@ import { getCompany } from "@/api/company.api";
 import { getContentByType } from "@/api/content.api";
 import type { FAQ } from "@/api/content.api";
 import { applyCompanyBranding, buildWhatsAppUrl, DEFAULT_COMPANY_NAME } from "@/utils/companyBrand";
+import { buildFilteredMainNavLinks } from "@/utils/landingNavbarLinks";
+import { DEFAULT_LANDING_SECTION_ORDER } from "@/utils/defaultLandingSectionOrder";
 
 const myProjectsHtmlContent = `
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
@@ -87,15 +90,6 @@ const howWeWorkItems = [
 ];
 
 const MAIN_NAV_SCROLL_IDS = new Set(["home", "about", "portfolio", "testimonials", "other-pages", "contact"]);
-
-// Default order when API hasn't loaded yet - must match backend DEFAULT_SECTIONS
-const DEFAULT_SECTION_ORDER = [
-  "hero", "about", "cta-banner-1", "text-image", "how-we-work", "cta-banner-2", "services", "courses",
-  "portfolio", "applications", "feature-cards", "cta-banner-3", "other-pages", "testimonials", "faqs", "help-banner-1",
-  "contact", "cta-banner-4", "scale-operations", "feature-service", "hero-business", "team",
-  "unlock-potential", "call-to-action", "features-details", "clients", "excellence", "help-banner-2",
-  "event-banner", "limited-offer", "coming-soon",
-];
 
 type ImgFn = (slot: string) => string;
 
@@ -223,7 +217,7 @@ function createSectionRenderers(
     ),
     services: () => (
       <div id="services" className={spacing.section.gap}>
-        <ServicesSection />
+        <ServicesSection bookMeetingHref={workTogetherWhatsAppHref} />
       </div>
     ),
     courses: () => (
@@ -242,9 +236,33 @@ function createSectionRenderers(
           catalogTypeSlug="applications"
           title="Our Applications"
           subtitle="Mini info section details"
+          maxItems={5}
+          seeMoreHref="/applications"
         />
       </div>
     ),
+    "zi-core-package": () => {
+      const z = SECTION_CONTENT_DEFAULTS["zi-core-package"] ?? {};
+      const st = ov("zi-core-package", "sectionTitle", z.sectionTitle ?? "");
+      return (
+        <div id="zi-core-package" className={spacing.section.gap}>
+          <ZiCorePackageSection
+            sectionTitle={st}
+            sectionSubtitle={ov("zi-core-package", "sectionSubtitle", z.sectionSubtitle ?? "")}
+            showSectionHeader={Boolean(String(st || "").trim())}
+            headingBefore={ov("zi-core-package", "headingBefore", z.headingBefore ?? "A Global ")}
+            headingAccent={ov("zi-core-package", "headingAccent", z.headingAccent ?? "Zi Core")}
+            headingAfter={ov("zi-core-package", "headingAfter", z.headingAfter ?? " Development Package")}
+            description={ov("zi-core-package", "description", z.description ?? "")}
+            youtubeUrl={ov("zi-core-package", "youtubeUrl", z.youtubeUrl ?? "")}
+            getStartedLabel={ov("zi-core-package", "getStartedLabel", z.getStartedLabel ?? "Get Started")}
+            getStartedHref={ov("zi-core-package", "getStartedHref", z.getStartedHref ?? "/get-started")}
+            watchDemoLabel={ov("zi-core-package", "watchDemoLabel", z.watchDemoLabel ?? "Watch Demo")}
+            watchDemoUrl={ov("zi-core-package", "watchDemoUrl", (z.watchDemoUrl && z.watchDemoUrl.trim()) || "#")}
+          />
+        </div>
+      );
+    },
     "feature-cards": () => (
       <div id="feature-cards" className={spacing.section.gap}>
         <FeatureCardsSection />
@@ -698,7 +716,7 @@ export default function SecondLanding() {
   const sectionOrder =
     enabledSectionIds != null && enabledSectionIds.length > 0
       ? enabledSectionIds
-      : DEFAULT_SECTION_ORDER;
+      : DEFAULT_LANDING_SECTION_ORDER;
 
   const sectionRenderers = React.useMemo(
     () =>
@@ -726,20 +744,19 @@ export default function SecondLanding() {
     ]
   );
 
-  const otherPagesItems: { id: string; label: string }[] =
-    enabledSectionIds == null || enabledSectionIds.length === 0
-      ? []
-      : enabledSectionIds
-          .filter((sectionId) => {
-            const scrollId = sectionId === "hero" ? "home" : sectionId;
-            if (MAIN_NAV_SCROLL_IDS.has(scrollId)) return false;
-            if (sectionShowInNavbarDropdown[sectionId] === false) return false;
-            return true;
-          })
-          .map((sectionId) => {
-            const scrollId = sectionId === "hero" ? "home" : sectionId;
-            return { id: scrollId, label: sectionLabels[sectionId] || sectionId };
-          });
+  const otherPagesItems: { id: string; label: string }[] = !sectionsReady
+    ? []
+    : sectionOrder
+        .filter((sectionId) => {
+          const scrollId = sectionId === "hero" ? "home" : sectionId;
+          if (MAIN_NAV_SCROLL_IDS.has(scrollId)) return false;
+          if (sectionShowInNavbarDropdown[sectionId] === false) return false;
+          return true;
+        })
+        .map((sectionId) => {
+          const scrollId = sectionId === "hero" ? "home" : sectionId;
+          return { id: scrollId, label: sectionLabels[sectionId] || sectionId };
+        });
 
   const landingScrollSpyOrder = useMemo(() => {
     if (!sectionsReady) return [];
@@ -750,8 +767,8 @@ export default function SecondLanding() {
   }, [sectionsReady, sectionOrder, customSectionCodeMap]);
 
   const otherPagesScrollIds = useMemo(() => {
-    if (enabledSectionIds == null || enabledSectionIds.length === 0) return [];
-    return enabledSectionIds
+    if (!sectionsReady) return [];
+    return sectionOrder
       .filter((sectionId) => {
         const scrollId = sectionId === "hero" ? "home" : sectionId;
         if (MAIN_NAV_SCROLL_IDS.has(scrollId)) return false;
@@ -759,7 +776,15 @@ export default function SecondLanding() {
         return true;
       })
       .map((sectionId) => (sectionId === "hero" ? "home" : sectionId));
-  }, [enabledSectionIds, sectionShowInNavbarDropdown]);
+  }, [sectionsReady, sectionOrder, sectionShowInNavbarDropdown]);
+
+  const mainNavLinks = useMemo(() => {
+    if (!sectionsReady || enabledSectionIds == null) return [];
+    return buildFilteredMainNavLinks({
+      enabledSectionIds: sectionOrder,
+      otherPagesItems,
+    });
+  }, [sectionsReady, enabledSectionIds, sectionOrder, otherPagesItems]);
 
   useEffect(() => {
     const hashId = hash?.replace("#", "");
@@ -783,6 +808,7 @@ export default function SecondLanding() {
         companySocialLinks={companyData.socialLinks}
         landingScrollSpyOrder={landingScrollSpyOrder}
         otherPagesScrollIds={otherPagesScrollIds}
+        mainNavLinks={mainNavLinks}
       />
 
       {/* Section gap from spacing.ts = outer padding (wrapper), not on section div */}
@@ -817,6 +843,8 @@ export default function SecondLanding() {
                     catalogTypeSlug={slug}
                     title={label}
                     subtitle="Mini info section details"
+                    maxItems={slug === "applications" ? 5 : undefined}
+                    seeMoreHref={slug === "applications" ? "/applications" : undefined}
                   />
                 ) : (
                   <CatalogSection

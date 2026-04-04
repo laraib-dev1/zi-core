@@ -3,6 +3,11 @@ import { getCompany } from "@/api/company.api";
 import { getEnabledLandingSections, getLandingSections } from "@/api/landingsection.api";
 import { getCachedData, CACHE_KEYS } from "@/utils/cache";
 import { buildWhatsAppUrl, DEFAULT_COMPANY_NAME } from "@/utils/companyBrand";
+import {
+  buildFilteredMainNavLinks,
+  type Navbar2NavLinkItem,
+} from "@/utils/landingNavbarLinks";
+import { DEFAULT_LANDING_SECTION_ORDER } from "@/utils/defaultLandingSectionOrder";
 
 /** Same set as SecondLanding – sections that appear in main nav (not “Other pages”). */
 const MAIN_NAV_SCROLL_IDS = new Set(["home", "about", "portfolio", "testimonials", "other-pages", "contact"]);
@@ -12,6 +17,8 @@ export type SecondLandingNavbarProps = {
   hireMeHref: string;
   companySocialLinks: Record<string, string | undefined>;
   otherPagesItems: { id: string; label: string }[];
+  /** Filtered main nav (empty until first SpFolio load completes). */
+  mainNavLinks: Navbar2NavLinkItem[];
 };
 
 /**
@@ -32,6 +39,7 @@ export function useSecondLandingNavbarProps(): SecondLandingNavbarProps {
     return c?.socialLinks || {};
   });
   const [otherPagesItems, setOtherPagesItems] = useState<{ id: string; label: string }[]>([]);
+  const [mainNavLinks, setMainNavLinks] = useState<Navbar2NavLinkItem[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,22 +62,28 @@ export function useSecondLandingNavbarProps(): SecondLandingNavbarProps {
           if (s.sectionId) navDropdownBySection[s.sectionId] = s.showInNavbarDropdown !== false;
         });
 
-        const items =
-          ids && ids.length > 0
-            ? ids
-                .filter((sectionId: string) => {
-                  const scrollId = sectionId === "hero" ? "home" : sectionId;
-                  if (MAIN_NAV_SCROLL_IDS.has(scrollId)) return false;
-                  if (navDropdownBySection[sectionId] === false) return false;
-                  return true;
-                })
-                .map((sectionId: string) => {
-                  const scrollId = sectionId === "hero" ? "home" : sectionId;
-                  return { id: scrollId, label: labelMap[sectionId] || sectionId };
-                })
-            : [];
+        const effectiveIds =
+          Array.isArray(ids) && ids.length > 0 ? ids : DEFAULT_LANDING_SECTION_ORDER;
+
+        const items = effectiveIds
+          .filter((sectionId: string) => {
+            const scrollId = sectionId === "hero" ? "home" : sectionId;
+            if (MAIN_NAV_SCROLL_IDS.has(scrollId)) return false;
+            if (navDropdownBySection[sectionId] === false) return false;
+            return true;
+          })
+          .map((sectionId: string) => {
+            const scrollId = sectionId === "hero" ? "home" : sectionId;
+            return { id: scrollId, label: labelMap[sectionId] || sectionId };
+          });
 
         setOtherPagesItems(items);
+        setMainNavLinks(
+          buildFilteredMainNavLinks({
+            enabledSectionIds: effectiveIds,
+            otherPagesItems: items,
+          })
+        );
 
         if (company) {
           setCompanyName(company.company || DEFAULT_COMPANY_NAME);
@@ -91,5 +105,6 @@ export function useSecondLandingNavbarProps(): SecondLandingNavbarProps {
     hireMeHref: buildWhatsAppUrl(phone, "Hello, I visited the ZI_Core site. I would like to ask you"),
     companySocialLinks: socialLinks,
     otherPagesItems,
+    mainNavLinks,
   };
 }

@@ -18,25 +18,25 @@ export default function BlogPage() {
         <TabsList className="bg-transparent border-b border-gray-300 rounded-none p-0 h-auto mb-6">
           <TabsTrigger
             value="dashboard"
-            className="px-4 py-2 rounded-t-md data-[state=active]:border-b-2 data-[state=active]:border-[var(--theme-primary)] data-[state=active]:bg-transparent"
+            className="min-h-10 box-border px-4 py-2 text-sm font-medium leading-normal rounded-t-md border-b-2 border-transparent transition-colors hover:bg-[color-mix(in_srgb,var(--theme-primary)_10%,#f9fafb)] data-[state=active]:border-[var(--theme-primary)] data-[state=active]:bg-transparent data-[state=active]:text-[var(--theme-primary)] data-[state=inactive]:text-gray-600"
           >
             Dashboard
           </TabsTrigger>
           <TabsTrigger
             value="blogs"
-            className="px-4 py-2 rounded-t-md data-[state=active]:border-b-2 data-[state=active]:border-[var(--theme-primary)] data-[state=active]:bg-transparent"
+            className="min-h-10 box-border px-4 py-2 text-sm font-medium leading-normal rounded-t-md border-b-2 border-transparent transition-colors hover:bg-[color-mix(in_srgb,var(--theme-primary)_10%,#f9fafb)] data-[state=active]:border-[var(--theme-primary)] data-[state=active]:bg-transparent data-[state=active]:text-[var(--theme-primary)] data-[state=inactive]:text-gray-600"
           >
             Blogs
           </TabsTrigger>
           <TabsTrigger
             value="categories"
-            className="px-4 py-2 rounded-t-md data-[state=active]:border-b-2 data-[state=active]:border-[var(--theme-primary)] data-[state=active]:bg-transparent"
+            className="min-h-10 box-border px-4 py-2 text-sm font-medium leading-normal rounded-t-md border-b-2 border-transparent transition-colors hover:bg-[color-mix(in_srgb,var(--theme-primary)_10%,#f9fafb)] data-[state=active]:border-[var(--theme-primary)] data-[state=active]:bg-transparent data-[state=active]:text-[var(--theme-primary)] data-[state=inactive]:text-gray-600"
           >
             Categories & Niches
           </TabsTrigger>
           <TabsTrigger
             value="authors"
-            className="px-4 py-2 rounded-t-md data-[state=active]:border-b-2 data-[state=active]:border-[var(--theme-primary)] data-[state=active]:bg-transparent"
+            className="min-h-10 box-border px-4 py-2 text-sm font-medium leading-normal rounded-t-md border-b-2 border-transparent transition-colors hover:bg-[color-mix(in_srgb,var(--theme-primary)_10%,#f9fafb)] data-[state=active]:border-[var(--theme-primary)] data-[state=active]:bg-transparent data-[state=active]:text-[var(--theme-primary)] data-[state=inactive]:text-gray-600"
           >
             Author Profile
           </TabsTrigger>

@@ -76,6 +76,7 @@ export const upsertBannerBySlot = async (req) => {
   const { slot } = req.params; // e.g. "hero-main"
   const { targetUrl = "" } = req.body;
   const file = req.file;
+  const clearImage = String(req.body.clearImage || "") === "true";
 
   if (!slot) {
     throw new Error("Banner slot is required");
@@ -88,12 +89,9 @@ export const upsertBannerBySlot = async (req) => {
     imageUrl = await uploadBannerImage(file);
   }
 
-  // If there is no uploaded image and we are creating for the first time,
-  // we keep the old image (if any). If banner does not exist and imageUrl
-  // is still empty, we throw an error.
   const existing = await Banner.findOne({ slot });
 
-  if (!existing && !imageUrl) {
+  if (!existing && !imageUrl && !clearImage) {
     throw new Error("Banner image is required for a new banner");
   }
 
@@ -102,11 +100,15 @@ export const upsertBannerBySlot = async (req) => {
   };
 
   if (imageUrl) {
-    // Optionally remove old local file if it was stored under /uploads
     if (existing?.imageUrl) {
       tryRemoveBannerFromUrl(existing.imageUrl);
     }
     update.imageUrl = imageUrl;
+  } else if (clearImage && existing) {
+    if (existing.imageUrl) {
+      tryRemoveBannerFromUrl(existing.imageUrl);
+    }
+    update.imageUrl = "";
   }
 
   const options = { new: true, upsert: true, setDefaultsOnInsert: true };

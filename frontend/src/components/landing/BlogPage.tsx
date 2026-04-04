@@ -10,6 +10,7 @@ import Banner from "@/components/hero/Banner";
 import { getPublishedCatalogItems } from "@/api/blog.api";
 import { getBanners, type Banner as BannerType } from "@/api/banner.api";
 import { spacing } from "@/utils/spacing";
+import PageLoader from "@/components/ui/PageLoader";
 import { ChevronDown, Check } from "lucide-react";
 
 function stripHtml(html: string, maxLength?: number): string {
@@ -85,6 +86,10 @@ export default function BlogPage() {
     ? items.filter((i) => getCategoryName(i) === selectedCategory)
     : items;
 
+  if (loading) {
+    return <PageLoader />;
+  }
+
   return (
     <div className="bg-white text-black min-h-screen flex flex-col w-full">
       <Navbar2
@@ -93,6 +98,7 @@ export default function BlogPage() {
         companyName={landingNav.companyName}
         hireMeHref={landingNav.hireMeHref}
         companySocialLinks={landingNav.companySocialLinks}
+        mainNavLinks={landingNav.mainNavLinks}
       />
       <main className={`${spacing.navbar.offset} ${spacing.navbar.gapBottom} flex-1 w-full`}>
         <Container12 grid gap="gap-6" className={spacing.section.gap}>
@@ -163,31 +169,21 @@ export default function BlogPage() {
             </div>
           </div>
 
-          {loading ? (
-            <>
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="col-span-12 sm:col-span-6 lg:col-span-4 xl:col-span-3">
-                  <div className="h-64 bg-gray-100 animate-pulse rounded-xl" />
-                </div>
-              ))}
-            </>
-          ) : (
-            filteredItems.map((item, i) => (
-              <div key={item._id || item.id || i} className="col-span-12 sm:col-span-6 lg:col-span-4 xl:col-span-3">
-                <PortfolioCard
-                  id={item._id || item.id || `item-${i}`}
-                  title={item.title || "Untitled"}
-                  description={stripHtml(item.description || "No description", 120)}
-                  image={item.image || "/hero.png"}
-                  date={formatDate(item.createdAt) || "—"}
-                  niche={getCategoryName(item)}
-                  index={i}
-                  inView={true}
-                  to={`/blog/${item._id || item.id}`}
-                />
-              </div>
-            ))
-          )}
+          {filteredItems.map((item, i) => (
+            <div key={item._id || item.id || i} className="col-span-12 sm:col-span-6 lg:col-span-4 xl:col-span-3">
+              <PortfolioCard
+                id={item._id || item.id || `item-${i}`}
+                title={item.title || "Untitled"}
+                description={stripHtml(item.description || "No description", 120)}
+                image={item.image || "/hero.png"}
+                date={formatDate(item.createdAt) || "—"}
+                niche={getCategoryName(item)}
+                index={i}
+                inView={true}
+                to={`/blog/${item._id || item.id}`}
+              />
+            </div>
+          ))}
         </Container12>
       </main>
       <section className={`w-full ${spacing.footer.gapTop}`} style={{ marginBottom: 0, paddingBottom: 0 }}>

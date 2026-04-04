@@ -2,9 +2,13 @@ import React from "react";
 import { useLoader, LOADER_STYLES } from "@/context/LoaderContext";
 import "./PageLoader.css";
 
+export type PageLoaderVariant = "fullscreen" | "embedded";
+
 interface PageLoaderProps {
   /** Override global loader message when provided */
   message?: string;
+  /** `fullscreen` = fixed overlay (default). `embedded` = fills a bounded area inside a section. */
+  variant?: PageLoaderVariant;
 }
 
 function SpinnerByStyle({
@@ -74,36 +78,76 @@ function SpinnerByStyle({
   return <div className={base} aria-hidden />;
 }
 
-export default function PageLoader({ message: messageProp }: PageLoaderProps) {
+function LoaderBody({
+  message,
+  styleId,
+  customZipCss,
+  loaderStylesList,
+  displayMode,
+}: {
+  message: string;
+  styleId: string;
+  customZipCss: string | null;
+  loaderStylesList: { id: string; spinnerClass: string }[];
+  displayMode: "both" | "message_only" | "spinner_only";
+}) {
+  const showMessage = displayMode === "both" || displayMode === "message_only";
+  const showSpinner = displayMode === "both" || displayMode === "spinner_only";
+  const effectiveStyleId = styleId || "default";
+  const displayMessage = (message && message.trim()) || "...";
+  const letters = displayMessage.split("");
+
+  return (
+    <div className="loader-wrapper">
+      {showSpinner && (
+        <SpinnerByStyle styleId={effectiveStyleId} customZipCss={customZipCss} loaderStyles={loaderStylesList} />
+      )}
+      {showMessage && (
+        <div className="loader-text">
+          {letters.map((letter, index) => (
+            <span key={index} className="loader-letter">
+              {letter === " " ? "\u00A0" : letter}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function PageLoader({ message: messageProp, variant = "fullscreen" }: PageLoaderProps) {
   const loader = useLoader();
   const message = messageProp ?? loader?.loaderMessage ?? "Loading...";
-  const displayMessage = (message && message.trim()) || "...";
   const styleId = loader?.loaderStyleId ?? "default";
   const customZipCss = loader?.customZipCss ?? null;
   const loaderStylesList = loader?.loaderStyles ?? LOADER_STYLES;
   const displayMode = loader?.loaderDisplayMode ?? "both";
 
-  const showMessage = displayMode === "both" || displayMode === "message_only";
-  const showSpinner = displayMode === "both" || displayMode === "spinner_only";
-  const effectiveStyleId = styleId || "default";
-  const letters = displayMessage.split("");
+  const body = (
+    <LoaderBody
+      message={message}
+      styleId={styleId}
+      customZipCss={customZipCss}
+      loaderStylesList={loaderStylesList}
+      displayMode={displayMode}
+    />
+  );
+
+  if (variant === "embedded") {
+    return (
+      <div
+        className="relative w-full min-h-[min(50vh,360px)] rounded-xl overflow-hidden"
+        aria-busy="true"
+        aria-live="polite"
+      >
+        <div className="absolute inset-0 bg-black z-[5] flex items-center justify-center">{body}</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
-      <div className="loader-wrapper">
-        {showSpinner && (
-          <SpinnerByStyle styleId={effectiveStyleId} customZipCss={customZipCss} loaderStyles={loaderStylesList} />
-        )}
-        {showMessage && (
-          <div className="loader-text">
-            {letters.map((letter, index) => (
-              <span key={index} className="loader-letter">
-                {letter === " " ? "\u00A0" : letter}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
+    <div className="fixed inset-0 bg-black z-50 flex items-center justify-center" aria-busy="true" aria-live="polite">
+      {body}
     </div>
   );
 }

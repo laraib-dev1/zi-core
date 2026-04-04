@@ -56,11 +56,12 @@ export const getBanners2 = async (): Promise<Banner2[]> => {
 
 export const updateBanner2 = async (
   slot: Banner2Slot | string,
-  options: { targetUrl: string; file?: File | null }
+  options: { targetUrl: string; file?: File | null; clearImage?: boolean }
 ): Promise<Banner2> => {
   const form = new FormData();
   form.append("targetUrl", options.targetUrl || "");
   if (options.file) form.append("image", options.file);
+  if (options.clearImage) form.append("clearImage", "true");
   const res = await API.put(`/banners2/${slot}`, form, {
     headers: { "Content-Type": "multipart/form-data" },
   });

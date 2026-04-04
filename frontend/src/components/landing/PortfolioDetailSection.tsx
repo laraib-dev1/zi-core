@@ -4,6 +4,7 @@ import Container12 from "@/components/layout/Container12";
 import SectionHeader from "@/components/ui/SectionHeader";
 import ProductImageGallery from "@/components/products/ProductImageGallery";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { cnTabsTriggerUnderline } from "@/components/ui/tabTriggerVariants";
 import { spacing } from "@/utils/spacing";
 import { cn } from "@/lib/utils";
 import LandingSocialIconButtons from "@/components/landing/LandingSocialIconButtons";
@@ -119,14 +120,9 @@ export default function PortfolioDetailSection({
         {/* Bottom: Tabs — full 12 cols */}
         <div className="mt-8">
           <Tabs defaultValue="description">
-            <div className="w-full border-b-2 border-gray-100">
-              <TabsList
-                className="flex gap-0 p-0 h-auto w-fit min-w-0 border-0"
-              >
-              <TabsTrigger
-                value="description"
-                className="px-5 py-2.5 rounded-t-lg rounded-b-none text-xs sm:text-sm font-medium bg-gray-200 text-gray-600 data-[state=active:bg-var(--theme-primary)] data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:scale-100 mb-1 transition-colors border-0 hover:bg-[color-mix(in_srgb,var(--theme-primary,#8B5E3C)_15%,#e5e7eb)] data-[state=active:hover:bg-var(--theme-primary)]"
-              >
+            <div className="w-full">
+              <TabsList className="flex gap-0.5 p-0 h-10 w-fit min-w-0 border-0 bg-transparent items-stretch mb-2">
+              <TabsTrigger value="description" className={cnTabsTriggerUnderline()}>
                 Description
               </TabsTrigger>
               {/* <TabsTrigger
@@ -136,6 +132,7 @@ export default function PortfolioDetailSection({
                 Demo Video
               </TabsTrigger> */}
             </TabsList>
+              <div className="h-0 w-full border-b-2 border-gray-100" aria-hidden />
             </div>
             <TabsContent value="description" className="mt-4">
               <div

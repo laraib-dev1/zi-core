@@ -46,12 +46,15 @@ export const getBanners = async (): Promise<Banner[]> => {
 // -------- ADMIN: Update one banner slot --------
 export const updateBanner = async (
   slot: BannerSlot | string,
-  options: { targetUrl: string; file?: File | null }
+  options: { targetUrl: string; file?: File | null; clearImage?: boolean }
 ): Promise<Banner> => {
   const form = new FormData();
   form.append("targetUrl", options.targetUrl || "");
   if (options.file) {
     form.append("image", options.file);
+  }
+  if (options.clearImage) {
+    form.append("clearImage", "true");
   }
 
   const res = await API.put(`/banners/${slot}`, form, {

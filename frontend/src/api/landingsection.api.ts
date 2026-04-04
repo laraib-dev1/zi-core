@@ -10,7 +10,7 @@ export interface LandingSectionItem {
   code?: string;
   /** JSON object string: editable copy fields per section (see landingSectionContent). */
   contentJson?: string;
-  /** Include in Navbar2 "Other pages" dropdown (when section is not a main nav link). Default true. */
+  /** When false, hidden from Other pages dropdown / mobile submenu only. Main row links (Home, Contact, …) follow which sections are enabled. Default true. */
   showInNavbarDropdown?: boolean;
 }
 

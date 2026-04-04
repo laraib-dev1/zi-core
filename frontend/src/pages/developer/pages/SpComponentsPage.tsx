@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Package, Search, Check, Calendar, Clock, Image as ImageIcon, Globe, Heart, ShoppingCart, User, Star, MapPin, MessageSquare, Eye, Edit, Trash2, Plus } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cnTabsTriggerPill } from "@/components/ui/tabTriggerVariants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -349,16 +350,7 @@ export default function SpComponentsPage() {
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-6">
         <TabsList className="flex flex-wrap gap-2 border-b border-gray-200 pb-2 bg-transparent h-auto p-0">
           {categories.map((cat) => (
-            <TabsTrigger
-              key={cat}
-              value={cat}
-              className={`px-4 py-2 rounded-lg font-medium transition-all data-[state=active]:text-white data-[state=inactive]:text-gray-700 data-[state=inactive]:hover:bg-gray-100`}
-              style={
-                selectedCategory === cat
-                  ? { backgroundColor: "var(--theme-primary)" }
-                  : {}
-              }
-            >
+            <TabsTrigger key={cat} value={cat} className={cnTabsTriggerPill()}>
               {cat}
             </TabsTrigger>
           ))}

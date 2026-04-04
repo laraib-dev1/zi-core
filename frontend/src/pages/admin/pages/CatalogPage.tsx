@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { cnTabsTriggerPill } from "@/components/ui/tabTriggerVariants";
 import BlogDashboard from "@/components/admin/blog/BlogDashboard";
 import BlogsTab from "@/components/admin/blog/BlogsTab";
 import BlogCategoriesTab from "@/components/admin/blog/BlogCategoriesTab";
@@ -49,30 +50,24 @@ export default function CatalogPage({ forcedType, forcedLabel }: CatalogPageProp
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="inline-flex gap-1 p-1.5 rounded-xl mb-6 h-auto border-0 shadow-none bg-[color-mix(in_srgb,var(--theme-primary)_10%,#e8f0f3)]">
-          {!isApplications && <TabsTrigger
-            value="dashboard"
-            className="rounded-lg px-4 py-2 text-sm font-medium data-[state=active]:bg-[var(--theme-primary)] data-[state=active]:text-white data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:bg-[color-mix(in_srgb,var(--theme-primary)_15%,transparent)] transition-colors"
-          >
-            Dashboard
-          </TabsTrigger>}
-          <TabsTrigger
-            value="blogs"
-            className="rounded-lg px-4 py-2 text-sm font-medium data-[state=active]:bg-[var(--theme-primary)] data-[state=active]:text-white data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:bg-[color-mix(in_srgb,var(--theme-primary)_15%,transparent)] transition-colors"
-          >
+          {!isApplications && (
+            <TabsTrigger value="dashboard" className={cnTabsTriggerPill()}>
+              Dashboard
+            </TabsTrigger>
+          )}
+          <TabsTrigger value="blogs" className={cnTabsTriggerPill()}>
             {typeLabel}
           </TabsTrigger>
-          {!isApplications && <TabsTrigger
-            value="categories"
-            className="rounded-lg px-4 py-2 text-sm font-medium data-[state=active]:bg-[var(--theme-primary)] data-[state=active]:text-white data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:bg-[color-mix(in_srgb,var(--theme-primary)_15%,transparent)] transition-colors"
-          >
-            Categories & Niches
-          </TabsTrigger>}
-          {!isApplications && <TabsTrigger
-            value="authors"
-            className="rounded-lg px-4 py-2 text-sm font-medium data-[state=active]:bg-[var(--theme-primary)] data-[state=active]:text-white data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:bg-[color-mix(in_srgb,var(--theme-primary)_15%,transparent)] transition-colors"
-          >
-            Author Profile
-          </TabsTrigger>}
+          {!isApplications && (
+            <TabsTrigger value="categories" className={cnTabsTriggerPill()}>
+              Categories & Niches
+            </TabsTrigger>
+          )}
+          {!isApplications && (
+            <TabsTrigger value="authors" className={cnTabsTriggerPill()}>
+              Author Profile
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {!isApplications && <TabsContent value="dashboard" className="mt-0">

@@ -87,6 +87,7 @@ export default function ProjectDetail() {
           companyName={landingNav.companyName}
           hireMeHref={landingNav.hireMeHref}
           companySocialLinks={landingNav.companySocialLinks}
+          mainNavLinks={landingNav.mainNavLinks}
         />
         <main className="flex-1 flex items-center justify-center">
           <PageLoader />
@@ -104,6 +105,7 @@ export default function ProjectDetail() {
           companyName={landingNav.companyName}
           hireMeHref={landingNav.hireMeHref}
           companySocialLinks={landingNav.companySocialLinks}
+          mainNavLinks={landingNav.mainNavLinks}
         />
         <main className="flex-1 pt-0">
           <div className={spacing.section.gap}>
@@ -134,6 +136,7 @@ export default function ProjectDetail() {
         companyName={landingNav.companyName}
         hireMeHref={landingNav.hireMeHref}
         companySocialLinks={landingNav.companySocialLinks}
+        mainNavLinks={landingNav.mainNavLinks}
       />
       <main className="flex-1 pt-0" style={{ overflow: "visible" }}>
         <div className={spacing.section.gap}>

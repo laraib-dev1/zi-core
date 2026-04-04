@@ -31,7 +31,7 @@ export default function TestimonialCard({
         {avatarSrc ? (
           <img
             src={avatarSrc}
-            alt=""
+            alt={name}
             className="w-16 h-16 rounded-full object-cover bg-gray-200"
           />
         ) : (

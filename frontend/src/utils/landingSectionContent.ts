@@ -98,6 +98,19 @@ export const SECTION_EDIT_FIELD_DEFS: Record<string, SectionEditFieldDef[]> = {
     { key: "title", label: "Section title" },
     { key: "subtitle", label: "Section subtitle" },
   ],
+  "zi-core-package": [
+    { key: "sectionTitle", label: "Optional section heading above columns (leave empty to hide)" },
+    { key: "sectionSubtitle", label: "Section subtitle (when heading is shown)" },
+    { key: "headingBefore", label: "Main title — text before accent (e.g. \"A Global \")" },
+    { key: "headingAccent", label: "Main title — accent in theme color (e.g. \"Zi Core\")" },
+    { key: "headingAfter", label: "Main title — text after accent" },
+    { key: "description", label: "Description", multiline: true },
+    { key: "youtubeUrl", label: "YouTube URL for embedded video (watch or youtu.be or embed)" },
+    { key: "getStartedLabel", label: "Primary button label" },
+    { key: "getStartedHref", label: "Primary button link (e.g. /get-started)" },
+    { key: "watchDemoLabel", label: "Secondary button label" },
+    { key: "watchDemoUrl", label: "Secondary button URL (opens new tab — use YouTube watch link)" },
+  ],
 };
 
 /** Default copy matching SecondLanding hardcoded strings (used when DB empty). */
@@ -197,6 +210,20 @@ Custom Integration Solutions`,
   team: {
     title: "Team",
     subtitle: "Our Hardworking Team",
+  },
+  "zi-core-package": {
+    sectionTitle: "",
+    sectionSubtitle: "",
+    headingBefore: "A Global ",
+    headingAccent: "Zi Core",
+    headingAfter: " Development Package",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
+    youtubeUrl: "https://youtu.be/mm8ubTNbsTQ",
+    getStartedLabel: "Get Started",
+    getStartedHref: "/get-started",
+    watchDemoLabel: "Watch Demo",
+    watchDemoUrl: "https://youtu.be/mm8ubTNbsTQ",
   },
 };
 

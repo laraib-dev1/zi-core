@@ -72,6 +72,7 @@ export const upsertBanner2BySlot = async (req, res) => {
     const { slot } = req.params;
     const { targetUrl = "" } = req.body;
     const file = req.file;
+    const clearImage = String(req.body.clearImage || "") === "true";
 
     if (!slot) {
       return res.status(400).json({ success: false, message: "Banner slot is required" });
@@ -83,7 +84,7 @@ export const upsertBanner2BySlot = async (req, res) => {
     }
 
     const existing = await Banner2.findOne({ slot });
-    if (!existing && !imageUrl) {
+    if (!existing && !imageUrl && !clearImage) {
       return res.status(400).json({ success: false, message: "Image is required for a new banner" });
     }
 
@@ -91,6 +92,9 @@ export const upsertBanner2BySlot = async (req, res) => {
     if (imageUrl) {
       if (existing?.imageUrl) tryRemoveFromUrl(existing.imageUrl);
       update.imageUrl = imageUrl;
+    } else if (clearImage && existing) {
+      if (existing.imageUrl) tryRemoveFromUrl(existing.imageUrl);
+      update.imageUrl = "";
     }
 
     const options = { new: true, upsert: true, setDefaultsOnInsert: true };

@@ -5,6 +5,7 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import PortfolioCard from "@/components/landing/PortfolioCard";
 import { getPublishedCatalogItems } from "@/api/blog.api";
 import { spacing } from "@/utils/spacing";
+import PageLoader from "@/components/ui/PageLoader";
 
 const INITIAL_COUNT = 6;
 
@@ -79,11 +80,7 @@ export default function PortfolioGridSection({
         />
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-64 bg-gray-100 animate-pulse rounded-xl" />
-            ))}
-          </div>
+          <PageLoader variant="embedded" />
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">

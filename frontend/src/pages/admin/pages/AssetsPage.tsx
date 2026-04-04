@@ -65,6 +65,14 @@ const processAlignmentStyles = (html: string): string => {
 
 type TabType = "banners" | "banner2" | "privacy" | "terms" | "faq";
 
+type BannerFormFields = {
+  targetUrl: string;
+  imageFile: File | null;
+  imagePreview: string | null;
+  /** When true, next save clears stored image on the server */
+  clearImage?: boolean;
+};
+
 // Aspect ratios for Banner2 slots, matching how images are rendered on SecondLanding
 const getBanner2Aspect = (slot: Banner2Slot | string): number => {
   switch (slot) {
@@ -122,14 +130,14 @@ export default function AssetsPage() {
   // Banners state
   const [banners, setBanners] = useState<Banner[]>([]);
   const [bannerLoading, setBannerLoading] = useState(false);
-  const [bannerFormData, setBannerFormData] = useState<Record<BannerSlot, { targetUrl: string; imageFile: File | null; imagePreview: string | null }>>({
+  const [bannerFormData, setBannerFormData] = useState<Record<BannerSlot, BannerFormFields>>({
     "hero-main": { targetUrl: "", imageFile: null, imagePreview: null },
     "hero-secondary": { targetUrl: "", imageFile: null, imagePreview: null },
     "hero-tertiary": { targetUrl: "", imageFile: null, imagePreview: null },
     "hero-last": { targetUrl: "", imageFile: null, imagePreview: null },
     "shop-main": { targetUrl: "", imageFile: null, imagePreview: null },
   });
-  const [bannerOriginalData, setBannerOriginalData] = useState<Record<BannerSlot, { targetUrl: string; imageFile: File | null; imagePreview: string | null }>>({
+  const [bannerOriginalData, setBannerOriginalData] = useState<Record<BannerSlot, BannerFormFields>>({
     "hero-main": { targetUrl: "", imageFile: null, imagePreview: null },
     "hero-secondary": { targetUrl: "", imageFile: null, imagePreview: null },
     "hero-tertiary": { targetUrl: "", imageFile: null, imagePreview: null },
@@ -143,12 +151,8 @@ export default function AssetsPage() {
   // Banner 2 state (second landing page images)
   const [banners2, setBanners2] = useState<Banner2[]>([]);
   const [banner2Loading, setBanner2Loading] = useState(false);
-  const [banner2FormData, setBanner2FormData] = useState<
-    Record<string, { targetUrl: string; imageFile: File | null; imagePreview: string | null }>
-  >({});
-  const [banner2OriginalData, setBanner2OriginalData] = useState<
-    Record<string, { targetUrl: string; imageFile: File | null; imagePreview: string | null }>
-  >({});
+  const [banner2FormData, setBanner2FormData] = useState<Record<string, BannerFormFields>>({});
+  const [banner2OriginalData, setBanner2OriginalData] = useState<Record<string, BannerFormFields>>({});
   const [editingBanner2Slot, setEditingBanner2Slot] = useState<Banner2Slot | string | null>(null);
   const [showBanner2Cropper, setShowBanner2Cropper] = useState(false);
   const [currentBanner2Slot, setCurrentBanner2Slot] = useState<Banner2Slot | string | null>(null);
@@ -198,7 +202,7 @@ export default function AssetsPage() {
       const data = await getBanners();
       setBanners(data);
       // Initialize form data with existing banners
-      const initialData: Record<BannerSlot, { targetUrl: string; imageFile: File | null; imagePreview: string | null }> = {
+      const initialData: Record<BannerSlot, BannerFormFields> = {
         "hero-main": { targetUrl: "", imageFile: null, imagePreview: null },
         "hero-secondary": { targetUrl: "", imageFile: null, imagePreview: null },
         "hero-tertiary": { targetUrl: "", imageFile: null, imagePreview: null },
@@ -211,6 +215,7 @@ export default function AssetsPage() {
             targetUrl: banner.targetUrl || "",
             imageFile: null,
             imagePreview: banner.imageUrl,
+            clearImage: false,
           };
         }
       });
@@ -263,6 +268,7 @@ export default function AssetsPage() {
         ...bannerFormData[currentBannerSlot],
         imageFile: croppedFile,
         imagePreview: preview,
+        clearImage: false,
       },
     });
     setShowImageCropper(false);
@@ -277,6 +283,7 @@ export default function AssetsPage() {
         targetUrl: banner?.targetUrl || "",
         imageFile: null,
         imagePreview: banner?.imageUrl || null,
+        clearImage: false,
       },
     });
     setBannerOriginalData({
@@ -285,6 +292,7 @@ export default function AssetsPage() {
         targetUrl: banner?.targetUrl || "",
         imageFile: null,
         imagePreview: banner?.imageUrl || null,
+        clearImage: false,
       },
     });
     setEditingBannerSlot(slot);
@@ -303,6 +311,7 @@ export default function AssetsPage() {
       await updateBanner(slot, {
         targetUrl: bannerFormData[slot].targetUrl,
         file: bannerFormData[slot].imageFile,
+        clearImage: bannerFormData[slot].clearImage === true,
       });
       success("Banner updated successfully!");
       setEditingBannerSlot(null);
@@ -311,6 +320,7 @@ export default function AssetsPage() {
         [slot]: {
           ...bannerFormData[slot],
           imageFile: null,
+          clearImage: false,
         },
       });
       loadBanners();
@@ -482,9 +492,9 @@ export default function AssetsPage() {
       const data = await getBanners2();
       setBanners2(data);
       const slots = Object.keys(BANNER2_SLOT_SIZES);
-      const initial: Record<string, { targetUrl: string; imageFile: File | null; imagePreview: string | null }> = {};
+      const initial: Record<string, BannerFormFields> = {};
       slots.forEach((slot) => {
-        initial[slot] = { targetUrl: "", imageFile: null, imagePreview: null };
+        initial[slot] = { targetUrl: "", imageFile: null, imagePreview: null, clearImage: false };
       });
       data.forEach((b) => {
         if (b.slot in initial) {
@@ -492,6 +502,7 @@ export default function AssetsPage() {
             targetUrl: b.targetUrl || "",
             imageFile: null,
             imagePreview: b.imageUrl,
+            clearImage: false,
           };
         }
       });
@@ -520,6 +531,7 @@ export default function AssetsPage() {
         ...banner2FormData[currentBanner2Slot],
         imageFile: croppedFile,
         imagePreview: preview,
+        clearImage: false,
       },
     });
     setShowBanner2Cropper(false);
@@ -535,6 +547,7 @@ export default function AssetsPage() {
         targetUrl: banner?.targetUrl || "",
         imageFile: null,
         imagePreview: banner?.imageUrl || null,
+        clearImage: false,
       },
     });
     setBanner2OriginalData({
@@ -543,6 +556,7 @@ export default function AssetsPage() {
         targetUrl: banner?.targetUrl || "",
         imageFile: null,
         imagePreview: banner?.imageUrl || null,
+        clearImage: false,
       },
     });
     setEditingBanner2Slot(slot);
@@ -561,13 +575,14 @@ export default function AssetsPage() {
       await updateBanner2(slot, {
         targetUrl: banner2FormData[slot].targetUrl,
         file: banner2FormData[slot].imageFile,
+        clearImage: banner2FormData[slot].clearImage === true,
       });
       removeCachedData(CACHE_KEYS.BANNERS2);
       success("Image updated successfully!");
       setEditingBanner2Slot(null);
       setBanner2FormData({
         ...banner2FormData,
-        [slot]: { ...banner2FormData[slot], imageFile: null },
+        [slot]: { ...banner2FormData[slot], imageFile: null, clearImage: false },
       });
       loadBanners2();
     } catch (err: any) {
@@ -683,15 +698,15 @@ export default function AssetsPage() {
                               className="w-full h-64 object-cover rounded border"
                             />
                             <button
+                              type="button"
                               onClick={() => {
-                                console.log("slot:", slot);
-  console.log("formData:", formData);
                                 setBannerFormData({
                                   ...bannerFormData,
                                   [slot]: {
                                     ...formData,
-                                    imagePreview: banner?.imageUrl || null,
+                                    imagePreview: null,
                                     imageFile: null,
+                                    clearImage: true,
                                   },
                                 });
                               }}
@@ -774,7 +789,12 @@ export default function AssetsPage() {
             banner2Slots.map(({ slot, label, recommendedSize }) => {
               const banner = banners2.find((b) => b.slot === slot);
               const isEditing = editingBanner2Slot === slot;
-              const formData = banner2FormData[slot] || { targetUrl: "", imageFile: null, imagePreview: null };
+              const formData = banner2FormData[slot] || {
+                targetUrl: "",
+                imageFile: null,
+                imagePreview: null,
+                clearImage: false,
+              };
               const imageUrl = formData.imagePreview || banner?.imageUrl;
               const aspect = getBanner2Aspect(slot);
 
@@ -859,16 +879,17 @@ export default function AssetsPage() {
                             </div>
                             <button
                               type="button"
-                             onClick={() => {
-  setBanner2FormData((prev) => ({
-    ...prev,
-    [slot]: {
-      ...prev[slot],
-      imagePreview: null,
-      imageFile: null,
-    },
-  }));
-}}
+                              onClick={() => {
+                                setBanner2FormData((prev) => ({
+                                  ...prev,
+                                  [slot]: {
+                                    ...prev[slot],
+                                    imagePreview: null,
+                                    imageFile: null,
+                                    clearImage: true,
+                                  },
+                                }));
+                              }}
                               className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded"
                             >
                               Remove
