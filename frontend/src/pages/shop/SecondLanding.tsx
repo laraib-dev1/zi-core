@@ -89,7 +89,15 @@ const howWeWorkItems = [
   { icon: Package, label: "Label Here", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
 ];
 
-const MAIN_NAV_SCROLL_IDS = new Set(["home", "about", "portfolio", "testimonials", "other-pages", "contact"]);
+const MAIN_NAV_SCROLL_IDS = new Set([
+  "home",
+  "about",
+  "portfolio",
+  "testimonials",
+  "applications",
+  "other-pages",
+  "contact",
+]);
 
 type ImgFn = (slot: string) => string;
 
@@ -217,7 +225,7 @@ function createSectionRenderers(
     ),
     services: () => (
       <div id="services" className={spacing.section.gap}>
-        <ServicesSection bookMeetingHref={workTogetherWhatsAppHref} />
+        <ServicesSection />
       </div>
     ),
     courses: () => (
@@ -256,7 +264,7 @@ function createSectionRenderers(
             description={ov("zi-core-package", "description", z.description ?? "")}
             youtubeUrl={ov("zi-core-package", "youtubeUrl", z.youtubeUrl ?? "")}
             getStartedLabel={ov("zi-core-package", "getStartedLabel", z.getStartedLabel ?? "Get Started")}
-            getStartedHref={ov("zi-core-package", "getStartedHref", z.getStartedHref ?? "/get-started")}
+            getStartedHref={ov("zi-core-package", "getStartedHref", z.getStartedHref ?? "/zi-core-package")}
             watchDemoLabel={ov("zi-core-package", "watchDemoLabel", z.watchDemoLabel ?? "Watch Demo")}
             watchDemoUrl={ov("zi-core-package", "watchDemoUrl", (z.watchDemoUrl && z.watchDemoUrl.trim()) || "#")}
           />

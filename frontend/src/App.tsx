@@ -104,7 +104,8 @@ export default function App() {
         <Route path="/blog/:id" element={<BlogCatalogDetail />} />
         <Route path="/catalog/:type/:id" element={<CatalogDetail />} />
         <Route path="/applications" element={<ApplicationsListPage />} />
-        <Route path="/get-started" element={<GetStartedPage />} />
+        <Route path="/zi-core-package" element={<GetStartedPage />} />
+        <Route path="/get-started" element={<Navigate to="/zi-core-package" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<SecondLanding />} />
 

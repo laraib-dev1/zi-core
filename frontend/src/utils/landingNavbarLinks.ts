@@ -17,6 +17,7 @@ const NAV_TEMPLATE: (Navbar2NavLinkItem & { sectionId: string })[] = [
   { to: "#about", label: "About me", hash: "about", sectionId: "about" },
   { to: "#portfolio", label: "Portfolio", hash: "portfolio", sectionId: "portfolio" },
   { to: "#testimonials", label: "Testimonials", hash: "testimonials", sectionId: "testimonials" },
+  { to: "#applications", label: "Applications", hash: "applications", sectionId: "applications" },
   {
     to: "#other-pages",
     label: "Other Pages",

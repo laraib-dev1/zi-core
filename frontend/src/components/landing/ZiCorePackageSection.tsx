@@ -108,7 +108,7 @@ export default function ZiCorePackageSection({
             <div className="flex flex-wrap gap-3 pt-1">
               {getStartedIsInternal ? (
                 <Link
-                  to={getStartedHref.trim() || "/get-started"}
+                  to={getStartedHref.trim() || "/zi-core-package"}
                   className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
                   style={{ backgroundColor: "var(--theme-primary)" }}
                 >
@@ -116,7 +116,7 @@ export default function ZiCorePackageSection({
                 </Link>
               ) : (
                 <a
-                  href={getStartedHref.trim() || "/get-started"}
+                  href={getStartedHref.trim() || "/zi-core-package"}
                   className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
                   style={{ backgroundColor: "var(--theme-primary)" }}
                 >

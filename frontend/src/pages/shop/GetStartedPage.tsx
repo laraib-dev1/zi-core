@@ -1,14 +1,11 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import Navbar2 from "@/components/layout/Navbar2";
 import Footer from "@/components/layout/Footer";
 import Container12 from "@/components/layout/Container12";
 import { spacing } from "@/utils/spacing";
 import { useSecondLandingNavbarProps } from "@/hooks/useSecondLandingNavbarProps";
 
-/**
- * Target for “Get Started” from the Zi Core Development Package section (second landing).
- */
+/** Zi Core package iframe page — route: `/zi-core-package` (legacy `/get-started` redirects). */
 export default function GetStartedPage() {
   const landingNav = useSecondLandingNavbarProps();
 
@@ -37,11 +34,6 @@ export default function GetStartedPage() {
               referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
-          <p className="text-center text-sm text-gray-500 max-w-xl mx-auto mt-8">
-            <Link to="/" className="theme-heading font-medium hover:underline">
-              ← Back to home
-            </Link>
-          </p>
         </Container12>
       </main>
       <section className={`w-full ${spacing.footer.gapTop}`} style={{ marginBottom: 0, paddingBottom: 0 }}>

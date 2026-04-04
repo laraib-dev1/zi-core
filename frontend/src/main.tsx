@@ -11,6 +11,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import "./index.css";
 import { AuthProvider } from "./hooks/useAuth";
 import { ToastProvider } from "./components/ui/toast";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Suppress console warnings from third-party libraries in development
 if (import.meta.env.DEV) {
@@ -77,6 +78,7 @@ createRoot(document.getElementById("root")!).render(
             <AuthProvider>
               <ToastProvider>
                 <BrowserRouter>
+                <ScrollToTop />
                 {/* Wrap your app in Elements for Stripe */}
                 <Elements stripe={stripePromise}>
                   <App />

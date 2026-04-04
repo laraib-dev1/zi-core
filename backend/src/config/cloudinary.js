@@ -9,11 +9,17 @@ cloudinary.config({
 
 export default cloudinary;
 
-// Helper function to upload buffer to Cloudinary
-export const uploadToCloudinary = (buffer, folder) => {
+/**
+ * Upload buffer to Cloudinary.
+ * @param {Buffer} buffer
+ * @param {string} folder
+ * @param {{ resource_type?: string }} [options] — use `resource_type: "raw"` for .exe, .apk, zips, etc.
+ */
+export const uploadToCloudinary = (buffer, folder, options = {}) => {
+  const { resource_type = "image", ...uploadOpts } = options;
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder },
+      { folder, resource_type, ...uploadOpts },
       (error, result) => {
         if (error) return reject(error);
         resolve(result);

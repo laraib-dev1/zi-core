@@ -10,7 +10,15 @@ import {
 import { DEFAULT_LANDING_SECTION_ORDER } from "@/utils/defaultLandingSectionOrder";
 
 /** Same set as SecondLanding – sections that appear in main nav (not “Other pages”). */
-const MAIN_NAV_SCROLL_IDS = new Set(["home", "about", "portfolio", "testimonials", "other-pages", "contact"]);
+const MAIN_NAV_SCROLL_IDS = new Set([
+  "home",
+  "about",
+  "portfolio",
+  "testimonials",
+  "applications",
+  "other-pages",
+  "contact",
+]);
 
 export type SecondLandingNavbarProps = {
   companyName: string;

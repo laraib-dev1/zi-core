@@ -151,6 +151,8 @@ export default function ServiceDetail() {
             htmlContent={service.description || defaultServiceHtml}
             relatedServices={relatedServices.length > 0 ? relatedServices : undefined}
             stickySidebar={true}
+            bookMeetingHref={landingNav.hireMeHref}
+            bookMeetingLabel="Set Meeting"
           />
         </div>
         <DetailPageLatestAndCta

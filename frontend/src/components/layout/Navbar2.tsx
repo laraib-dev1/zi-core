@@ -105,6 +105,7 @@ function mapDomIdToNavHash(activeDomId: string, orderedDomIds: string[], otherPa
     if (sid === "about") nav = "about";
     if (sid === "portfolio") nav = "portfolio";
     if (sid === "testimonials") nav = "testimonials";
+    if (sid === "applications") nav = "applications";
     if (sid === "contact") nav = "contact";
     if (otherPagesIds.has(sid)) nav = "other-pages";
   }

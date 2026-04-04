@@ -24,7 +24,7 @@ const defaultTestimonials: TestimonialItem[] = [
   {
     name: "Malik Subhan",
     location: "Product Lead",
-    text: "They has a strong grip on system architecture and product execution. The way he structures apps and backend flows is highly scalable and clean. Working with him feels like building something truly production-ready.",
+    text: "They has a strong grip on system architecture and product execution. The way he structures apps and backend flows is highly scalable and clean. ",
     rating: 4,
     avatarSrc: "/subhan.png",
   },
@@ -33,6 +33,7 @@ const defaultTestimonials: TestimonialItem[] = [
     location: "Sales & Growth Strategist",
     text: "Team understands business needs beyond just development. He builds products that are actually sellable and user-focused. That’s a rare quality in developers.",
     rating: 4,
+    avatarSrc: "/Abdurehman.png",
   },
   {
     name: "Adil",
@@ -44,15 +45,16 @@ const defaultTestimonials: TestimonialItem[] = [
   {
     name: "Dr. Ali Athar ",
     location: "Surgeon & Consultant",
-    text: "eam has the ability to understand domain-specific requirements quickly. His approach to building structured and reliable systems is commendable.",
+    text: "Team has the ability to understand domain-specific requirements quickly. His approach to building structured and reliable systems is commendable.",
     rating: 5,
     avatarSrc: "/ali.png",
   },
   {
-    name: "Amin ",
+    name: "Aiman ",
     location: "Creative Design Director",
     text: "He respects design systems and translates UI/UX into development very accurately. That makes collaboration between design and development seamless",
     rating: 4,
+    avatarSrc: "/Aiman.png",
   },
 ];
 

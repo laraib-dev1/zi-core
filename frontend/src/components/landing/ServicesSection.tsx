@@ -21,8 +21,6 @@ export interface ServicesSectionProps {
   subtitle?: string;
   /** If provided, used instead of fetching (e.g. for static pages) */
   items?: ServiceItem[];
-  /** WhatsApp booking link (e.g. from `buildWhatsAppUrl`); same behavior as floating WhatsApp */
-  bookMeetingHref?: string;
   className?: string;
 }
 
@@ -45,7 +43,6 @@ export default function ServicesSection({
   title = "Services",
   subtitle = "Mini info section details",
   items: itemsProp,
-  bookMeetingHref,
   className,
 }: ServicesSectionProps) {
   const [items, setItems] = useState<ServiceItem[]>(itemsProp ?? defaultPlaceholders);
@@ -160,7 +157,6 @@ export default function ServicesSection({
                   description={item.description}
                   href={item.href}
                   views={item.views}
-                  bookMeetingHref={bookMeetingHref}
                 />
               </div>
             ))}

@@ -131,7 +131,7 @@ export const createApplication = async (req, res) => {
       const key = `downloadFile_${i}`;
       const file = req.files?.[key]?.[0];
       if (!file || !downloadsList[i]) continue;
-      const upload = await uploadToCloudinary(file.buffer, "applications/files");
+      const upload = await uploadToCloudinary(file.buffer, "applications/files", { resource_type: "raw" });
       downloadsList[i].fileUrl = upload.secure_url;
       downloadsList[i].fileName = file.originalname || downloadsList[i].fileName || "";
       downloadsList[i].fileSize = file.size || downloadsList[i].fileSize || 0;
@@ -188,7 +188,7 @@ export const updateApplication = async (req, res) => {
       const key = `downloadFile_${i}`;
       const file = req.files?.[key]?.[0];
       if (!file || !downloadsList[i]) continue;
-      const upload = await uploadToCloudinary(file.buffer, "applications/files");
+      const upload = await uploadToCloudinary(file.buffer, "applications/files", { resource_type: "raw" });
       downloadsList[i].fileUrl = upload.secure_url;
       downloadsList[i].fileName = file.originalname || downloadsList[i].fileName || "";
       downloadsList[i].fileSize = file.size || downloadsList[i].fileSize || 0;

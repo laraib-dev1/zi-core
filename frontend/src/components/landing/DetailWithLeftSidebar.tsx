@@ -44,6 +44,9 @@ export interface DetailWithLeftSidebarProps {
   relatedServices?: RelatedServiceItem[];
   /** If true, left sidebar sticks with scroll (like BlogDetail right sidebar) */
   stickySidebar?: boolean;
+  /** WhatsApp booking (e.g. hire-me link); shown right of title below hero when valid `wa.me` URL */
+  bookMeetingHref?: string;
+  bookMeetingLabel?: string;
   className?: string;
 }
 
@@ -63,12 +66,16 @@ export default function DetailWithLeftSidebar({
   topics,
   relatedServices,
   stickySidebar = false,
+  bookMeetingHref,
+  bookMeetingLabel = "Set Meeting",
   className,
 }: DetailWithLeftSidebarProps) {
   const contentRef = useRef<HTMLDivElement>(null);
   const leftColumnRef = useRef<HTMLDivElement>(null);
   const mainContentColumnRef = useRef<HTMLDivElement>(null);
   const effectiveShareTitle = shareTitle ?? title;
+  const showBookMeeting =
+    typeof bookMeetingHref === "string" && bookMeetingHref.startsWith("https://wa.me/");
 
   const hasRelatedLinks = Boolean(relatedServices && relatedServices.length > 0);
   const hasTopicList = Boolean(topics && topics.length > 0);
@@ -246,9 +253,21 @@ export default function DetailWithLeftSidebar({
                 />
               </div>
 
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold theme-heading text-gray-900 mb-2 sm:mb-3">
-                {title}
-              </h1>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-2 sm:mb-3">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold theme-heading text-gray-900 min-w-0 flex-1">
+                  {title}
+                </h1>
+                {showBookMeeting && (
+                  <a
+                    href={bookMeetingHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 self-start sm:self-center inline-flex items-center justify-center rounded-md border-2 px-3 py-1.5 text-sm font-medium transition-colors border-[var(--theme-primary)] text-[var(--theme-primary)] bg-transparent hover:bg-[var(--theme-primary)] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-primary)] focus-visible:ring-offset-1"
+                  >
+                    {bookMeetingLabel}
+                  </a>
+                )}
+              </div>
 
               {(author || date || (views != null && views > 0)) && (
                 <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">
