@@ -29,8 +29,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getApplicationPlatformNavEntries, getApplicationPlatformStatesLine } from "@/utils/applicationPlatforms";
+import {
+  getApplicationPlatformNavEntries,
+  getApplicationPlatformStatesLine,
+  getDefaultApplicationPlatformIconPath,
+} from "@/utils/applicationPlatforms";
 import { resolvePublicAssetUrl } from "@/utils/mediaUrl";
+import { applicationSetupFileHref } from "@/utils/applicationSetupDownloadUrl";
 
 const navGrayBtnClass =
   "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-xs sm:text-sm font-medium text-white shrink-0 border border-[#7D7D7D]/50 bg-[#7D7D7D]/70 transition-colors hover:bg-[var(--theme-primary)] hover:border-[var(--theme-primary)]";
@@ -42,9 +47,10 @@ function platformGuideBadgeLabel(typeKey: string, row: any): string {
   if (custom) return custom;
   const t = String(typeKey || "").toLowerCase();
   if (t === "website") return "Web";
+  if (t === "playstore") return "Play Store";
   if (t === "apk") return "APK";
   if (t === "ios") return "iOS";
-  if (t === "exe") return ".exe";
+  if (t === "exe") return "Desktop";
   if (t === "windows") return "Windows";
   return "Other";
 }
@@ -209,7 +215,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
     const isApplications = String(type || "").toLowerCase() === "applications";
     if (!isApplications || !item) return;
     const list = (Array.isArray(item.downloadsList) ? item.downloadsList : []).filter((x: any) => x?.enabled !== false);
-    const ordered = ["website", "apk", "ios", "exe", "windows", "other"];
+    const ordered = ["website", "playstore", "apk", "ios", "exe", "windows", "other"];
     const byType = new Set(list.map((x: any) => String(x?.type || "other").toLowerCase()));
     const firstWithData = ordered.find((t) => byType.has(t));
     setActiveDownloadType(firstWithData || ordered[0]);
@@ -277,7 +283,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
     const appInfo = item.appInfo || {};
     const allDownloadItems = Array.isArray(item.downloadsList) ? item.downloadsList : [];
     const downloadItems = allDownloadItems.filter((d: any) => d?.enabled !== false);
-    const orderedDownloadTypes: string[] = ["website", "apk", "ios", "exe", "windows", "other"];
+    const orderedDownloadTypes: string[] = ["website", "playstore", "apk", "ios", "exe", "windows", "other"];
     const availableDownloadTypes = orderedDownloadTypes.filter((typeKey) =>
       downloadItems.some((d: any) => String(d?.type || "").toLowerCase() === typeKey)
     );
@@ -288,7 +294,15 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
       .filter((d: any) => String(d.type || "").toLowerCase() === selectedType)
       .sort((a: any, b: any) => (Number(a?.order) || 0) - (Number(b?.order) || 0));
     const selectedDownload = filteredDownloads[0] || null;
-    const selectedDownloadHref = selectedDownload ? (selectedDownload.fileUrl || selectedDownload.url || "#") : "#";
+    const selectedDownloadHref = selectedDownload
+      ? applicationSetupFileHref(String(item._id || item.id || ""), selectedType, {
+          storageUrl: selectedDownload.storageUrl,
+          fileUrl: selectedDownload.fileUrl,
+          url: selectedDownload.url,
+          setupFileGzipped: selectedDownload.setupFileGzipped,
+          setupFileEncoding: selectedDownload.setupFileEncoding,
+        })
+      : "#";
     const resolveImg = (u: string | undefined) => resolvePublicAssetUrl(u).trim();
     const screenshotImages: string[] = Array.isArray(item.media?.screenshots)
       ? item.media.screenshots
@@ -322,6 +336,7 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
     const firstContentTab = hasDescription ? "description" : hasFeatures ? "features" : hasGuide ? "guide" : hasHelp ? "help" : "";
     const downloadTypeMeta: Record<string, { label: string }> = {
       website: { label: "Web" },
+      playstore: { label: "Play Store" },
       apk: { label: "App" },
       ios: { label: "App" },
       windows: { label: "Windows" },
@@ -335,15 +350,10 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
       const raw = String(imageCandidate || "").trim();
       return raw ? resolveImg(raw) : "";
     };
-    const defaultPlatformIconByType: Record<string, string> = {
-      apk: "/file_icons.svg",
-      ios: "/file_icons.svg",
-      exe: "/file_icons-1.svg",
-      website: "/file_icons-2.svg",
-      windows: "/file_icons-3.svg",
-    };
-
-    const primaryActionIsWeb = selectedType === "website";
+    const primaryActionIsWeb =
+      selectedType === "website" ||
+      selectedType === "playstore" ||
+      Boolean(String(selectedDownload?.storageUrl || "").trim());
     const primaryActionLabel = primaryActionIsWeb ? "Click here" : "Download now";
     const setupGuideCombinedHtml = perSetupGuideModalHtmlForRows(filteredDownloads);
     const guideModalHtml = setupGuideCombinedHtml
@@ -436,7 +446,8 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
                           {availableDownloadTypes.map((typeKey: string) => {
                             const meta = downloadTypeMeta[typeKey] || downloadTypeMeta.other;
                             const active = selectedType === typeKey;
-                            const typeImage = getTypeImage(typeKey) || defaultPlatformIconByType[typeKey] || "";
+                            const typeImage =
+                              getTypeImage(typeKey) || getDefaultApplicationPlatformIconPath(typeKey) || "";
                             return (
                               <button
                                 key={typeKey}

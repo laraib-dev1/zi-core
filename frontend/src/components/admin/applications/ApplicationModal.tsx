@@ -10,6 +10,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { createApplication, updateApplication } from "@/api/application.api";
 import { useToast } from "@/components/ui/toast";
 import ImageCropperModal from "@/components/admin/product/ImageCropperModal";
+import {
+  APPLICATION_SETUP_TYPE_ORDER,
+  sortApplicationDownloadsList,
+  defaultSetupLabelForType,
+} from "@/utils/applicationSetupOrder";
+
+const INSTALLER_SETUP_TYPES = new Set(["apk", "exe", "windows"]);
+
+/** One link field in the UI: move legacy storageUrl into url and clear storageUrl. */
+function normalizeInstallerDownloadsLinkField(list: unknown): any[] {
+  const arr = Array.isArray(list) ? list : [];
+  return arr.map((row: any) => {
+    const t = String(row?.type || "").toLowerCase();
+    if (!INSTALLER_SETUP_TYPES.has(t)) return row;
+    const u = String(row?.url || "").trim();
+    const s = String(row?.storageUrl || "").trim();
+    const primary = u || s;
+    return { ...row, url: primary, storageUrl: "" };
+  });
+}
 
 interface Props {
   open: boolean;
@@ -111,7 +131,7 @@ function createEmptyApplicationForm() {
 }
 
 export default function ApplicationModal({ open, mode, data, onClose, onSubmit }: Props) {
-  const { success, error } = useToast();
+  const { success, error, info } = useToast();
   const isView = mode === "view";
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState<AppTab>("app");
@@ -121,16 +141,18 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [form, setForm] = useState<any>(() => createEmptyApplicationForm());
   const currentTabIndex = useMemo(() => appTabs.indexOf(tab), [tab]);
-  const setupOrder = ["website", "apk", "exe", "windows"] as const;
   const getSetup = (typeKey: string) => {
     const existing = (form.downloadsList || []).find((x: any) => String(x?.type || "").toLowerCase() === typeKey);
     return {
       type: typeKey,
-      label: existing?.label || (typeKey === "website" ? "Web" : typeKey === "apk" ? "APK" : typeKey === "exe" ? "Desktop" : "Windows"),
+      label: existing?.label || defaultSetupLabelForType(typeKey),
       url: existing?.url || "",
-      file: existing?.file || null,
+      storageUrl: existing?.storageUrl || "",
       fileName: existing?.fileName || "",
       fileSize: existing?.fileSize || 0,
+      fileUrl: existing?.fileUrl || "",
+      setupFileGzipped: existing?.setupFileGzipped === true,
+      setupFileEncoding: String(existing?.setupFileEncoding || (existing?.setupFileGzipped ? "gzip" : "none")),
       sizeText: existing?.sizeText || "",
       description: existing?.description || "",
       enabled: existing?.enabled !== false,
@@ -145,11 +167,14 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
           ? list[idx]
           : {
               type: typeKey,
-              label: typeKey === "website" ? "Web" : typeKey === "apk" ? "APK" : typeKey === "exe" ? "Desktop" : "Windows",
+              label: defaultSetupLabelForType(typeKey),
               url: "",
-              file: null,
+              storageUrl: "",
               fileName: "",
               fileSize: 0,
+              fileUrl: "",
+              setupFileGzipped: false,
+              setupFileEncoding: "none",
               sizeText: "",
               description: "",
               enabled: true,
@@ -157,9 +182,9 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
       const nextItem = { ...current, ...patch, type: typeKey };
       if (idx >= 0) list[idx] = nextItem;
       else list.push(nextItem);
-      const sorted = setupOrder
-        .map((t) => list.find((x: any) => String(x?.type || "").toLowerCase() === t))
-        .filter(Boolean);
+      const sorted = APPLICATION_SETUP_TYPE_ORDER.map((t) =>
+        list.find((x: any) => String(x?.type || "").toLowerCase() === t)
+      ).filter(Boolean);
       return { ...prev, downloadsList: sorted };
     });
   };
@@ -178,7 +203,9 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
         ...data,
         appInfo: mergedAppInfo,
         media: { banner: "", inner: "", screenshots: [], ...(data.media || {}) },
-        downloadsList: Array.isArray(data.downloadsList) ? data.downloadsList : [],
+        downloadsList: sortApplicationDownloadsList(
+          normalizeInstallerDownloadsLinkField(Array.isArray(data.downloadsList) ? data.downloadsList : [])
+        ),
         tags: Array.isArray(data.tags) ? data.tags.join(", ") : (data.tags || ""),
         iconFile: null,
         bannerFile: null,
@@ -207,6 +234,16 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
         ...form,
         tags: String(form.tags || "").split(",").map((x) => x.trim()).filter(Boolean),
         helpEnabled: Boolean(form.appInfo?.supportTabEnabled),
+        downloadsList: sortApplicationDownloadsList(form.downloadsList || []).map((x: any) => {
+          const { file: _file, clearSetupFile: _clear, ...rest } = x;
+          const t = String(x?.type || "").toLowerCase();
+          const row = {
+            ...rest,
+            label: String(x.label || "").trim() || defaultSetupLabelForType(x.type),
+          };
+          if (INSTALLER_SETUP_TYPES.has(t)) return { ...row, storageUrl: "" };
+          return row;
+        }),
       };
       if (mode === "add") {
         await createApplication(payload);
@@ -252,8 +289,24 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
       case "setups":
         if (!Array.isArray(form.downloadsList) || form.downloadsList.length === 0) return "Setups tab: Add at least one setup option.";
         if (!form.downloadsList.some((x: any) => x?.enabled !== false)) return "Setups tab: Enable at least one setup option.";
-        if (form.downloadsList.some((x: any) => x?.enabled !== false && !x?.label?.trim())) return "Setups tab: Each enabled setup needs a label.";
-        if (form.downloadsList.some((x: any) => x?.enabled !== false && !x?.url?.trim() && !x?.file && !x?.fileUrl)) return "Setups tab: Each enabled setup needs a link or file.";
+        if (
+          form.downloadsList.some((x: any) => {
+            if (x?.enabled === false) return false;
+            const lab = String(x?.label || "").trim() || defaultSetupLabelForType(x?.type);
+            return !lab;
+          })
+        )
+          return "Setups tab: Each enabled setup needs a label.";
+        if (
+          form.downloadsList.some(
+            (x: any) =>
+              x?.enabled !== false &&
+              !x?.url?.trim() &&
+              !x?.storageUrl?.trim() &&
+              !x?.fileUrl
+          )
+        )
+          return "Setups tab: Each enabled setup needs a link.";
         return null;
       case "media":
         if (form.appInfo?.thumbnailEnabled && !(form.media?.banner || form.bannerFile)) return "Media tab: Thumbnail image is required when Thumbnail is enabled.";
@@ -525,12 +578,41 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
           </TabsContent>
 
           <TabsContent value="setups" className="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5 space-y-4">
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Paste one <strong>HTTPS link</strong> per row (your own CDN, or a Google Drive / Dropbox / OneDrive share link). At least one link is required for each enabled installer row. The <strong>File</strong> row is a placeholder: click it to see <strong>Coming soon</strong> — use the link field until upload is enabled.
+            </p>
             <div className="space-y-5">
               {[
-                { type: "website", title: "Web", hasFile: false, hasSize: false },
-                { type: "apk", title: "APK", hasFile: true, hasSize: true },
-                { type: "exe", title: "Desktop", hasFile: true, hasSize: true },
-                { type: "windows", title: "Windows", hasFile: true, hasSize: true },
+                { type: "website", title: "Web", installer: false, hasSize: false, linkPlaceholder: "https://www.example.com" },
+                {
+                  type: "playstore",
+                  title: "Play Store",
+                  installer: false,
+                  hasSize: false,
+                  linkPlaceholder: "https://play.google.com/store/apps/details?id=…",
+                },
+                {
+                  type: "apk",
+                  title: "APK",
+                  installer: true,
+                  hasSize: true,
+                  linkPlaceholder:
+                    "https://… APK (CDN, or Google Drive / Dropbox / OneDrive share link)",
+                },
+                {
+                  type: "exe",
+                  title: "Desktop",
+                  installer: true,
+                  hasSize: true,
+                  linkPlaceholder: "https://… desktop installer (CDN or cloud share link)",
+                },
+                {
+                  type: "windows",
+                  title: "Windows",
+                  installer: true,
+                  hasSize: true,
+                  linkPlaceholder: "https://… Windows .exe / .msi (CDN or cloud share link)",
+                },
               ].map((block) => {
                 const setup = getSetup(block.type);
                 return (
@@ -547,7 +629,10 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
                           <FieldLabel>Link</FieldLabel>
                           <Input
                             disabled={isView || !setup.enabled}
-                            placeholder={block.type === "website" ? "https://www.example.com" : "https://download-link.com/file"}
+                            placeholder={
+                              block.linkPlaceholder ||
+                              (block.installer ? "https://…" : "https://…")
+                            }
                             value={setup.url || ""}
                             onChange={(e) => updateSetup(block.type, { url: e.target.value })}
                           />
@@ -564,21 +649,34 @@ export default function ApplicationModal({ open, mode, data, onClose, onSubmit }
                           </div>
                         )}
                       </div>
-                      {block.hasFile && (
+                      {block.installer && (
                         <div>
                           <FieldLabel>File</FieldLabel>
-                          {!isView && (
-                            <input
-                              className="block w-full text-xs text-gray-600 file:mr-2 file:rounded-md file:border file:border-gray-300 file:bg-white file:px-2 file:py-1"
-                              type="file"
-                              disabled={!setup.enabled}
-                              onChange={(e) => {
-                                const f = e.target.files?.[0] || null;
-                                updateSetup(block.type, { file: f, fileName: f?.name || setup.fileName, fileSize: f?.size || setup.fileSize || 0 });
-                              }}
-                            />
+                          {!isView && setup.enabled ? (
+                            <button
+                              type="button"
+                              onClick={() => info("Coming soon")}
+                              className="flex w-full min-h-[44px] cursor-pointer flex-col items-start justify-center rounded-md border border-dashed border-gray-300 bg-gray-50 px-3 py-2.5 text-left text-sm text-gray-700 transition-colors hover:border-(--theme-primary)/40 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--theme-primary)"
+                            >
+                              <span className="font-medium text-gray-800">Choose file</span>
+                              <span className="mt-0.5 text-xs text-gray-500">
+                                Installer upload from here is not available yet — click to see Coming soon. Use the link field above.
+                              </span>
+                            </button>
+                          ) : isView ? (
+                            <p className="rounded-md border border-dashed border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-500">
+                              File upload: coming soon (view mode).
+                            </p>
+                          ) : (
+                            <p className="rounded-md border border-dashed border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-400">
+                              Enable this setup to use the file option.
+                            </p>
                           )}
-                          {setup.fileName ? <p className="mt-1 text-xs text-gray-500">Selected: {setup.fileName}</p> : null}
+                          {setup.fileUrl ? (
+                            <p className="mt-2 text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-md px-2.5 py-1.5">
+                              Existing hosted file: <span className="font-medium">{setup.fileName || "file"}</span>. New uploads from this screen are not available yet; use links or keep the current file until upload ships.
+                            </p>
+                          ) : null}
                         </div>
                       )}
                       <div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Home, ShoppingBag, BookOpen, User, LogOut, X } from "lucide-react";
+import { Home, ShoppingBag, BookOpen, User, LogOut, X, LayoutGrid } from "lucide-react";
 import Button from "./ui/buttons/Button";
 import { useNavigate } from "react-router-dom";
 
@@ -48,6 +48,7 @@ export function AppSidebar({
 
   const menuItems = [
     { title: "Home", url: "/", icon: Home },
+    { title: "Applications", url: "/applications", icon: LayoutGrid },
     { title: "Shop", url: "/shop", icon: ShoppingBag },
     { title: "Blogs", url: "/blogs", icon: BookOpen },
     { title: "About Us", url: "/about-us", icon: User },

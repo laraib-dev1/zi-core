@@ -1,6 +1,14 @@
 import Application from "../models/Application.js";
 import connectDB from "../config/db.js";
 import { uploadToCloudinary } from "../config/cloudinary.js";
+import {
+  APPLICATION_DOWNLOAD_TYPES,
+  sortDownloadsListByType,
+  buildPrevDownloadsByType,
+  mergeDownloadFilename,
+  mergeDownloadFileSize,
+} from "../utils/applicationDownloads.js";
+import { prepareSetupFileForUpload, decompressSetupFileBuffer } from "../utils/setupFileCompression.js";
 
 function normalizeList(raw) {
   if (!raw) return [];
@@ -52,7 +60,14 @@ function sanitizeApplicationForClient(doc) {
   if (Array.isArray(plain.downloadsList)) {
     plain.downloadsList = plain.downloadsList.map((d) => ({
       ...d,
+      storageUrl: sanitizeScreenshotSlot(typeof d?.storageUrl === "string" ? d.storageUrl : ""),
       fileUrl: sanitizeScreenshotSlot(typeof d?.fileUrl === "string" ? d.fileUrl : ""),
+      setupFileGzipped: Boolean(d?.setupFileGzipped),
+      setupFileEncoding: (() => {
+        let enc = ["gzip", "brotli", "none"].includes(d?.setupFileEncoding) ? d.setupFileEncoding : "none";
+        if (d?.setupFileGzipped && enc === "none") enc = "gzip";
+        return enc;
+      })(),
       iconUrl: sanitizeScreenshotSlot(typeof d?.iconUrl === "string" ? d.iconUrl : ""),
       icon: sanitizeScreenshotSlot(typeof d?.icon === "string" ? d.icon : ""),
       imageUrl: sanitizeScreenshotSlot(typeof d?.imageUrl === "string" ? d.imageUrl : ""),
@@ -86,6 +101,48 @@ export const getApplicationById = async (req, res) => {
   }
 };
 
+/** Public: stream setup file; decompress gzip/Brotli when stored compressed so installers match the original upload. */
+export const downloadApplicationSetupFile = async (req, res) => {
+  try {
+    await connectDB();
+    const id = req.params.id;
+    const typeKey = String(req.params.type || "").toLowerCase();
+    const item = await Application.findById(id);
+    if (!item || item.status !== "published") {
+      return res.status(404).json({ success: false, message: "Not found" });
+    }
+    const row = (Array.isArray(item.downloadsList) ? item.downloadsList : []).find(
+      (d) => String(d?.type || "").toLowerCase() === typeKey && d?.enabled !== false
+    );
+    const fileUrl = sanitizeScreenshotSlot(typeof row?.fileUrl === "string" ? row.fileUrl : "");
+    if (!row || !fileUrl) {
+      return res.status(404).json({ success: false, message: "File not found" });
+    }
+
+    const upstream = await fetch(fileUrl);
+    if (!upstream.ok) {
+      return res.status(502).json({ success: false, message: "Failed to fetch file" });
+    }
+    const buf = Buffer.from(await upstream.arrayBuffer());
+    let out = buf;
+    try {
+      out = await decompressSetupFileBuffer(buf, row.setupFileEncoding, row.setupFileGzipped);
+    } catch {
+      return res.status(500).json({ success: false, message: "Failed to decompress file" });
+    }
+
+    const rawName = String(row.fileName || "download").trim() || "download";
+    const safeName = rawName.replace(/["\r\n]/g, "_");
+    const asciiName = safeName.replace(/[^\x20-\x7E]/g, "_");
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Content-Disposition", `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(safeName)}`);
+    res.setHeader("Cache-Control", "private, max-age=3600");
+    res.send(out);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const incrementApplicationView = async (req, res) => {
   try {
     await connectDB();
@@ -97,10 +154,43 @@ export const incrementApplicationView = async (req, res) => {
   }
 };
 
+async function applyDownloadFileFields(req, downloadsList) {
+  async function uploadOneBuffer(idx, buffer, originalName, originalSize, typeKey) {
+    const { buffer: toUpload, setupFileGzipped, setupFileEncoding } = await prepareSetupFileForUpload(buffer, typeKey);
+    const upload = await uploadToCloudinary(toUpload, "applications/files", { resource_type: "raw" });
+    downloadsList[idx].fileUrl = upload.secure_url;
+    downloadsList[idx].fileName = originalName || downloadsList[idx].fileName || "";
+    downloadsList[idx].fileSize = originalSize || downloadsList[idx].fileSize || 0;
+    downloadsList[idx].setupFileGzipped = setupFileGzipped;
+    downloadsList[idx].setupFileEncoding = setupFileEncoding;
+  }
+
+  for (const typeKey of APPLICATION_DOWNLOAD_TYPES) {
+    const key = `downloadFile_${typeKey}`;
+    const file = req.files?.[key]?.[0];
+    if (!file) continue;
+    const idx = downloadsList.findIndex((d) => String(d?.type || "").toLowerCase() === typeKey);
+    if (idx < 0) continue;
+    await uploadOneBuffer(idx, file.buffer, file.originalname || "", file.size || 0, typeKey);
+  }
+  for (let i = 0; i < 20; i += 1) {
+    const key = `downloadFile_${i}`;
+    const file = req.files?.[key]?.[0];
+    if (!file || !downloadsList[i]) continue;
+    const rowType = String(downloadsList[i]?.type || "other").toLowerCase();
+    await uploadOneBuffer(i, file.buffer, file.originalname || "", file.size || 0, rowType);
+  }
+}
+
 export const createApplication = async (req, res) => {
   try {
     await connectDB();
-    const downloadsList = normalizeList(req.body.downloadsList).map((x, index) => ({ ...x, order: x.order ?? index }));
+    let downloadsList = normalizeList(req.body.downloadsList);
+    await applyDownloadFileFields(req, downloadsList);
+    downloadsList = sortDownloadsListByType(downloadsList).map((d) => ({
+      ...d,
+      storageUrl: sanitizeScreenshotSlot(typeof d?.storageUrl === "string" ? d.storageUrl : ""),
+    }));
 
     let image = "";
     const iconFile = req.files?.icon?.[0] || req.files?.image?.[0];
@@ -127,16 +217,6 @@ export const createApplication = async (req, res) => {
       screenshots.push(upload.secure_url);
     }
 
-    for (let i = 0; i < 20; i += 1) {
-      const key = `downloadFile_${i}`;
-      const file = req.files?.[key]?.[0];
-      if (!file || !downloadsList[i]) continue;
-      const upload = await uploadToCloudinary(file.buffer, "applications/files", { resource_type: "raw" });
-      downloadsList[i].fileUrl = upload.secure_url;
-      downloadsList[i].fileName = file.originalname || downloadsList[i].fileName || "";
-      downloadsList[i].fileSize = file.size || downloadsList[i].fileSize || 0;
-    }
-
     const tags = req.body.tags
       ? (Array.isArray(req.body.tags) ? req.body.tags : String(req.body.tags).split(",").map((t) => t.trim()).filter(Boolean))
       : [];
@@ -161,6 +241,9 @@ export const createApplication = async (req, res) => {
     });
     res.status(201).json({ success: true, data: sanitizeApplicationForClient(app) });
   } catch (error) {
+    if (error?.code === "SETUP_FILE_TOO_LARGE") {
+      return res.status(413).json({ success: false, message: error.message });
+    }
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -172,27 +255,55 @@ export const updateApplication = async (req, res) => {
     if (!existing) return res.status(404).json({ success: false, message: "Application not found" });
 
     const prevDownloads = Array.isArray(existing.downloadsList) ? existing.downloadsList : [];
-    const downloadsList = normalizeList(req.body.downloadsList).map((x, index) => ({
-      ...x,
-      order: x.order ?? index,
-      fileUrl: mergeUrlField(x.fileUrl, prevDownloads[index]?.fileUrl),
-      fileName: x.fileName || "",
-      fileSize: x.fileSize || 0,
-      iconUrl: mergeUrlField(x.iconUrl, prevDownloads[index]?.iconUrl),
-      icon: mergeUrlField(x.icon, prevDownloads[index]?.icon),
-      imageUrl: mergeUrlField(x.imageUrl, prevDownloads[index]?.imageUrl),
-      image: mergeUrlField(x.image, prevDownloads[index]?.image),
+    const prevByType = buildPrevDownloadsByType(prevDownloads);
+    let downloadsList = normalizeList(req.body.downloadsList).map((x) => {
+      const type = String(x?.type || "other").toLowerCase();
+      const prev = prevByType.get(type);
+      if (x.clearSetupFile === true) {
+        return {
+          ...x,
+          fileUrl: "",
+          fileName: "",
+          fileSize: 0,
+          setupFileGzipped: false,
+          setupFileEncoding: "none",
+          storageUrl: sanitizeScreenshotSlot(
+            typeof x.storageUrl === "string"
+              ? x.storageUrl
+              : typeof prev?.storageUrl === "string"
+                ? prev.storageUrl
+                : ""
+          ),
+        };
+      }
+      return {
+        ...x,
+        storageUrl: sanitizeScreenshotSlot(
+          typeof x.storageUrl === "string"
+            ? x.storageUrl
+            : typeof prev?.storageUrl === "string"
+              ? prev.storageUrl
+              : ""
+        ),
+        fileUrl: mergeUrlField(x.fileUrl, prev?.fileUrl),
+        fileName: mergeDownloadFilename(x.fileName, prev?.fileName),
+        fileSize: mergeDownloadFileSize(x.fileSize, prev?.fileSize),
+        setupFileEncoding: ["none", "gzip", "brotli"].includes(x.setupFileEncoding)
+          ? x.setupFileEncoding
+          : prev?.setupFileEncoding || (prev?.setupFileGzipped ? "gzip" : "none"),
+        setupFileGzipped:
+          typeof x.setupFileGzipped === "boolean" ? x.setupFileGzipped : Boolean(prev?.setupFileGzipped),
+        iconUrl: mergeUrlField(x.iconUrl, prev?.iconUrl),
+        icon: mergeUrlField(x.icon, prev?.icon),
+        imageUrl: mergeUrlField(x.imageUrl, prev?.imageUrl),
+        image: mergeUrlField(x.image, prev?.image),
+      };
+    });
+    await applyDownloadFileFields(req, downloadsList);
+    downloadsList = sortDownloadsListByType(downloadsList).map((d) => ({
+      ...d,
+      storageUrl: sanitizeScreenshotSlot(typeof d?.storageUrl === "string" ? d.storageUrl : ""),
     }));
-
-    for (let i = 0; i < 20; i += 1) {
-      const key = `downloadFile_${i}`;
-      const file = req.files?.[key]?.[0];
-      if (!file || !downloadsList[i]) continue;
-      const upload = await uploadToCloudinary(file.buffer, "applications/files", { resource_type: "raw" });
-      downloadsList[i].fileUrl = upload.secure_url;
-      downloadsList[i].fileName = file.originalname || downloadsList[i].fileName || "";
-      downloadsList[i].fileSize = file.size || downloadsList[i].fileSize || 0;
-    }
 
     let image = sanitizeScreenshotSlot(existing.image || "");
     const iconFile = req.files?.icon?.[0] || req.files?.image?.[0];
@@ -262,6 +373,9 @@ export const updateApplication = async (req, res) => {
 
     res.json({ success: true, data: sanitizeApplicationForClient(updated) });
   } catch (error) {
+    if (error?.code === "SETUP_FILE_TOO_LARGE") {
+      return res.status(413).json({ success: false, message: error.message });
+    }
     res.status(500).json({ success: false, message: error.message });
   }
 };

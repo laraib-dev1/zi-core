@@ -1,4 +1,5 @@
 import API from "./axios";
+import { sortApplicationDownloadsList } from "@/utils/applicationSetupOrder";
 
 export const getApplications = async (status?: string) => {
   const params = new URLSearchParams();
@@ -31,7 +32,7 @@ export const createApplication = async (data: any) => {
   formData.append("latestVersionSize", data.latestVersionSize || "");
   formData.append("tags", Array.isArray(data.tags) ? data.tags.join(",") : (data.tags || ""));
 
-  const list = Array.isArray(data.downloadsList) ? data.downloadsList : [];
+  const list = sortApplicationDownloadsList(Array.isArray(data.downloadsList) ? data.downloadsList : []);
   const listForApi = list.map((item: any) => {
     if (!item || typeof item !== "object") return item;
     const { file: _f, ...rest } = item;
@@ -53,10 +54,12 @@ export const createApplication = async (data: any) => {
     if (file instanceof File) formData.append(`screenshot_${index}`, file);
   });
 
-  list.forEach((item: any, index: number) => {
-    if (item?.file instanceof File) {
-      formData.append(`downloadFile_${index}`, item.file);
-    }
+  const downloadFileTypes = new Set(["website", "playstore", "apk", "exe", "windows", "ios", "other"]);
+  list.forEach((item: any) => {
+    if (!(item?.file instanceof File) || !item?.type) return;
+    const t = String(item.type).toLowerCase();
+    if (!downloadFileTypes.has(t)) return;
+    formData.append(`downloadFile_${t}`, item.file);
   });
 
   const res = await API.post("/applications", formData, {
@@ -76,7 +79,7 @@ export const updateApplication = async (id: string, data: any) => {
   formData.append("latestVersionSize", data.latestVersionSize || "");
   formData.append("tags", Array.isArray(data.tags) ? data.tags.join(",") : (data.tags || ""));
 
-  const list = Array.isArray(data.downloadsList) ? data.downloadsList : [];
+  const list = sortApplicationDownloadsList(Array.isArray(data.downloadsList) ? data.downloadsList : []);
   const listForApi = list.map((item: any) => {
     if (!item || typeof item !== "object") return item;
     const { file: _f, ...rest } = item;
@@ -98,10 +101,12 @@ export const updateApplication = async (id: string, data: any) => {
     if (file instanceof File) formData.append(`screenshot_${index}`, file);
   });
 
-  list.forEach((item: any, index: number) => {
-    if (item?.file instanceof File) {
-      formData.append(`downloadFile_${index}`, item.file);
-    }
+  const downloadFileTypes = new Set(["website", "playstore", "apk", "exe", "windows", "ios", "other"]);
+  list.forEach((item: any) => {
+    if (!(item?.file instanceof File) || !item?.type) return;
+    const t = String(item.type).toLowerCase();
+    if (!downloadFileTypes.has(t)) return;
+    formData.append(`downloadFile_${t}`, item.file);
   });
 
   const res = await API.put(`/applications/${id}`, formData, {

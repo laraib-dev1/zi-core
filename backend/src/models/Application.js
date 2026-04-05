@@ -4,14 +4,20 @@ const applicationDownloadSchema = new mongoose.Schema(
   {
     type: {
       type: String,
-      enum: ["apk", "ios", "windows", "website", "exe", "other"],
+      enum: ["apk", "ios", "windows", "website", "exe", "playstore", "other"],
       default: "other",
     },
     label: { type: String, trim: true },
     url: { type: String, trim: true, default: "" },
+    /** Optional: Google Drive / Dropbox / OneDrive share URL; public site prefers this over uploaded file. */
+    storageUrl: { type: String, trim: true, default: "" },
     fileUrl: { type: String, trim: true, default: "" },
     fileName: { type: String, trim: true, default: "" },
     fileSize: { type: Number, default: 0 },
+    /** When true, stored bytes are not the raw installer; use download proxy. */
+    setupFileGzipped: { type: Boolean, default: false },
+    /** How bytes on Cloudinary were compressed: none | gzip | brotli (Brotli often needed to get under free-tier 10 MiB). */
+    setupFileEncoding: { type: String, enum: ["none", "gzip", "brotli"], default: "none" },
     sizeText: { type: String, trim: true, default: "" },
     description: { type: String, trim: true, default: "" },
     enabled: { type: Boolean, default: true },

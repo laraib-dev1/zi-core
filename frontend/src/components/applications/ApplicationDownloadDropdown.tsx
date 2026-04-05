@@ -4,6 +4,7 @@ type DownloadItem = {
   type?: string;
   label?: string;
   url?: string;
+  storageUrl?: string;
   fileUrl?: string;
   fileName?: string;
   fileSize?: number;
@@ -24,7 +25,7 @@ export default function ApplicationDownloadDropdown({
   const [open, setOpen] = useState(false);
   const normalized = useMemo(
     () =>
-      (items || []).filter((x) => Boolean(x?.url || x?.fileUrl)).map((x) => ({
+      (items || []).filter((x) => Boolean(x?.url || x?.fileUrl || x?.storageUrl)).map((x) => ({
         ...x,
         type: (x.type || "other").toLowerCase(),
       })),
@@ -47,7 +48,7 @@ export default function ApplicationDownloadDropdown({
         <div className="absolute right-0 top-full mt-2 z-30 min-w-[260px] rounded-lg border border-gray-200 bg-white p-3 shadow-xl">
           <div className="space-y-2">
             {normalized.map((item, idx) => {
-              const href = item.fileUrl || item.url || "#";
+              const href = item.storageUrl || item.fileUrl || item.url || "#";
               const meta = item.fileSize ? toReadableSize(item.fileSize) : "";
               return (
                 <a

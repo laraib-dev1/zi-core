@@ -152,6 +152,19 @@ export default function Navbar() {
             Home
           </Link>
           <Link 
+            to="/applications" 
+            className={linkClasses("/applications")}
+            style={{ 
+              color:
+                pathname === "/applications" || pathname.startsWith("/catalog/applications")
+                  ? "var(--theme-primary)"
+                  : "var(--theme-dark)",
+              cursor: "pointer",
+            }}
+          >
+            Applications
+          </Link>
+          <Link 
             to="/shop" 
             className={linkClasses("/shop")}
             style={{ 

@@ -2,7 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ApplicationPlatformNavEntry } from "@/utils/applicationPlatforms";
+import {
+  type ApplicationPlatformNavEntry,
+  getDefaultApplicationPlatformIconPath,
+} from "@/utils/applicationPlatforms";
 
 export interface ApplicationTileData {
   id: string;
@@ -67,7 +70,7 @@ export default function ApplicationTileCard({
     >
       {item.isTopRated && (
         <div
-          className="absolute left-0 top-0 -translate-x-2 -translate-y-2 -rotate-45 rounded px-2 py-0.5 text-[10px] font-semibold text-white"
+          className="absolute left-3 top-3 z-10 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm"
           style={{ backgroundColor: "var(--theme-primary)" }}
         >
           Top Rated
@@ -122,17 +125,23 @@ export default function ApplicationTileCard({
             </div>
             {platformLinks && platformLinks.length > 0 ? (
               <div className="flex flex-wrap items-center sm:justify-end gap-x-1 gap-y-0.5 text-sm text-gray-600">
-                {platformLinks.map((p, i) => (
-                  <span key={`${p.label}-${i}`} className="inline-flex items-center">
-                    {i > 0 ? <span className="mx-1 text-gray-400">|</span> : null}
-                    <Link
-                      to={p.href}
-                      className="transition-colors hover:text-[var(--theme-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-primary)] rounded"
-                    >
-                      {p.label}
-                    </Link>
-                  </span>
-                ))}
+                {platformLinks.map((p, i) => {
+                  const iconSrc = getDefaultApplicationPlatformIconPath(p.typeKey);
+                  return (
+                    <span key={`${p.typeKey}-${p.label}-${i}`} className="inline-flex items-center gap-1">
+                      {i > 0 ? <span className="mx-1 text-gray-400">|</span> : null}
+                      <Link
+                        to={p.href}
+                        className="inline-flex items-center gap-1 transition-colors hover:text-[var(--theme-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-primary)] rounded"
+                      >
+                        {iconSrc ? (
+                          <img src={iconSrc} alt="" className="h-4 w-4 object-contain shrink-0" aria-hidden />
+                        ) : null}
+                        {p.label}
+                      </Link>
+                    </span>
+                  );
+                })}
               </div>
             ) : platformStatesLine ? (
               <p className="text-sm text-gray-600 sm:text-right whitespace-normal break-words">{platformStatesLine}</p>
