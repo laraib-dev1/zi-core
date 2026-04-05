@@ -324,11 +324,8 @@ export default function CatalogDetail({ typeOverride, idOverride }: CatalogDetai
         .replace(/&amp;/gi, "&")
         .replace(/\s+/g, " ")
         .trim();
-    const setupDescriptionBlocks = downloadItems
-      .filter((d: any) => String(d?.description || "").trim())
-      .map((d: any) => `<h4>${String(d?.label || d?.type || "").toUpperCase()}</h4><p>${String(d.description || "")}</p>`)
-      .join("");
-    const descriptionHtml = `${setupDescriptionBlocks}${item.description || defaultHtml}`;
+    /** Main Description tab: application `description` only — not per-setup guide text (that stays in View installation guide for the selected platform). */
+    const descriptionHtml = item.description || defaultHtml;
     const hasDescription = Boolean(appInfo.descriptionTabEnabled !== false && cleanText(descriptionHtml));
     const hasFeatures = Boolean(appInfo.featuresTabEnabled !== false && cleanText(item.featuresHtml));
     const hasGuide = Boolean(appInfo.guideTabEnabled !== false && cleanText(item.guideHtml));
