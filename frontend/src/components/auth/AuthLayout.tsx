@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { getCompany } from "@/api/company.api";
 import { CACHE_KEYS, getCachedData, setCachedData } from "@/utils/cache";
-import { applyCompanyBranding, DEFAULT_COMPANY_NAME, resolveCompanyAssetUrl } from "@/utils/companyBrand";
+import {
+  applyCompanyBranding,
+  DEFAULT_AUTH_TAGLINE,
+  DEFAULT_COMPANY_NAME,
+  resolveCompanyAssetUrl,
+} from "@/utils/companyBrand";
 
 /**
  * AuthLayout
@@ -10,10 +15,16 @@ import { applyCompanyBranding, DEFAULT_COMPANY_NAME, resolveCompanyAssetUrl } fr
  * Uses theme color for border and accents.
  */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
-  const [company, setCompany] = useState<{ company: string; logo: string; favicon: string }>({
+  const [company, setCompany] = useState<{
+    company: string;
+    logo: string;
+    favicon: string;
+    authTagline?: string | null;
+  }>({
     company: DEFAULT_COMPANY_NAME,
     logo: "",
     favicon: "",
+    authTagline: undefined,
   });
 
   useEffect(() => {
@@ -23,6 +34,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         company: cachedCompany.company || DEFAULT_COMPANY_NAME,
         logo: cachedCompany.logo || "",
         favicon: cachedCompany.favicon || "",
+        authTagline: cachedCompany.authTagline,
       };
       setCompany(normalized);
       applyCompanyBranding(normalized);
@@ -35,6 +47,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           company: latest?.company || DEFAULT_COMPANY_NAME,
           logo: latest?.logo || "",
           favicon: latest?.favicon || "",
+          authTagline: latest?.authTagline,
         };
         setCompany(normalized);
         setCachedData(CACHE_KEYS.COMPANY, latest);
@@ -46,6 +59,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     loadCompany();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const authTaglineLine =
+    company.authTagline === undefined || company.authTagline === null
+      ? DEFAULT_AUTH_TAGLINE
+      : String(company.authTagline).trim() === ""
+        ? null
+        : String(company.authTagline).trim();
 
   return (
     <div
@@ -68,9 +88,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             />
           </div>
           <h1 className="text-2xl font-semibold tracking-wide">{`Welcome to ${company.company || DEFAULT_COMPANY_NAME}`}</h1>
-          <p className="text-sm text-white/80 text-center px-6">
-            Handcrafted essentials with a touch of elegance.
-          </p>
+          {authTaglineLine && (
+            <p className="text-sm text-white/80 text-center px-6">{authTaglineLine}</p>
+          )}
         </div>
 
         {/* Right Content (360px) */}

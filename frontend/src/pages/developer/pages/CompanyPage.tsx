@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/toast";
 import PageLoader from "@/components/ui/PageLoader";
 import CircularLoader from "@/components/ui/CircularLoader";
 import { getCachedData, setCachedData, removeCachedData, CACHE_KEYS } from "@/utils/cache";
+import { DEFAULT_AUTH_TAGLINE } from "@/utils/companyBrand";
 
 const INITIAL_SOCIAL_POSTS = Array(8).fill(null).map((_, i) => ({ image: "", url: "", order: i }));
 
@@ -15,6 +16,7 @@ export default function CompanyPage() {
   const [companyData, setCompanyData] = useState({
     company: "",
     slogan: "",
+    authTagline: DEFAULT_AUTH_TAGLINE,
     email: "",
     phone: "",
     supportEmail: "",
@@ -56,9 +58,13 @@ export default function CompanyPage() {
 
   useEffect(() => {
     const cached = getCachedData<any>(CACHE_KEYS.COMPANY);
-    if (cached && typeof cached === 'object') {
-      setCompanyData(cached);
-      setOriginalData(cached);
+    if (cached && typeof cached === "object") {
+      const normalized = {
+        ...cached,
+        authTagline: cached.authTagline ?? DEFAULT_AUTH_TAGLINE,
+      };
+      setCompanyData(normalized);
+      setOriginalData(normalized);
     }
     const load = async () => {
       if (!cached) setInitialLoading(true);
@@ -150,9 +156,10 @@ export default function CompanyPage() {
         ...(data.socialLinks || {}),
       };
       
-      setCompanyData(data);
-      setOriginalData(data);
-      setCachedData(CACHE_KEYS.COMPANY, data);
+      const loaded = { ...data, authTagline: data.authTagline ?? DEFAULT_AUTH_TAGLINE };
+      setCompanyData(loaded);
+      setOriginalData(loaded);
+      setCachedData(CACHE_KEYS.COMPANY, loaded);
       // Initialize refs array to match the number of social posts
       if (data.socialPosts) {
         socialPostInputRefs.current = Array(data.socialPosts.length).fill(null);
@@ -663,6 +670,29 @@ export default function CompanyPage() {
                   e.currentTarget.style.boxShadow = "";
                 }}
               />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Auth pages tagline
+              </label>
+              <input
+                type="text"
+                value={companyData.authTagline ?? ""}
+                onChange={(e) => handleChange("authTagline", e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none"
+                placeholder={DEFAULT_AUTH_TAGLINE}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = "var(--theme-primary)";
+                  e.currentTarget.style.boxShadow = "0 0 0 2px var(--theme-primary)";
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = "";
+                  e.currentTarget.style.boxShadow = "";
+                }}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Shown under the welcome line on Login and Access. Leave empty to hide this line.
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

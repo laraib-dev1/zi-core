@@ -12,23 +12,33 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [waitingAccess, setWaitingAccess] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth(); 
   const handleLogin = async () => {
   try {
+    setWaitingAccess(false);
+    setError("");
     const data = await loginUser({ email, password });
-
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
- login({ ...data.user, token: data.token });
 
     // check previous page user came from
     const from = location.state?.from;
 
     const role = data.user.role?.toLowerCase();
+    const hasOperatorAccess = !!data.user.adminAccess;
 
-      if (role === "admin") {
+      if (role !== "admin" && !hasOperatorAccess) {
+        setWaitingAccess(true);
+        setError("Please wait for admin access approval.");
+        return;
+      }
+
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    login({ ...data.user, token: data.token });
+
+      if (role === "admin" || hasOperatorAccess) {
         // Redirect admin to dashboard
         return navigate("/admin/dashboard");
       }
@@ -101,7 +111,7 @@ export default function Login() {
             e.currentTarget.style.backgroundColor = "var(--theme-primary)";
           }}
         >
-          Login
+          {waitingAccess ? "Wait for access" : "Login"}
         </Button>
 
         <p className="text-sm text-white mt-1">

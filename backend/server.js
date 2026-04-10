@@ -26,6 +26,7 @@ import catalogtypeRoutes from "./src/routes/catalogtype.routes.js";
 import landingsectionRoutes from "./src/routes/landingsection.routes.js";
 import banner2Routes from "./src/routes/banner2.routes.js";
 import applicationRoutes from "./src/routes/application.routes.js";
+import operatorRoutes from "./src/routes/operator.routes.js";
 
 dotenv.config();
 
@@ -90,6 +91,7 @@ app.use("/api/catalogtypes", catalogtypeRoutes);
 app.use("/api/landingsections", landingsectionRoutes);
 app.use("/api/banners2", banner2Routes);
 app.use("/api/applications", applicationRoutes);
+app.use("/api/operators", operatorRoutes);
 
 // Health check for Vercel (helps debug and avoids cold-start 500 on first hit)
 app.get("/api/health", (req, res) => {
@@ -149,6 +151,7 @@ const defaultCompanyPayload = () => ({
     brandTheme: { primary: "#8C5934", accent: "", dark: "", light: "" },
     copyright: "",
     description: "",
+    authTagline: "Handcrafted essentials with a touch of elegance.",
   },
 });
 

@@ -17,6 +17,7 @@ import {
   FileText,
   FolderTree,
   Star,
+  Users,
   BarChart3,
   ChevronDown,
   LayoutList,
@@ -37,6 +38,8 @@ interface UserType {
   name: string;
   email: string;
   role: string;
+  adminAccess?: boolean;
+  adminTabAccess?: string[];
   avatar?: string;
 }
 
@@ -55,6 +58,7 @@ const DEFAULT_MENU: MenuItem[] = [
   { label: "Assets Panel", icon: ImageIcon, path: "/admin/assets" },
   { label: "Queries", icon: MessageSquare, path: "/admin/queries" },
   { label: "Reviews", icon: Star, path: "/admin/reviews" },
+  { label: "Operators", icon: Users, path: "/admin/operators" },
   { label: "Sections", icon: LayoutList, path: "/admin/sections" },
   { label: "Settings", icon: Settings, path: "/admin/settings" },
 ];
@@ -70,6 +74,15 @@ function buildMenuFromTabs(tabs: any[]): MenuItem[] {
       return { label, icon: IconComponent, path };
     });
   return [...menuItems, { label: "Sections", icon: LayoutList, path: "/admin/sections" }];
+}
+
+function filterMenuForUser(menuItems: MenuItem[], currentUser: UserType | null): MenuItem[] {
+  if (!currentUser) return menuItems;
+  const isAdmin = currentUser.role?.toLowerCase() === "admin";
+  if (isAdmin) return menuItems;
+  if (!currentUser.adminAccess) return [];
+  const allowed = new Set(currentUser.adminTabAccess || []);
+  return menuItems.filter((item) => allowed.has(item.path));
 }
 
 export default function AdminLayout() {
@@ -141,6 +154,11 @@ export default function AdminLayout() {
             avatar: avatarUrl || undefined
           };
         setUser(fullUser);
+        const isAdmin = fullUser.role?.toLowerCase() === "admin";
+        if (!isAdmin && !fullUser.adminAccess) {
+          navigate("/login");
+          return;
+        }
 
         if (useCacheForMenu) {
           (async () => {
@@ -153,7 +171,7 @@ export default function AdminLayout() {
               setCachedData(CACHE_KEYS.CATALOG_TYPES, freshTypes);
             }
             if (freshTabs) {
-              setMenu(buildMenuFromTabs(freshTabs));
+              setMenu(filterMenuForUser(buildMenuFromTabs(freshTabs), fullUser));
               setCachedData(CACHE_KEYS.ADMIN_TABS, freshTabs);
             }
           })();
@@ -163,7 +181,7 @@ export default function AdminLayout() {
             setCachedData(CACHE_KEYS.CATALOG_TYPES, types);
           }
           if (tabs) {
-            setMenu(buildMenuFromTabs(tabs));
+            setMenu(filterMenuForUser(buildMenuFromTabs(tabs), fullUser));
             setCachedData(CACHE_KEYS.ADMIN_TABS, tabs);
           }
         }
@@ -183,18 +201,21 @@ export default function AdminLayout() {
   }
 
   const isSectionsPage = loc.pathname.startsWith("/admin/sections");
+  const isAdminUser = user?.role?.toLowerCase() === "admin";
+  const operatorTabPaths = new Set(user?.adminTabAccess || []);
+  const showSpConsole = isAdminUser || operatorTabPaths.has("/admin/sp-console");
 
   // Sidebar content component (reusable for both desktop and mobile)
   // Sidebar content – same structure and styling as DeveloperLayout
   const SidebarContent = ({ onLinkClick }: { onLinkClick?: () => void }) => (
     <div className="flex flex-col h-full">
-      {/* Admin Badge (like Developer badge in DeveloperLayout) */}
+      {/* Role badge: full admins see "Admin", panel operators see "Operator" */}
       <div className="px-5 pt-6 pb-6 border-b border-white/20 shrink-0">
         <span
           className="font-bold text-sm tracking-wider"
           style={{ color: "var(--theme-accent)" }}
         >
-          Admin
+          {isAdminUser ? "Admin" : "Operator"}
         </span>
       </div>
 
@@ -285,18 +306,20 @@ export default function AdminLayout() {
 
       {/* SP CONSOLE & LOGOUT (bottom – position and logic unchanged) */}
       <div className="mt-auto px-2 shrink-0 space-y-2">
-        <Link
-          to="/admin/sp-console"
-          onClick={onLinkClick}
-          className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition w-full
-          ${loc.pathname === "/admin/sp-console" ? "text-white font-semibold shadow-md" : "hover:bg-white/10 text-white/80 hover:text-white"}`}
-          style={{
-            backgroundColor: loc.pathname === "/admin/sp-console" ? "var(--theme-dark)" : "transparent",
-          }}
-        >
-          <Cog size={18} />
-          Sp Console
-        </Link>
+        {showSpConsole && (
+          <Link
+            to="/admin/sp-console"
+            onClick={onLinkClick}
+            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition w-full
+            ${loc.pathname === "/admin/sp-console" ? "text-white font-semibold shadow-md" : "hover:bg-white/10 text-white/80 hover:text-white"}`}
+            style={{
+              backgroundColor: loc.pathname === "/admin/sp-console" ? "var(--theme-dark)" : "transparent",
+            }}
+          >
+            <Cog size={18} />
+            Sp Console
+          </Link>
+        )}
         <button
           onClick={() => {
             localStorage.removeItem("token");

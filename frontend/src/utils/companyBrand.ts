@@ -7,6 +7,10 @@ export type CompanyBrandData = {
 
 export const DEFAULT_COMPANY_NAME = "Grace by Anu";
 
+/** Shown on login/access auth layouts when company has no custom auth tagline saved yet. */
+export const DEFAULT_AUTH_TAGLINE =
+  "Handcrafted essentials with a touch of elegance.";
+
 export function resolveCompanyAssetUrl(value?: string): string {
   if (!value || typeof value !== "string" || !value.trim()) return "";
   const trimmed = value.trim();

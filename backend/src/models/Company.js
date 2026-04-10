@@ -32,6 +32,10 @@ const CompanySchema = new mongoose.Schema({
   },
   copyright: { type: String, default: "" },
   description: { type: String, default: "" },
+  authTagline: {
+    type: String,
+    default: "Handcrafted essentials with a touch of elegance.",
+  },
 }, { timestamps: true });
 
 export default mongoose.models.Company || mongoose.model("Company", CompanySchema);

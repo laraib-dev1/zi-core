@@ -194,6 +194,7 @@ const defaultCompany = () => ({
   brandTheme: { primary: "#8C5934", accent: "", dark: "", light: "" },
   copyright: "",
   description: "",
+  authTagline: "Handcrafted essentials with a touch of elegance.",
 });
 
 // GET company data (or create default if none exists)
@@ -279,6 +280,7 @@ export const updateCompany = async (req, res) => {
     if (req.body.address !== undefined) updateData.address = req.body.address;
     if (req.body.description !== undefined) updateData.description = req.body.description;
     if (req.body.copyright !== undefined) updateData.copyright = req.body.copyright;
+    if (req.body.authTagline !== undefined) updateData.authTagline = req.body.authTagline;
 
     // Handle social links (JSON string)
     if (req.body.socialLinks) {

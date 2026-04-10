@@ -17,7 +17,8 @@ export const getAdminTabs = async (req, res) => {
       { label: "Assets Panel", path: "/admin/assets", icon: "ImageIcon", order: 6, subInfo: "Manage banners and assets" },
       { label: "Queries", path: "/admin/queries", icon: "MessageSquare", order: 7, subInfo: "Manage customer queries" },
       { label: "Reviews", path: "/admin/reviews", icon: "Star", order: 8, subInfo: "Manage product reviews" },
-      { label: "Settings", path: "/admin/settings", icon: "Settings", order: 9, subInfo: "System settings" },
+      { label: "Operators", path: "/admin/operators", icon: "Users", order: 9, subInfo: "Manage admin panel access" },
+      { label: "Settings", path: "/admin/settings", icon: "Settings", order: 10, subInfo: "System settings" },
     ];
 
     // Auto-create missing tabs
@@ -80,7 +81,8 @@ export const getEnabledAdminTabs = async (req, res) => {
       { label: "Assets Panel", path: "/admin/assets", icon: "ImageIcon", order: 6, subInfo: "Manage banners and assets" },
       { label: "Queries", path: "/admin/queries", icon: "MessageSquare", order: 7, subInfo: "Manage customer queries" },
       { label: "Reviews", path: "/admin/reviews", icon: "Star", order: 8, subInfo: "Manage product reviews" },
-      { label: "Settings", path: "/admin/settings", icon: "Settings", order: 9, subInfo: "System settings" },
+      { label: "Operators", path: "/admin/operators", icon: "Users", order: 9, subInfo: "Manage admin panel access" },
+      { label: "Settings", path: "/admin/settings", icon: "Settings", order: 10, subInfo: "System settings" },
     ];
 
     // Auto-create missing tabs

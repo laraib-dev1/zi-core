@@ -55,7 +55,13 @@ const uploadToCloud = async (file) => {
 // JWT helper
 const signToken = (user) => {
   return jwt.sign(
-    { id: user._id, email: user.email, role: user.role },
+    {
+      id: user._id,
+      email: user.email,
+      role: user.role,
+      adminAccess: !!user.adminAccess,
+      adminTabAccess: Array.isArray(user.adminTabAccess) ? user.adminTabAccess : [],
+    },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
@@ -80,6 +86,8 @@ export const registerUser = async (req) => {
     email: emailLower,
     password: hashed,
     role: "user",
+    adminAccess: false,
+    adminTabAccess: [],
   });
 
   const token = signToken(user);
@@ -91,6 +99,8 @@ export const registerUser = async (req) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      adminAccess: user.adminAccess,
+      adminTabAccess: user.adminTabAccess || [],
     },
   };
 };
@@ -120,6 +130,9 @@ export const loginUser = async (req) => {
     throw new Error("Invalid credentials");
   }
 
+  user.lastLoginAt = new Date();
+  await user.save();
+
   const token = signToken(user);
 
   return {
@@ -129,6 +142,8 @@ export const loginUser = async (req) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      adminAccess: user.adminAccess,
+      adminTabAccess: user.adminTabAccess || [],
     },
   };
 };
@@ -146,6 +161,9 @@ export const adminLoginUser = async (req) => {
   const match = await bcrypt.compare(password, user.password);
   if (!match) throw new Error("Invalid credentials");
 
+  user.lastLoginAt = new Date();
+  await user.save();
+
   const token = signToken(user);
 
   return {
@@ -155,6 +173,8 @@ export const adminLoginUser = async (req) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      adminAccess: user.adminAccess,
+      adminTabAccess: user.adminTabAccess || [],
     },
   };
 };

@@ -28,6 +28,7 @@ import PageLoader from "./components/ui/PageLoader";
 // import Forgot from "./pages/auth/Forgot";
 
 import Login from "./pages/auth/Login";
+const Access = React.lazy(() => import("./pages/auth/Access"));
 import AdminRoute from "./components/AdminRoute";
 import { Navigate } from "react-router-dom";
 import { getCompany } from "./api/company.api";
@@ -47,6 +48,8 @@ const ApplicationsPage = React.lazy(() => import("./pages/admin/pages/Applicatio
 const SpConsolePage = React.lazy(() => import("./pages/admin/pages/SpConsolePage"));
 const AdminSectionsPage = React.lazy(() => import("./pages/admin/pages/AdminSectionsPage"));
 const AdminCategories = React.lazy(() => import("./pages/admin/pages/CategoriesPage"));
+const OperatorsPage = React.lazy(() => import("./pages/admin/pages/OperatorsPage"));
+const AdminNoPrivilegePage = React.lazy(() => import("./pages/admin/pages/AdminNoPrivilegePage"));
 const DeveloperLayout = React.lazy(() => import("./pages/developer/layout/DeveloperLayout"));
 const AdminTabsPage = React.lazy(() => import("./pages/developer/pages/AdminTabsPage"));
 const CompanyPage = React.lazy(() => import("./pages/developer/pages/CompanyPage"));
@@ -107,6 +110,7 @@ export default function App() {
         <Route path="/zi-core-package" element={<GetStartedPage />} />
         <Route path="/get-started" element={<Navigate to="/zi-core-package" replace />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/access" element={<Access />} />
         <Route path="*" element={<SecondLanding />} />
 
         {/* ---------- COMMENTED OUT: SHOP ROUTES ---------- */}
@@ -147,6 +151,8 @@ export default function App() {
           <Route path="applications" element={<ApplicationsPage />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="sections" element={<AdminSectionsPage />} />
+          <Route path="operators" element={<OperatorsPage />} />
+          <Route path="no-access" element={<AdminNoPrivilegePage />} />
           <Route path="sp-console" element={<SpConsolePage />} />
         </Route>
 
